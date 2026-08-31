@@ -26,7 +26,7 @@ $wertung = Ausgabe::wertungsname($this->turnier);
           <?php
             // In der Paarungsliste steht statt des Ergebnisses ein Strich: Sie
             // wird vor der Runde ausgehaengt, wenn es noch keines gibt.
-            $ergebnis = $this->mitErgebnissen ? Ausgabe::ergebnisPaar($partie['ergebnis']) : '';
+            $ergebnis = $this->mitErgebnissen ? Ausgabe::ergebnisPaar($partie['ergebnis'], (string) $partie['status']) : '';
           ?>
           <tr<?= $partie['spielfrei'] ? ' class="ctv-partie--frei"' : '' ?>>
             <td class="ctv-zahl"><?= Ausgabe::zahl($partie[$this->spalte]) ?></td>

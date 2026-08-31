@@ -122,34 +122,34 @@ nachdem die letzte Runde eingegeben war.
 
 ### Mannschaftswertung
 
-Die Mannschaftsangaben der SWT-Dateien sind **nicht** die Grundlage der
-Mannschaftslisten. Der Mannschaftsbereich der Datei enthält in allen
-geprüften Turnieren kein einziges Ergebnis, und in Dateien vor Fassung 800
-stehen auf den Mannschaftskarteikarten unbrauchbare Zahlen — Brettpunkte wie
-14137 bei sechs Brettern und sieben Runden.
+Der Ausgang eines Mannschaftskampfes steht **nicht** in der SWT-Datei: Die
+Paarungssätze der Mannschaften führen Spielort, Gegner und Tischnummer, aber
+kein Ergebnis. Swiss-Chess rechnet den Kampf jedes Mal aus den Einzelpartien
+zurück, und der SWT-Leser dieses Bundles tut dasselbe — Brettpunkte aus den
+Ergebnissen aller Spieler einer Mannschaft in einer Runde, Mannschaftspunkte
+aus dem Vergleich mit dem Gegner, mit zwei oder drei Punkten für den Sieg je
+nach Turniereinstellung.
 
-Wettkämpfe, Brett- und Mannschaftspunkte werden deshalb aus den
-**Einzelpartien** zurückgerechnet, die über den gesamten Bestand geprüft sind.
-Zwei Regeln gehören dazu:
+Der Nachweis gegen die Ausgaben von Swiss-Chess selbst:
 
-1. Die Mannschaftsnummer ist die Position in der Mannschaftsliste, nicht das
-   Nummernfeld der Karteikarte — dieses liefert 999 plus Position.
-2. Eine Mannschaft ohne Wettkampf in einer gespielten Runde hat ein Freilos
-   und bekommt die volle Brettzahl sowie zwei Mannschaftspunkte.
+| Vergleich | Umfang | Abweichungen |
+| --- | ---: | ---: |
+| Mannschaftstabelle Blitz-MM 2012 (Platz, S/R/N, MP, BP) | 28 Mannschaften | 0 |
+| Mannschaftstabelle Betriebs-MM 2012 (Platz, Name, S/R/N, MP, BP) | 38 Mannschaften | 0 |
+| Kreuztabelle der Mannschaften Blitz-MM 2012 | 784 Felder | 0 |
 
-Der Nachweis: Verglichen mit den gespeicherten Werten der Dateien, in denen
-diese brauchbar sind, ergibt die Rückrechnung **keine einzige Abweichung**.
+**Freilose bleiben unbewertet.** Zu einer spielfreien Runde steht in der Datei
+nichts als das Fehlen eines Gegners. Ob die Turnierleitung dafür einen
+kampflosen Sieg gutgeschrieben hat, ist daraus nicht zu erkennen — manche tun
+es, manche nicht. Weicht die hier gezeigte Tabelle deshalb von der in der
+Datei gespeicherten ab, steht darüber ein Hinweis.
 
-| Datei | Fassung | Mannschaften | Abweichungen |
-| --- | ---: | ---: | ---: |
-| `DBMM_2012.SWT` | 882 | 38 | 0 |
-| `FVS_BMM_2012_13.SWT` | 882 | 14 | 0 |
-| `BSMM2017.SWT` | 897 | 23 | 0 |
-
-Gewertet wird mit zwei Punkten für den gewonnenen und einem für den
-unentschiedenen Wettkampf. Ligen, die anders werten, zeigt die Datei nicht an;
-weicht die Rückrechnung von gespeicherten Werten ab, erscheint darüber ein
-Hinweis.
+Die Spalte **Ø TWZ** ist eine eigene Zahl und nicht die von Swiss-Chess:
+Gemittelt wird über alle gemeldeten Spieler einer Mannschaft, also über genau
+den Kreis, den die Mannschaftsliste mit eingeschalteter Aufstellung darunter
+zeigt. Nach welcher Regel Swiss-Chess seine TWZ-Spalte bildet, ließ sich an
+den vorliegenden Ausgaben nicht bestimmen; die Einzelheiten stehen im
+Klassenkommentar von `Mannschaftswertung::wertungsschnitt()`.
 
 ## Weitere Turnierformate
 

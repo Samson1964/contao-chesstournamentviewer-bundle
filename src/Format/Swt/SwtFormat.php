@@ -20,12 +20,11 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
  * übersetzt deren Ergebnis in das formatunabhängige Turniermodell und ist
  * damit die einzige Stelle im Bundle, an der SWT-Eigenheiten vorkommen.
  *
- * Eine Eigenheit wird dabei geradegerückt: Das Nummernfeld der
- * Mannschaftskarteikarten liefert in allen geprüften Dateien 999 plus
- * Position statt der Mannschaftsnummer. Die Liste wird deshalb neu nach
- * Position ab 1 durchnummeriert — das ist die Zahl, die auch auf den
- * Spielerkarteikarten steht (geprüft an 540 Teilnehmern aus fünf Dateien der
- * Fassungen 650 bis 897, ohne eine einzige Abweichung).
+ * Die Übersetzung ist bewusst dünn: Seit der Fassung des Lesers vom
+ * 2026-08-31 liefert dieser die Mannschaftsdaten selbst richtig — die
+ * Mannschaften unter ihrer echten Nummer, die Wettkämpfe mit Brett- und
+ * Mannschaftspunkten aus den Einzelpartien. Was hier früher geradegerückt
+ * werden musste, ist entfallen.
  */
 class SwtFormat implements TurnierFormatInterface
 {
@@ -120,12 +119,13 @@ class SwtFormat implements TurnierFormatInterface
             $this->getName(),
             $this->kopfdaten($kopf),
             $datei->getSpieler(),
-            $this->mannschaften($datei),
+            $datei->getMannschaften(),
             $paarungen,
             $datei->getRangliste(),
             $this->runden($datei, $paarungen),
             $datei->getKreuztabelle(),
-            $datei->getHinweise()
+            $datei->getHinweise(),
+            $datei->getMannschaftspaarungen()
         );
     }
 
@@ -166,36 +166,6 @@ class SwtFormat implements TurnierFormatInterface
             'feinwertung2Text' => $feinwertung2,
             'feinwertungSicher' => (bool) ($kopf['feinwertungBezeichnungSicher'] ?? true),
         ]);
-    }
-
-    /**
-     * Gibt die Mannschaften nach Position durchnummeriert zurück.
-     *
-     * Siehe Klassenkommentar: Das Nummernfeld der Karteikarte ist unbrauchbar,
-     * die Position dagegen stimmt mit der Mannschaftsnummer der Spieler
-     * überein. Bei Einzelturnieren bleibt die Liste leer.
-     *
-     * @param SwtFile $datei Die eingelesene Datei
-     *
-     * @return array<int,array<string,mixed>> Mannschaften ab Nummer 1
-     */
-    private function mannschaften(SwtFile $datei): array
-    {
-        $mannschaften = array_values($datei->getMannschaften());
-
-        if ([] === $mannschaften) {
-            return [];
-        }
-
-        $nummeriert = [];
-
-        foreach ($mannschaften as $index => $mannschaft) {
-            $nummer = $index + 1;
-            $mannschaft['mnr'] = $nummer;
-            $nummeriert[$nummer] = $mannschaft;
-        }
-
-        return $nummeriert;
     }
 
     /**

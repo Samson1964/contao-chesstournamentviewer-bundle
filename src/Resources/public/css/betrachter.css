@@ -19,6 +19,8 @@
     --ctv-text: #1c1c1c;
     --ctv-gedaempft: #6b6b6b;
     --ctv-akzent: #1c5a8c;
+    --ctv-blind: #c9ced3;
+    --ctv-blind-figur: #6b7379;
     --ctv-hinweis: #8a6d3b;
     --ctv-hinweis-grund: #fdf5e6;
     --ctv-fehler: #a94442;
@@ -64,30 +66,39 @@
 }
 
 /*
- * Farbe und Hintergrund stehen hier ausdrücklich und werden nicht vom Theme
- * geerbt. Ein `color: inherit` auf einem Knopf, dessen Hintergrund das Theme
- * setzt, führte sonst zu schwarzer Schrift auf dunklem Grund. Der Selektor
- * ist absichtlich zweigliedrig, damit er sich gegen Theme-Regeln wie
- * `.mod_article button` durchsetzt, ohne dass es `!important` braucht.
+ * Zu `!important`
+ * --------------
+ * Themes gestalten ihre Knöpfe und Tabellen gern über Selektoren mit einer
+ * ID — `#main button`, `#main table td`. Eine ID wiegt in der Spezifität
+ * mehr als jede Zahl von Klassen: Gegen `#main button { background: #333;
+ * color: #000 }` kommt keine Klassenregel an, und genau so entstand die
+ * gemeldete schwarze Schrift auf dunklem Grund. Deshalb tragen die
+ * Eigenschaften, ohne die der Betrachter unbrauchbar wird — Farben der
+ * Reiter, Breite und Ausrichtung der Zahlenspalten — ein `!important`.
+ *
+ * Anpassbar bleibt trotzdem alles: Die Werte kommen aus den Eigenschaften am
+ * Element `.ctv`, und die lassen sich im Theme setzen, ohne diese Regeln zu
+ * berühren.
  */
 .ctv .ctv-reiter__knopf {
-    padding: .4rem .9rem;
-    border: 1px solid var(--ctv-linie);
-    border-bottom-color: transparent;
-    border-radius: 3px 3px 0 0;
-    background: var(--ctv-wechsel);
-    box-shadow: none;
-    color: var(--ctv-gedaempft);
-    font: inherit;
-    line-height: 1.4;
-    text-transform: none;
+    padding: .4rem .9rem !important;
+    border: 1px solid var(--ctv-linie) !important;
+    border-bottom-color: transparent !important;
+    border-radius: 3px 3px 0 0 !important;
+    background: var(--ctv-wechsel) !important;
+    box-shadow: none !important;
+    color: var(--ctv-gedaempft) !important;
+    font: inherit !important;
+    line-height: 1.4 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
     cursor: pointer;
 }
 
 .ctv .ctv-reiter__knopf:hover,
 .ctv .ctv-reiter__knopf:focus-visible {
-    background: var(--ctv-kopf);
-    color: var(--ctv-text);
+    background: var(--ctv-kopf) !important;
+    color: var(--ctv-text) !important;
 }
 
 /*
@@ -100,12 +111,12 @@
 .ctv .ctv-reiter__knopf--aktiv:hover,
 .ctv .ctv-reiter__knopf--aktiv:focus-visible {
     position: relative;
-    border-color: var(--ctv-linie);
-    border-top: 3px solid var(--ctv-akzent);
-    padding-top: calc(.4rem - 2px);
-    background: var(--ctv-grund);
-    color: var(--ctv-text);
-    font-weight: 700;
+    border-color: var(--ctv-linie) !important;
+    border-top: 3px solid var(--ctv-akzent) !important;
+    padding-top: calc(.4rem - 2px) !important;
+    background: var(--ctv-grund) !important;
+    color: var(--ctv-text) !important;
+    font-weight: 700 !important;
 }
 
 /* Deckt die Trennlinie unter der Reiterleiste ab. */
@@ -183,8 +194,8 @@
     background: transparent;
 }
 
-.ctv-zahl {
-    text-align: right;
+.ctv .ctv-tabelle .ctv-zahl {
+    text-align: right !important;
 }
 
 /*
@@ -192,8 +203,8 @@
  * Verbindung mit `white-space: nowrap` weist der Spalte gerade so viel Platz
  * zu, wie ihr Inhalt braucht — der Rest bleibt den Namensspalten.
  */
-.ctv-schmal {
-    width: 1%;
+.ctv .ctv-tabelle .ctv-schmal {
+    width: 1% !important;
 }
 
 .ctv-punkte {
@@ -230,17 +241,24 @@
 /*
  * Alle Ergebnisfelder gleich breit und mittig — sonst springen die Spalten
  * je nachdem, ob in ihnen „1", „½" oder nichts steht, und die Tabelle liest
- * sich nicht mehr als Raster.
+ * sich nicht mehr als Raster. Zum `!important` siehe oben: Ein Theme mit
+ * `#main table td { padding: .6rem 1rem; text-align: left; width: auto }`
+ * macht aus der Kreuztabelle sonst ein Feld doppelter Breite mit
+ * linksbündigen Zahlen.
  */
-.ctv-kreuz__feld {
-    width: 2.2em;
-    min-width: 2.2em;
-    padding-inline: .2rem;
-    text-align: center;
+.ctv .ctv-tabelle--kreuz th.ctv-kreuz__feld,
+.ctv .ctv-tabelle--kreuz td.ctv-kreuz__feld {
+    width: 2.1em !important;
+    min-width: 2.1em !important;
+    max-width: 2.1em !important;
+    padding: .25rem .1rem !important;
+    text-align: center !important;
+    text-indent: 0 !important;
+    font-variant-numeric: tabular-nums;
 }
 
-.ctv-kreuz__kopf {
-    font-weight: 400;
+.ctv .ctv-tabelle--kreuz th.ctv-kreuz__kopf {
+    font-weight: 400 !important;
 }
 
 .ctv-kreuz__name {
@@ -251,13 +269,25 @@
 
 /*
  * Blindfeld: Der Spieler trifft nicht auf sich selbst. Es soll auf einen
- * Blick als Sperrfeld erkennbar sein, deshalb dunklerer Grund und ein
- * König als Zeichen.
+ * Blick als Sperrfeld erkennbar sein — deshalb derselbe Grund wie im
+ * Tabellenkopf, aber kräftiger, und ein König als Zeichen.
+ *
+ * Der König sitzt als Flex-Element mittig; `text-align` allein reicht nicht,
+ * weil die Glyphe in vielen Schriften eine eigene Seitenlage hat und über
+ * der Grundlinie hängt.
  */
-.ctv-kreuz__diagonale {
-    background: var(--ctv-kopf);
-    color: var(--ctv-gedaempft);
-    font-size: 1.15em;
+.ctv .ctv-tabelle--kreuz td.ctv-kreuz__diagonale {
+    padding: 0 !important;
+    background: var(--ctv-blind) !important;
+}
+
+.ctv-kreuz__diagonale > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.6em;
+    color: var(--ctv-blind-figur);
+    font-size: 1.25em;
     line-height: 1;
 }
 
@@ -267,25 +297,27 @@
  * Mitte steht; sie und die Brettspalte bleiben so schmal wie ihr Inhalt.
  */
 
-.ctv-paarung__seite {
-    width: 50%;
+.ctv .ctv-tabelle .ctv-paarung__seite {
+    width: 50% !important;
 }
 
-.ctv-paarung__ergebnis {
-    width: 1%;
-    padding-inline: .6rem;
-    text-align: center;
+.ctv .ctv-tabelle .ctv-paarung__ergebnis {
+    width: 1% !important;
+    padding-inline: .6rem !important;
+    text-align: center !important;
+    white-space: nowrap;
 }
 
 /* --- Fortschrittstabelle ------------------------------------------------ */
 
-.ctv-fortschritt__kopf {
-    text-align: center;
-    font-weight: 400;
+.ctv .ctv-tabelle .ctv-fortschritt__kopf {
+    text-align: center !important;
+    font-weight: 400 !important;
 }
 
-.ctv-fortschritt__zelle {
-    text-align: center;
+.ctv .ctv-tabelle .ctv-fortschritt__zelle {
+    padding-inline: .35rem !important;
+    text-align: center !important;
 }
 
 .ctv-fortschritt__farbe {

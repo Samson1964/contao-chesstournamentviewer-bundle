@@ -32,8 +32,8 @@ final class TurnierBauer
      *   Runde 2: M1 gegen M3 (½:1½), M2 setzt aus, M4 setzt aus
      *
      * In Runde 2 gibt es nur einen Wettkampf; M2 und M4 haben also ein
-     * Freilos und bekommen dafür die volle Brettzahl und zwei
-     * Mannschaftspunkte.
+     * Freilos. Punkte gibt es dafür keine — was in der Datei nicht steht,
+     * wird nicht erfunden.
      *
      * @return Turnier Das zusammengebaute Turnier
      */
@@ -71,10 +71,12 @@ final class TurnierBauer
             $mannschaften[$nummer] = [
                 'mnr' => $nummer,
                 'name' => 'Mannschaft '.$nummer,
+                'spielfrei' => false,
+                'spieler' => [$nummer * 2 - 1, $nummer * 2],
                 'spielerzahl' => 2,
                 'platz' => $nummer,
-                'brettpunkte' => 0,
-                'mannschaftspunkte' => 0,
+                'brettpunkte' => null,
+                'mannschaftspunkte' => null,
                 'eloSchnitt' => 0,
                 'dwzSchnitt' => 0,
             ];
@@ -99,6 +101,33 @@ final class TurnierBauer
         $paarungen[2][2] = self::satz(6, 'Schwarz', 0.0, 2);
         $paarungen[6][2] = self::satz(2, 'Weiß', 1.0, 2);
 
+        // Die Wettkampfsätze in der Form, die der Format-Adapter liefert: mit
+        // übersetzter Gegnernummer, Brettpunkten beider Seiten und den
+        // Mannschaftspunkten, die sich daraus ergeben. Ein Gegner 0 steht für
+        // eine spielfreie Runde.
+        $mannschaftspaarungen = [
+            1 => [
+                1 => self::kampf(2, 2.0, 0.0, 2.0),
+                2 => self::kampf(3, 0.5, 1.5, 0.0),
+            ],
+            2 => [
+                1 => self::kampf(1, 0.0, 2.0, 0.0),
+                2 => self::kampf(0, 0.0, 0.0, null),
+            ],
+            3 => [
+                1 => self::kampf(4, 1.0, 1.0, 1.0),
+                2 => self::kampf(1, 1.5, 0.5, 2.0),
+            ],
+            4 => [
+                1 => self::kampf(3, 1.0, 1.0, 1.0),
+                2 => self::kampf(0, 0.0, 0.0, null),
+            ],
+        ];
+
+        // Beide Runden sind ausgelost; der Inhalt spielt für die Wertung keine
+        // Rolle, nur dass die Runde nicht leer ist.
+        $runden = [1 => [['brett' => 1]], 2 => [['brett' => 1]]];
+
         return new Turnier(
             'Prüfstand',
             [
@@ -114,10 +143,35 @@ final class TurnierBauer
             $mannschaften,
             $paarungen,
             array_values($spieler),
-            [1 => [], 2 => []],
+            $runden,
             null,
-            []
+            [],
+            $mannschaftspaarungen
         );
+    }
+
+    /**
+     * Stellt einen Wettkampfsatz zusammen.
+     *
+     * @param int        $gegner            Mannschaftsnummer des Gegners, 0 bei spielfrei
+     * @param float      $brettpunkte       Brettpunkte der eigenen Mannschaft
+     * @param float      $gegenpunkte       Brettpunkte des Gegners
+     * @param float|null $mannschaftspunkte Mannschaftspunkte, null wenn nicht gespielt
+     *
+     * @return array<string,mixed> Der Satz im Modellformat
+     */
+    private static function kampf(int $gegner, float $brettpunkte, float $gegenpunkte, ?float $mannschaftspunkte): array
+    {
+        return [
+            'gegner' => $gegner,
+            'gegnerName' => $gegner > 0 ? 'Mannschaft '.$gegner : '',
+            'farbe' => 'Heim',
+            'brettpunkte' => $brettpunkte,
+            'brettpunkteGegner' => $gegenpunkte,
+            'mannschaftspunkte' => $mannschaftspunkte,
+            'amGruenenTisch' => false,
+            'tisch' => 1,
+        ];
     }
 
     /**
@@ -189,7 +243,7 @@ final class TurnierBauer
             [],
             $paarungen,
             [$spieler[1], $spieler[2], $spieler[3], $spieler[4]],
-            [1 => [[]], 2 => [[]], 3 => [[]]],
+            [1 => [["brett" => 1]], 2 => [["brett" => 1]], 3 => [["brett" => 1]]],
             null,
             []
         );

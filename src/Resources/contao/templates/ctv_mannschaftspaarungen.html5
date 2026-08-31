@@ -29,8 +29,8 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
                 &ndash; <?= Ausgabe::esc($kampf['gastName']) ?>
               <?php endif; ?>
             </td>
-            <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($kampf['brettpunkteHeim']) ?>:<?= Ausgabe::punkte($kampf['brettpunkteGast']) ?></td>
-            <td class="ctv-zahl"><?= Ausgabe::punkte($kampf['mannschaftspunkteHeim']) ?>:<?= Ausgabe::punkte($kampf['mannschaftspunkteGast']) ?></td>
+            <td class="ctv-zahl ctv-punkte"><?= $kampf['gespielt'] ? Ausgabe::punkte($kampf['brettpunkteHeim']).':'.Ausgabe::punkte($kampf['brettpunkteGast']) : '&ndash;' ?></td>
+            <td class="ctv-zahl"><?= $kampf['gespielt'] ? Ausgabe::punkte($kampf['mannschaftspunkteHeim']).':'.Ausgabe::punkte($kampf['mannschaftspunkteGast']) : '&ndash;' ?></td>
           </tr>
 
           <?php if ($this->mitSpielern && $kampf['partien']): ?>
@@ -51,7 +51,7 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
                       <tr>
                         <td class="ctv-zahl"><?= Ausgabe::zahl($partie['brett']) ?></td>
                         <td><?= Ausgabe::esc(Ausgabe::name($partie['weiss'])) ?></td>
-                        <td class="ctv-zahl ctv-punkte"><?= Ausgabe::esc($partie['ergebnisText']) ?></td>
+                        <td class="ctv-paarung__ergebnis ctv-punkte"><?= Ausgabe::esc(Ausgabe::ergebnisPaar($partie['ergebnis'], $partie['status'])) ?: '&ndash;' ?></td>
                         <td><?= Ausgabe::esc(Ausgabe::name($partie['schwarz'])) ?></td>
                       </tr>
                     <?php endforeach; ?>

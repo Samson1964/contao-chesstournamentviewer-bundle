@@ -19,7 +19,6 @@ use Contao\Template;
 use Psr\Log\LoggerInterface;
 use Schachbulle\ContaoChesstournamentviewerBundle\Format\FormatVerzeichnis;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
-use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftswertung;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -119,7 +118,7 @@ class TurnierBetrachterController extends AbstractContentElementController
         $template->turnier = $turnier;
         $template->kopf = $turnier->getKopf();
         $template->listen = $listen;
-        $template->hinweise = array_merge($turnier->getHinweise(), Mannschaftswertung::hinweise($turnier));
+        $template->hinweise = $turnier->getHinweise();
 
         // Die Reiternavigation lohnt erst ab zwei Listen. Bei einer einzigen
         // Liste bliebe eine Lasche übrig, die nichts umschalten kann.

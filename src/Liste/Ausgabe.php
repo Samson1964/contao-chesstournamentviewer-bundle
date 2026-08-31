@@ -123,13 +123,24 @@ final class Ausgabe
      *
      * @return string Das Ergebnis beider Seiten, leer wenn keines vorliegt
      */
-    public static function ergebnisPaar(mixed $ergebnis): string
+    public static function ergebnisPaar(mixed $ergebnis, string $status = ''): string
     {
         if (null === $ergebnis || '' === $ergebnis) {
             return '';
         }
 
         $weiss = (float) $ergebnis;
+
+        // Kampflose Partien werden nicht mit Zahlen geschrieben, sondern mit
+        // + und -, wie es Swiss-Chess und chess-results halten: Eine 1:0 ließe
+        // eine gespielte Partie vermuten, die es nie gab.
+        if (self::istKampflos($status)) {
+            return match (true) {
+                $weiss >= 1.0 => '+:-',
+                $weiss <= 0.0 => '-:+',
+                default => '½:½',
+            };
+        }
 
         // Bei zwei Partien je Runde kann das Ergebnis über 1 liegen. Die
         // Gegenseite ergibt sich dann aus der Zahl der Partien, die hier nicht
@@ -139,6 +150,22 @@ final class Ausgabe
         }
 
         return self::punkte($weiss).':'.self::punkte(1.0 - $weiss);
+    }
+
+    /**
+     * Sagt, ob eine Partie kampflos gewertet wurde.
+     *
+     * Der Status kommt aus der Turnierdatei. „kampflos" steht für eine Partie,
+     * zu der einer nicht erschienen ist, „nicht eingesetzt" für ein Brett, das
+     * eine Mannschaft nicht besetzt hat — gewertet werden beide gleich.
+     *
+     * @param string $status Statustext aus dem Paarungssatz
+     *
+     * @return bool true, wenn nicht gespielt wurde
+     */
+    public static function istKampflos(string $status): bool
+    {
+        return \in_array(trim($status), ['kampflos', 'nicht eingesetzt'], true);
     }
 
     /**

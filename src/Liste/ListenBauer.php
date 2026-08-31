@@ -428,10 +428,9 @@ class ListenBauer
         $zeilen = [];
 
         foreach ($mannschaften as $nummer => $mannschaft) {
-            $name = trim((string) ($mannschaft['name'] ?? ''));
-
-            // Die Platzhaltermannschaft für Freilose gehört nicht in die Liste.
-            if ('' === $name || 'spielfrei' === mb_strtolower($name)) {
+            // Die Platzhaltermannschaft für Freilose gehört nicht in die
+            // Liste; das Format kennzeichnet sie selbst.
+            if ($mannschaft['spielfrei'] ?? false) {
                 continue;
             }
 
@@ -439,40 +438,12 @@ class ListenBauer
                 'nummer' => $nummer,
                 'mannschaft' => $mannschaft,
                 'anzahl' => \count($aufstellungen[$nummer] ?? []),
-                'schnitt' => $this->wertungsschnitt($aufstellungen[$nummer] ?? []),
+                'schnitt' => Mannschaftswertung::wertungsschnitt($turnier->getSpieler(), array_column($aufstellungen[$nummer] ?? [], 'tnr')),
                 'spieler' => $mitSpielern ? ($aufstellungen[$nummer] ?? []) : [],
             ];
         }
 
         return [] === $zeilen ? [] : ['mannschaften' => $zeilen, 'mitSpielern' => $mitSpielern];
-    }
-
-    /**
-     * Errechnet die durchschnittliche Turnierwertungszahl einer Aufstellung.
-     *
-     * Gerechnet wird über die Spieler, nicht über die Angabe auf der
-     * Mannschaftskarteikarte: Diese steht in alten Dateiformaten an einer
-     * anderen Adresse und liefert dort unbrauchbare Werte. Spieler ohne
-     * Wertungszahl bleiben außen vor — sie würden den Schnitt nach unten
-     * ziehen, obwohl über ihre Stärke nichts bekannt ist.
-     *
-     * @param array<int,array<string,mixed>> $spieler Die Aufstellung
-     *
-     * @return int Der Schnitt, oder 0 wenn kein Spieler eine Wertungszahl hat
-     */
-    private function wertungsschnitt(array $spieler): int
-    {
-        $werte = [];
-
-        foreach ($spieler as $einzelner) {
-            $twz = (int) ($einzelner['twz'] ?? 0);
-
-            if ($twz > 0) {
-                $werte[] = $twz;
-            }
-        }
-
-        return [] === $werte ? 0 : (int) round(array_sum($werte) / \count($werte));
     }
 
     /**

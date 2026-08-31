@@ -14,12 +14,12 @@ use PHPUnit\Framework\TestCase;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftswertung;
 
 /**
- * Prüft die Rückrechnung der Mannschaftswertung aus den Einzelpartien.
+ * Prüft die Zusammenstellung der Mannschaftswertung.
  *
- * Geprüft werden die Regeln, an denen die Rückrechnung gegen echte
- * Turnierdateien gemessen wurde: Wettkampfbildung, Brett- und
- * Mannschaftspunkte, Freilose und die Ausrichtung nach der Farbe am
- * niedrigsten Brett.
+ * Die Zahlen kommen aus dem Format-Adapter; geprüft wird, was diese Klasse
+ * daraus macht: die Zusammenführung der beiden Sichten eines Wettkampfs, die
+ * Ausrichtung nach der Farbe am niedrigsten Brett, die Behandlung von
+ * Freilosen und nicht ausgelosten Runden sowie die Summen der Tabelle.
  */
 class MannschaftswertungTest extends TestCase
 {
@@ -59,6 +59,7 @@ class MannschaftswertungTest extends TestCase
         $this->assertSame(2.0, $kampf['mannschaftspunkteHeim']);
         $this->assertSame(0.0, $kampf['mannschaftspunkteGast']);
         $this->assertCount(2, $kampf['partien'], 'Beide Bretter gehören zum Wettkampf.');
+        $this->assertTrue($kampf['gespielt']);
     }
 
     /**
@@ -78,16 +79,16 @@ class MannschaftswertungTest extends TestCase
     }
 
     /**
-     * Prüft die Wertung eines Freiloses.
+     * Prüft, dass ein Freilos ohne Punkte bleibt.
      *
-     * Eine Mannschaft ohne Wettkampf in einer gespielten Runde bekommt die
-     * volle Brettzahl und zwei Mannschaftspunkte. Ohne diese Regel gingen bei
-     * echten Turnierdateien genau diese Beträge gegenüber den gespeicherten
-     * Werten verloren.
+     * In der Datei steht zu einer spielfreien Runde nichts als das Fehlen
+     * eines Gegners. Ob die Turnierleitung dafür einen kampflosen Sieg
+     * gutgeschrieben hat, ist daraus nicht zu erkennen und wird deshalb nicht
+     * angenommen.
      *
      * @return void
      */
-    public function testFreilosGibtVolleBrettzahl(): void
+    public function testFreilosBleibtOhnePunkte(): void
     {
         $kaempfe = Mannschaftswertung::kaempfe(TurnierBauer::mannschaftsturnier());
         $freilose = array_values(array_filter($kaempfe[2], static fn (array $k): bool => $k['spielfrei']));
@@ -96,20 +97,38 @@ class MannschaftswertungTest extends TestCase
 
         foreach ($freilose as $freilos) {
             $this->assertNull($freilos['gast']);
-            $this->assertSame(2.0, $freilos['brettpunkteHeim'], 'Das Turnier hat zwei Bretter.');
-            $this->assertSame(2.0, $freilos['mannschaftspunkteHeim']);
+            $this->assertSame(0.0, $freilos['brettpunkteHeim']);
+            $this->assertNull($freilos['mannschaftspunkteHeim']);
+            $this->assertFalse($freilos['gespielt']);
             $this->assertSame([], $freilos['partien']);
         }
+    }
+
+    /**
+     * Prüft, dass eine nicht ausgeloste Runde kein Freilos ergibt.
+     *
+     * Nicht ausgeloste Runden stehen in der Datei genauso ohne Gegner wie
+     * spielfreie. Beides gleich zu behandeln hieße, in einem laufenden
+     * Turnier jeder Mannschaft für jede kommende Runde ein Freilos
+     * einzutragen.
+     *
+     * @return void
+     */
+    public function testNichtAusgelosteRundeIstKeinFreilos(): void
+    {
+        $kaempfe = Mannschaftswertung::kaempfe(TurnierBauer::mannschaftsturnier());
+
+        $this->assertArrayNotHasKey(3, $kaempfe, 'Es gibt nur zwei ausgeloste Runden.');
     }
 
     /**
      * Prüft die fertige Mannschaftstabelle.
      *
      * Erwartet wird:
-     *   M1: Sieg 2:0, Niederlage ½:1½ → 2 MP, 2½ BP
-     *   M2: Niederlage 0:2, Freilos    → 2 MP, 2 BP
+     *   M1: Sieg 2:0, Niederlage ½:1½   → 2 MP, 2½ BP
+     *   M2: Niederlage 0:2, Freilos     → 0 MP, 0 BP
      *   M3: Unentschieden 1:1, Sieg 1½:½ → 3 MP, 2½ BP
-     *   M4: Unentschieden 1:1, Freilos → 3 MP, 3 BP
+     *   M4: Unentschieden 1:1, Freilos  → 1 MP, 1 BP
      *
      * @return void
      */
@@ -126,24 +145,30 @@ class MannschaftswertungTest extends TestCase
 
         $this->assertSame(2.0, $nachNummer[1]['mannschaftspunkte']);
         $this->assertSame(2.5, $nachNummer[1]['brettpunkte']);
+        $this->assertSame(2, $nachNummer[1]['kaempfe']);
         $this->assertSame(1, $nachNummer[1]['siege']);
         $this->assertSame(1, $nachNummer[1]['niederlagen']);
         $this->assertSame(0, $nachNummer[1]['freilose']);
 
-        $this->assertSame(2.0, $nachNummer[2]['mannschaftspunkte']);
-        $this->assertSame(2.0, $nachNummer[2]['brettpunkte']);
+        $this->assertSame(0.0, $nachNummer[2]['mannschaftspunkte']);
+        $this->assertSame(0.0, $nachNummer[2]['brettpunkte']);
+        $this->assertSame(1, $nachNummer[2]['kaempfe'], 'Ein Freilos ist kein Wettkampf.');
         $this->assertSame(1, $nachNummer[2]['freilose']);
-        $this->assertSame(0, $nachNummer[2]['siege'], 'Ein Freilos ist kein gewonnener Wettkampf.');
+        $this->assertSame(0, $nachNummer[2]['siege']);
 
         $this->assertSame(3.0, $nachNummer[3]['mannschaftspunkte']);
         $this->assertSame(2.5, $nachNummer[3]['brettpunkte']);
+        $this->assertSame(1, $nachNummer[3]['unentschieden']);
 
-        $this->assertSame(3.0, $nachNummer[4]['mannschaftspunkte']);
-        $this->assertSame(3.0, $nachNummer[4]['brettpunkte']);
+        $this->assertSame(1.0, $nachNummer[4]['mannschaftspunkte']);
+        $this->assertSame(1.0, $nachNummer[4]['brettpunkte']);
+        $this->assertSame(1, $nachNummer[4]['freilose']);
 
         // Reihenfolge: erst Mannschaftspunkte, dann Brettpunkte
-        $this->assertSame(4, $tabelle[0]['nummer'], 'M4 führt mit 3 MP und 3 BP.');
-        $this->assertSame(3, $tabelle[1]['nummer']);
+        $this->assertSame(3, $tabelle[0]['nummer'], 'M3 führt mit 3 Mannschaftspunkten.');
+        $this->assertSame(1, $tabelle[1]['nummer']);
+        $this->assertSame(4, $tabelle[2]['nummer']);
+        $this->assertSame(2, $tabelle[3]['nummer']);
     }
 
     /**
@@ -175,7 +200,6 @@ class MannschaftswertungTest extends TestCase
     {
         $this->assertSame([], Mannschaftswertung::kaempfe(TurnierBauer::einzelturnier()));
         $this->assertSame([], Mannschaftswertung::tabelle(TurnierBauer::einzelturnier()));
-        $this->assertSame([], Mannschaftswertung::hinweise(TurnierBauer::einzelturnier()));
     }
 
     /**

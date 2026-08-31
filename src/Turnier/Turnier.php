@@ -48,6 +48,8 @@ final class Turnier
      * @param array{spieler:array<int,array<string,mixed>>,zeilen:array<int,array<int,string>>}|null $kreuztabelle
      *                                                               Kreuztabelle, oder null wenn das Format keine liefert
      * @param string[]                                $hinweise      Meldungen der Selbstkontrolle des Adapters
+     * @param array<int,array<int,array<string,mixed>>> $mannschaftspaarungen
+     *                                                               Wettkämpfe als [MNr.][Runde]; bei Einzelturnieren leer
      */
     public function __construct(
         private readonly string $format,
@@ -59,7 +61,26 @@ final class Turnier
         private readonly array $runden,
         private readonly ?array $kreuztabelle,
         private readonly array $hinweise,
+        private readonly array $mannschaftspaarungen = [],
     ) {
+    }
+
+    /**
+     * Gibt die Wettkämpfe der Mannschaften zurück.
+     *
+     * Aufbau: `[Mannschaftsnummer][Runde]`. Jeder Satz nennt mindestens
+     * `gegner` (0 bei einer spielfreien Runde), `gegnerName`, `brettpunkte`,
+     * `brettpunkteGegner`, `mannschaftspunkte` (null, solange der Kampf nicht
+     * gespielt ist) und `amGruenenTisch`.
+     *
+     * Anders als bei den Einzelpaarungen steht ein Wettkampf zweimal darin —
+     * einmal aus Sicht jeder Mannschaft.
+     *
+     * @return array<int,array<int,array<string,mixed>>> Wettkämpfe je Mannschaft und Runde
+     */
+    public function getMannschaftspaarungen(): array
+    {
+        return $this->mannschaftspaarungen;
     }
 
     /**

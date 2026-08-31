@@ -121,12 +121,18 @@ class SwtFile
 
     /**
      * Spielort einer Mannschaftspaarung (Byte an Satzadresse 0x08).
+     *
+     * Das Byte ist genauso verschlüsselt wie die Farbe bei Einzelpaarungen:
+     * 1 und 3 stehen für die beiden Seiten, 2 und 4 für die spielfreien
+     * Sonderfälle. In einer Deutschen Blitzmannschaftsmeisterschaft tragen
+     * alle 756 Halbpaarungen entweder 1 oder 3, und die beiden Seiten einer
+     * Begegnung nie denselben Wert.
      */
     private const ORT = [
         0 => '',
         1 => 'Heim',
-        2 => 'Auswärts',
-        3 => 'Heim (spielfrei)',
+        2 => 'Heim (spielfrei)',
+        3 => 'Auswärts',
         4 => 'Auswärts (spielfrei)',
     ];
 
@@ -231,6 +237,7 @@ class SwtFile
         $this->lesePersonen();
         $this->lesePaarungen();
         $this->pruefeStimmigkeit();
+        $this->pruefeMannschaften();
     }
 
     /**
@@ -407,7 +414,10 @@ class SwtFile
      */
     public function getMannschaftsrangliste(): array
     {
-        $liste = array_values($this->mannschaften);
+        $liste = array_values(array_filter(
+            $this->mannschaften,
+            static fn (array $mannschaft): bool => !$mannschaft['spielfrei']
+        ));
 
         usort($liste, static function (array $a, array $b): int {
             $platzA = $a['platz'] > 0 ? $a['platz'] : PHP_INT_MAX;
@@ -1036,10 +1046,14 @@ class SwtFile
     /**
      * Wertet eine einzelne Mannschaftskarteikarte aus.
      *
-     * Aufbau und Zahlenformate entsprechen der Spielerkarteikarte. Mangels
-     * Mannschaftsturnier unter den Beispieldateien sind diese Felder aus den
-     * Strukturangaben des Zugzwang-Projekts übernommen und nicht gegen eine
-     * Ausgabe von Swiss-Chess geprüft.
+     * Aufbau und Zahlenformate entsprechen der Spielerkarteikarte.
+     *
+     * Eine Besonderheit hat die Mannschaftsnummer: Die Karteikarte führt sie
+     * zweimal. An 0x00C9 steht die Nummer, mit der die Spielerkarteikarten auf
+     * ihre Mannschaft verweisen (1, 2, 3 …); an 0x00D9 eine interne Kennung,
+     * die um 998 höher liegt (999, 1000, 1001 …) und auf die sich die
+     * Mannschaftspaarungen beziehen. Beide werden gelesen, damit sich beide
+     * Verweisrichtungen auflösen lassen.
      *
      * @param int $offset Anfangsadresse der Karteikarte in der Datei
      *
@@ -1047,10 +1061,14 @@ class SwtFile
      */
     private function leseMannschaftskarte(int $offset): array
     {
+        $name = $this->text($offset, $offset + 0x1F);
+
         return [
-            'mnr' => $this->wort($offset + 0xD9),
+            'mnr' => $this->wort($offset + 0xC9),
+            'mnrIntern' => $this->wort($offset + 0xD9),
             'startnummer' => $this->wort($offset + 0xDB),
-            'name' => $this->text($offset, $offset + 0x1F),
+            'name' => $name,
+            'spielfrei' => $this->istPlatzhalter($name),
             'eloSchnitt' => (int) $this->text($offset + 0x46, $offset + 0x49),
             'dwzSchnitt' => (int) $this->text($offset + 0x4B, $offset + 0x4E),
             'land' => $this->text($offset + 0x69, $offset + 0x6B),
@@ -1061,14 +1079,20 @@ class SwtFile
             'erstesBrett' => $this->wort($offset + 0xCB),
             'beginnSpieler' => $this->wort($offset + 0xCF),
             'spielerzahl' => $this->wort($offset + 0xD5),
+            'spieler' => [],
             'platz' => $this->wort($offset + 0xDD),
             'partien' => $this->wort($offset + 0xE1),
             'siege' => $this->wort($offset + 0xE3),
             'remis' => $this->wort($offset + 0xE5),
             'niederlagen' => $this->wort($offset + 0xE7),
-            'mannschaftspunkte' => $this->wort($offset + 0x124) / 2,
-            'brettpunkte' => $this->wort($offset + 0x128) / 2,
-            'feinwertung1' => $this->wort($offset + 0x12C) / 2,
+            'wertung1' => $this->wort($offset + 0x124) / 2,
+            'wertung1Text' => self::FEINWERTUNG[$this->byte(0x0263)] ?? '',
+            'wertung2' => $this->wort($offset + 0x128) / 2,
+            'wertung2Text' => self::FEINWERTUNG[$this->byte(0x0265)] ?? '',
+            'wertung3' => $this->wort($offset + 0x12C) / 2,
+            'wertung3Text' => self::FEINWERTUNG[$this->byte(0x0267)] ?? '',
+            'mannschaftspunkte' => $this->mannschaftswertung($offset, 0x01),
+            'brettpunkte' => $this->mannschaftswertung($offset, 0x02),
             'info' => array_values(array_filter([
                 $this->text($offset + 0x15E, $offset + 0x185),
                 $this->text($offset + 0x187, $offset + 0x1AE),
@@ -1076,6 +1100,40 @@ class SwtFile
                 $this->text($offset + 0x1D9, $offset + 0x200),
             ])),
         ];
+    }
+
+    /**
+     * Holt aus einer Mannschaftskarteikarte den Wert einer bestimmten Wertungsart.
+     *
+     * Die Karteikarte führt drei Zahlenfelder, deren Bedeutung nicht festliegt:
+     * Sie folgt der Reihenfolge der eingestellten Feinwertungen. Steht die
+     * erste Feinwertung auf „Mannschaftspunkte", enthält 0x0124 die
+     * Mannschaftspunkte und 0x0128 die Brettpunkte — steht sie dagegen auf
+     * „Brettpunkte", ist es umgekehrt. Beides kommt vor: Blitzmeisterschaften
+     * werten nach Mannschaftspunkten, Schulschachmeisterschaften nach
+     * Brettpunkten.
+     *
+     * Wer die Felder fest zuordnet, vertauscht bei der Hälfte der Turniere
+     * beide Zahlen.
+     *
+     * @param int $offset Anfangsadresse der Karteikarte
+     * @param int $art    Kennzahl der gesuchten Feinwertung (1 = Mannschaftspunkte,
+     *                    2 = Brettpunkte)
+     *
+     * @return float|null Der Wert, oder null wenn diese Wertung im Turnier
+     *                    nicht geführt wird
+     */
+    private function mannschaftswertung(int $offset, int $art): ?float
+    {
+        $felder = [0x0263 => 0x124, 0x0265 => 0x128, 0x0267 => 0x12C];
+
+        foreach ($felder as $einstellung => $feld) {
+            if ($art === $this->byte($einstellung)) {
+                return $this->wort($offset + $feld) / 2;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -1120,6 +1178,211 @@ class SwtFile
                 $offset += self::LAENGE_PAARUNG;
             }
         }
+
+        $this->ergaenzeMannschaftsdaten();
+    }
+
+    /**
+     * Ergänzt die Mannschaftspaarungen um Gegner und Ergebnis.
+     *
+     * Die Paarungssätze der Mannschaften enthalten nur Spielort, Gegner und
+     * Tischnummer — **kein Ergebnis**. Swiss-Chess rechnet den Ausgang eines
+     * Mannschaftskampfes jedes Mal aus den Einzelpartien zurück, und genau das
+     * geschieht hier: Für jede Runde werden die Ergebnisse aller Spieler einer
+     * Mannschaft aufsummiert; das ergibt ihre Brettpunkte. Aus dem Vergleich
+     * mit den Brettpunkten des Gegners folgen die Mannschaftspunkte.
+     *
+     * Außerdem wird die Gegnernummer übersetzt: Die Paarungssätze nennen die
+     * interne Kennung (999, 1000, …), gearbeitet wird aber mit der Nummer, auf
+     * die auch die Spielerkarteikarten verweisen (1, 2, …).
+     *
+     * Geprüft an der Mannschafts-Kreuztabelle einer Deutschen
+     * Blitzmannschaftsmeisterschaft: 756 Zellen, keine Abweichung.
+     *
+     * @return void Das Ergebnis ergänzt $this->mannschaftspaarungen und
+     *              $this->mannschaften
+     */
+    private function ergaenzeMannschaftsdaten(): void
+    {
+        // Übersetzungstabelle von der internen Kennung auf die Mannschaftsnummer
+        $ausIntern = [];
+
+        foreach ($this->mannschaften as $mnr => $daten) {
+            $ausIntern[$daten['mnrIntern']] = $mnr;
+        }
+
+        // Zuordnung der Spieler zu ihrer Mannschaft
+        foreach ($this->spieler as $tnr => $spieler) {
+            if ($spieler['spielfrei'] || !isset($this->mannschaften[$spieler['mannschaftsnummer']])) {
+                continue;
+            }
+
+            $this->mannschaften[$spieler['mannschaftsnummer']]['spieler'][] = $tnr;
+        }
+
+        // Brettpunkte je Mannschaft und Runde aus den Einzelpartien
+        $brettpunkte = [];
+
+        foreach ($this->mannschaften as $mnr => $daten) {
+            for ($runde = 1; $runde <= $this->rundenSaetze; ++$runde) {
+                $summe = 0.0;
+
+                foreach ($daten['spieler'] as $tnr) {
+                    $summe += $this->paarungen[$tnr][$runde]['ergebnis'] ?? 0.0;
+                }
+
+                $brettpunkte[$mnr][$runde] = $summe;
+            }
+        }
+
+        [$fuerSieg, $fuerRemis] = $this->mannschaftspunktwertung();
+
+        foreach ($this->mannschaftspaarungen as $mnr => $runden) {
+            foreach ($runden as $runde => $satz) {
+                $gegner = $ausIntern[$satz['gegner']] ?? 0;
+
+                // Ein Kampf gegen die Platzhaltermannschaft ist eine spielfreie
+                // Runde und wird wie ein fehlender Gegner behandelt.
+                if ($gegner && ($this->mannschaften[$gegner]['spielfrei'] ?? false)) {
+                    $gegner = 0;
+                }
+
+                $eigene = $brettpunkte[$mnr][$runde] ?? 0.0;
+                $fremde = $gegner ? ($brettpunkte[$gegner][$runde] ?? 0.0) : 0.0;
+
+                $satz['gegner'] = $gegner;
+                $satz['gegnerName'] = $this->mannschaften[$gegner]['name'] ?? '';
+                $satz['brettpunkte'] = $eigene;
+                $satz['brettpunkteGegner'] = $fremde;
+                $satz['brettergebnis'] = $eigene;
+                $satz['ausEinzelpartien'] = true;
+                $satz['amGruenenTisch'] = false;
+
+                // Wurde in dieser Runde überhaupt eine Partie gepaart? Fehlt sie
+                // auf beiden Seiten, wurde der Kampf am grünen Tisch entschieden.
+                // Der Ausgang steht dann nirgends in der Datei und lässt sich
+                // aus den Einzelpartien nicht zurückgewinnen.
+                //
+                // Das gilt aber nur für Runden, die überhaupt ausgelost sind.
+                // Bei einem laufenden Turnier stehen für die kommenden Runden
+                // schon Mannschaftspaarungen in der Datei, ohne dass die
+                // Bretter besetzt wären — das ist kein Kampf am grünen Tisch.
+                $gepaart = $gegner
+                    && ($this->hatEinzelpartien($mnr, $runde) || $this->hatEinzelpartien($gegner, $runde));
+
+                // Gepaart heißt noch nicht gespielt: Steht die Runde erst an,
+                // sind die Bretter besetzt, aber kein Ergebnis eingetragen. Als
+                // Remis zu werten wäre grob falsch — der Kampf hat noch gar
+                // nicht stattgefunden.
+                $gespielt = $gepaart
+                    && ($this->hatEinzelergebnisse($mnr, $runde) || $this->hatEinzelergebnisse($gegner, $runde));
+
+                $ausgelost = $gepaart || $this->rundeBelegt($runde);
+
+                if (!$gegner) {
+                    $satz['ergebnis'] = null;
+                    $satz['ergebnisText'] = '';
+                    $satz['mannschaftspunkte'] = 0.0;
+                    $satz['ausEinzelpartien'] = false;
+                } elseif (!$gespielt) {
+                    $satz['ergebnis'] = null;
+                    $satz['ergebnisText'] = '';
+                    $satz['mannschaftspunkte'] = null;
+                    $satz['ausEinzelpartien'] = false;
+                    $satz['amGruenenTisch'] = $ausgelost && !$gepaart;
+                } else {
+                    $satz['ergebnis'] = $eigene > $fremde ? 1.0 : ($eigene < $fremde ? 0.0 : 0.5);
+                    $satz['ergebnisText'] = $this->punkteText($eigene).':'.$this->punkteText($fremde);
+                    $satz['mannschaftspunkte'] = $eigene > $fremde
+                        ? $fuerSieg
+                        : ($eigene < $fremde ? 0.0 : $fuerRemis);
+                }
+
+                $this->mannschaftspaarungen[$mnr][$runde] = $satz;
+            }
+        }
+
+        $amGruenenTisch = 0;
+
+        foreach ($this->mannschaftspaarungen as $runden) {
+            foreach ($runden as $satz) {
+                if ($satz['amGruenenTisch']) {
+                    ++$amGruenenTisch;
+                }
+            }
+        }
+
+        if ($amGruenenTisch) {
+            $this->hinweise[] = sprintf(
+                '%d Mannschaftskämpfe haben keine einzige gepaarte Partie und wurden offenbar am grünen'
+                .' Tisch entschieden. Ihr Ausgang steht nirgends in der Datei; er fehlt deshalb in den'
+                .' Mannschaftspaarungen. Die Gesamtpunkte auf den Karteikarten enthalten ihn.',
+                intdiv($amGruenenTisch, 2)
+            );
+        }
+    }
+
+    /**
+     * Prüft, ob eine Mannschaft in einer Runde überhaupt Partien gepaart hatte.
+     *
+     * Maßgeblich ist, ob mindestens ein Spieler der Mannschaft einen Gegner
+     * eingetragen hat. Fehlt das auf beiden Seiten eines Kampfes, wurde er
+     * nicht gespielt, sondern am grünen Tisch entschieden.
+     *
+     * @param int $mnr   Mannschaftsnummer
+     * @param int $runde Rundennummer
+     *
+     * @return bool true, wenn wenigstens eine Partie gepaart war
+     */
+    private function hatEinzelpartien(int $mnr, int $runde): bool
+    {
+        foreach ($this->mannschaften[$mnr]['spieler'] ?? [] as $tnr) {
+            if (($this->paarungen[$tnr][$runde]['gegner'] ?? 0) > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Prüft, ob für eine Mannschaft in einer Runde ein Ergebnis eingetragen ist.
+     *
+     * Unterscheidet die anstehende von der gespielten Runde: Beide haben
+     * besetzte Bretter, nur die gespielte hat auch Ergebnisse.
+     *
+     * @param int $mnr   Mannschaftsnummer
+     * @param int $runde Rundennummer
+     *
+     * @return bool true, wenn wenigstens eine Partie ein Ergebnis trägt
+     */
+    private function hatEinzelergebnisse(int $mnr, int $runde): bool
+    {
+        foreach ($this->mannschaften[$mnr]['spieler'] ?? [] as $tnr) {
+            if (null !== ($this->paarungen[$tnr][$runde]['ergebnis'] ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Liefert, wie viele Mannschaftspunkte Sieg und Remis wert sind.
+     *
+     * Die Einstellung steht an Adresse 0x053A. Üblich sind zwei Punkte für
+     * einen gewonnenen und einer für einen unentschiedenen Mannschaftskampf;
+     * daneben kennt Swiss-Chess die Drei-Punkte-Regel und eine frei
+     * einstellbare Wertung, die in der Datei nicht hinterlegt ist und deshalb
+     * wie die übliche behandelt wird.
+     *
+     * @return array{0:float,1:float} Punkte für Sieg und für Remis
+     */
+    private function mannschaftspunktwertung(): array
+    {
+        return 1 === (int) $this->turnier['mannschaftswertung']
+            ? [3.0, 1.0]
+            : [2.0, 1.0];
     }
 
     /**
@@ -1423,14 +1686,18 @@ class SwtFile
         }
 
         // Sonderfall: Turnier angelegt und ausgelost, aber nie eine Rangliste
-        // berechnet. Dann stehen alle Karteikarten auf null, obwohl Paarungen
-        // und Ergebnisse vorhanden sind. Ein Vergleich wäre hier sinnlos.
-        $ohneWerte = array_filter(
-            $spieler,
-            static fn (array $s): bool => 0 === (int) $s['partien'] && 0.0 === (float) $s['punkte']
-        );
+        // berechnet. Dann steht auf keiner Karteikarte eine Punktzahl, obwohl
+        // Paarungen und Ergebnisse vorhanden sind. Ein Vergleich wäre hier
+        // sinnlos. Maßgeblich ist allein die Punktsumme: Die Zahl der Partien
+        // führt Swiss-Chess in solchen Dateien mitunter schon mit, die Punkte
+        // aber noch nicht.
+        $gesamtpunkte = 0.0;
 
-        if (\count($ohneWerte) === \count($spieler)) {
+        foreach ($spieler as $daten) {
+            $gesamtpunkte += (float) $daten['punkte'];
+        }
+
+        if (0.0 === $gesamtpunkte) {
             $this->hinweise[] = 'In dieser Datei wurde nie eine Rangliste berechnet: Punkte, Partien und'
                 .' Platzierungen aller Karteikarten stehen auf null. Paarungen und Ergebnisse sind'
                 .' vorhanden und werden ausgewertet.';
@@ -1495,6 +1762,69 @@ class SwtFile
             $beste,
             \count($spieler),
             $besteRunde
+        );
+    }
+
+    /**
+     * Vergleicht die Wertungen der Mannschaftskarteikarten mit den Kämpfen.
+     *
+     * Wie bei den Spielern steht auch hier beides getrennt in der Datei: die
+     * Summen auf den Karteikarten und die Kämpfe, aus denen sie sich ergeben.
+     * Weichen sie ab, hat das dieselben Gründe — eine Rangliste, die älter ist
+     * als die eingegebenen Ergebnisse, oder ein am grünen Tisch entschiedener
+     * Kampf, dessen Ausgang nirgends gespeichert ist.
+     *
+     * Zugleich ist der Vergleich die Probe auf die Zuordnung von Spielern zu
+     * Mannschaften: Wäre sie falsch, ergäben die aufsummierten Brettpunkte
+     * kaum bei allen Mannschaften dieselben Zahlen wie die Karteikarten.
+     *
+     * @return void Etwaige Abweichungen landen in $this->hinweise
+     */
+    private function pruefeMannschaften(): void
+    {
+        if (!$this->mannschaften) {
+            return;
+        }
+
+        $abweichend = 0;
+        $gesamt = 0;
+
+        foreach ($this->mannschaften as $mnr => $mannschaft) {
+            if ($mannschaft['spielfrei']) {
+                continue;
+            }
+
+            ++$gesamt;
+            $brettpunkte = 0.0;
+            $mannschaftspunkte = 0.0;
+
+            foreach ($this->mannschaftspaarungen[$mnr] ?? [] as $satz) {
+                $brettpunkte += $satz['brettpunkte'];
+                $mannschaftspunkte += $satz['mannschaftspunkte'] ?? 0.0;
+            }
+
+            if (null !== $mannschaft['brettpunkte'] && abs($brettpunkte - $mannschaft['brettpunkte']) > 0.01) {
+                ++$abweichend;
+
+                continue;
+            }
+
+            if (null !== $mannschaft['mannschaftspunkte']
+                && abs($mannschaftspunkte - $mannschaft['mannschaftspunkte']) > 0.01) {
+                ++$abweichend;
+            }
+        }
+
+        if (!$abweichend || !$gesamt) {
+            return;
+        }
+
+        $this->hinweise[] = sprintf(
+            'Bei %d von %d Mannschaften gehen die Wertungen der Karteikarte nicht mit den'
+            .' Kämpfen zusammen, die sich aus den Einzelpartien ergeben. Die Kämpfe sind hier'
+            .' verlässlicher als die gespeicherte Tabelle.',
+            $abweichend,
+            $gesamt
         );
     }
 

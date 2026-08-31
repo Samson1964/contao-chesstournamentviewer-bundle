@@ -1,5 +1,32 @@
 # Änderungen
 
+## Version 1.2.0 (2026-08-31)
+
+* Change: Der SWT-Leser wurde auf die Fassung vom 2026-08-31 gebracht. Er
+  wertet die Mannschaftsdaten jetzt selbst aus — Mannschaften unter ihrer
+  echten Nummer, Wettkämpfe mit Brett- und Mannschaftspunkten aus den
+  Einzelpartien, Mannschaftspunkte nach der Turniereinstellung (zwei oder
+  drei für den Sieg). Die Rückrechnung im Bundle entfällt dafür.
+* Change: **Freilose bleiben unbewertet.** Bis 1.1.0 bekam eine Mannschaft
+  ohne Wettkampf die volle Brettzahl und zwei Mannschaftspunkte
+  gutgeschrieben. Das war geraten: In der Datei steht dazu nichts, und die
+  Turnierleitungen halten es unterschiedlich. Weicht die Tabelle deshalb von
+  der gespeicherten ab, steht darüber ein Hinweis.
+* Change: Nicht gespielte und am grünen Tisch entschiedene Wettkämpfe
+  erscheinen als Strich statt als Unentschieden.
+* Fix: Kampflose Partien werden mit `+:-` und `-:+` ausgegeben statt mit
+  `1:0` und `0:1`. Betrifft 906 Partien im geprüften Bestand.
+* Fix: Kreuztabelle und Reiter setzen sich jetzt gegen Themes durch, die ihre
+  Tabellen und Knöpfe über ID-Selektoren gestalten (`#main table td`,
+  `#main button`). Gegen eine ID kommt keine Klassenregel an; die
+  Eigenschaften, ohne die der Betrachter unbrauchbar wird, tragen deshalb ein
+  `!important`. Anpassbar bleiben sie über die Farbeigenschaften an `.ctv`.
+* Change: Blindfelder der Kreuztabelle heben sich deutlicher ab und tragen
+  einen mittig gesetzten König.
+* Add: Mannschaftstabelle und Kreuztabelle der Mannschaften gegen die
+  CSV-Ausgaben von Swiss-Chess geprüft: 28 und 38 Mannschaften sowie 784
+  Kreuzfelder, keine Abweichung.
+
 ## Version 1.1.0 (2026-08-31)
 
 * Add: Neue Liste „Fortschritt ohne Punktestand" — dieselbe

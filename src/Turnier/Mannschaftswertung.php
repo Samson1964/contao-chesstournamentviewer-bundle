@@ -11,73 +11,51 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Turnier;
 
 /**
- * Rechnet die Mannschaftswertung aus den Einzelpartien zurück.
+ * Stellt Wettkämpfe, Mannschaftstabelle und Mannschaftskreuztabelle zusammen.
  *
- * Warum überhaupt zurückgerechnet wird
- * ------------------------------------
- * Die Mannschaftsangaben, die Swiss-Chess in seinen Dateien ablegt, sind
- * nicht durchgängig brauchbar. Geprüft an den fünf Mannschaftsdateien unter
- * `Gegentest/C-Mannschaftsturnier` (Fassungen 650 bis 897):
+ * Die Zahlen kommen aus dem Format-Adapter und werden hier nicht mehr
+ * nachgerechnet. Das war bis zur Fassung 1.1.0 anders: Der SWT-Leser lieferte
+ * damals keine brauchbaren Mannschaftsdaten, weshalb dieses Bundle die
+ * Wettkämpfe aus den Einzelpartien zurückrechnete. Seit der Leserfassung vom
+ * 2026-08-31 macht er das selbst — und gründlicher:
  *
- *   * Der Mannschaftspaarungsbereich enthält in allen fünf Dateien **kein
- *     einziges Ergebnis** — `ergebnis`, `brettergebnis` und
- *     `mannschaftsergebnis` sind durchweg null. Wer die Wettkämpfe daraus
- *     ausgibt, zeigt eine Tabelle ohne Zahlen.
- *   * Vor Fassung 800 stehen auf den Mannschaftskarteikarten Unsinnswerte
- *     (Brettpunkte wie 14137 bei sechs Brettern und sieben Runden).
+ *   * Die Mannschaftspunkte richten sich nach der Turniereinstellung, also
+ *     zwei oder drei Punkte für den Sieg, statt fest zwei.
+ *   * Drei Zustände werden unterschieden, die vorher alle als Remis
+ *     durchgingen: Runde noch nicht ausgelost, Runde ausgelost aber nicht
+ *     gespielt, und ein Kampf ganz ohne Paarungen, der am grünen Tisch
+ *     entschieden wurde.
+ *   * Die Zahlenfelder der Mannschaftskarteikarte folgen der Reihenfolge der
+ *     eingestellten Feinwertungen und liegen nicht fest.
  *
- * Die Einzelpartien dagegen sind über den gesamten Bestand geprüft. Aus ihnen
- * lässt sich alles gewinnen, was eine Mannschaftstabelle braucht — die
- * Zuordnung Spieler zu Mannschaft steht auf jeder Spielerkarteikarte.
+ * Diese Klasse gruppiert die Daten nur noch für die Ausgabe: Sie führt die
+ * beiden Sichten eines Wettkampfs zusammen, hängt die Einzelpartien an und
+ * bildet die Summen für die Tabelle.
  *
- * Nachweis der Rückrechnung
- * -------------------------
- * Verglichen wurden die zurückgerechneten Brett- und Mannschaftspunkte mit
- * den gespeicherten Werten der Mannschaftskarteikarten, für alle Dateien der
- * Fassungen ab 800, in denen diese Werte plausibel sind:
- *
- *   | Datei                | Mannschaften | Abweichungen |
- *   | -------------------- | -----------: | -----------: |
- *   | DBMM_2012.SWT (882)  |           38 |            0 |
- *   | FVS_BMM_2012_13 (882)|           14 |            0 |
- *   | BSMM2017.SWT (897)   |           23 |            0 |
- *
- * Bei den älteren Fassungen 650 und 710 gibt es nichts zu vergleichen, weil
- * die gespeicherten Werte dort unbrauchbar sind; die Rückrechnung ist die
- * einzige Quelle.
- *
- * Zwei Regeln waren dafür nötig und sind an genau diesen Zahlen belegt:
- *
- *   1. Die Mannschaftsnummer ist die **Position** in der Mannschaftsliste,
- *      nicht das Nummernfeld der Karteikarte — dieses liefert in allen fünf
- *      Dateien 999 plus Position. (Geprüft an 540 Teilnehmern: die Position
- *      stimmt in jedem einzelnen Fall mit dem Mannschaftsnamen des Spielers
- *      überein.) Die Adapter liefern die Liste deshalb positionsindiziert.
- *   2. Eine Mannschaft ohne Wettkampf in einer gespielten Runde hat ein
- *      Freilos und bekommt die volle Brettzahl sowie zwei Mannschaftspunkte.
- *      Ohne diese Regel fehlten bei BSMM2017 genau den sieben Mannschaften
- *      mit sechs statt sieben Wettkämpfen je 4 Brett- und 2 Mannschaftspunkte.
+ * **Freilose bleiben unbewertet.** Der Leser vergibt für eine spielfreie
+ * Runde weder Brett- noch Mannschaftspunkte, weil in der Datei nichts darüber
+ * steht. Manche Turnierleitungen schreiben einer freigelosten Mannschaft
+ * trotzdem einen kampflosen Sieg gut; dann weicht die hier gezeigte Tabelle
+ * von der gespeicherten ab, und der Leser vermerkt das als Hinweis über den
+ * Tabellen. Ihn stillschweigend nachzubilden hieße raten.
  */
 final class Mannschaftswertung
 {
     /**
-     * Bildet die Wettkämpfe aller Runden aus den Einzelpartien.
+     * Führt die Wettkämpfe aller Runden zusammen.
      *
-     * Zwei Mannschaften gelten als aufeinandergetroffen, sobald in einer Runde
-     * mindestens eine Partie zwischen ihren Spielern steht. Die Reihenfolge
-     * innerhalb eines Wettkampfs richtet sich nach der Farbe am niedrigsten
-     * Brett: Wer dort Weiß führt, steht links. Das entspricht der üblichen
-     * Auslosung und ist die einzige Angabe zur Heimseite, die sich aus den
-     * Einzelpartien gewinnen lässt — ob eine Mannschaft tatsächlich Gastgeber
-     * war, steht in der Datei nicht verwertbar.
+     * Die Datei führt jeden Wettkampf zweimal, einmal aus Sicht jeder
+     * Mannschaft. Hier erscheint er einmal. Welche Mannschaft links steht,
+     * richtet sich nach der Farbe am niedrigsten Brett: Wer dort Weiß führt,
+     * gilt als Heimmannschaft. Das entspricht der üblichen Auslosung und ist
+     * die einzige belastbare Angabe dazu — das Ortsbyte der
+     * Mannschaftspaarungen ist in geprüften Dateien unglaubwürdig belegt
+     * (bei 24 Mannschaften über sieben Runden 154 Heim- gegen 14
+     * Auswärtsbegegnungen).
      *
      * @param Turnier $turnier Das eingelesene Turnier
      *
-     * @return array<int,array<int,array<string,mixed>>> Wettkämpfe je Runde.
-     *         Jeder Eintrag enthält `heim`, `gast` (Mannschaftsnummern, `gast`
-     *         ist null bei Freilos), die zugehörigen Namen, Brett- und
-     *         Mannschaftspunkte beider Seiten sowie unter `partien` die
-     *         Einzelpartien nach Brett sortiert.
+     * @return array<int,array<int,array<string,mixed>>> Wettkämpfe je Runde
      */
     public static function kaempfe(Turnier $turnier): array
     {
@@ -85,108 +63,43 @@ final class Mannschaftswertung
             return [];
         }
 
-        $spieler = $turnier->getSpieler();
         $mannschaften = $turnier->getMannschaften();
-        $bretter = $turnier->getBretter();
-        $platzhalter = self::platzhaltermannschaften($mannschaften);
+        $kaempfe = [];
 
-        // Schritt 1: Partien nach Runde und Mannschaftspaar bündeln.
-        $roh = [];
+        foreach ($turnier->getMannschaftspaarungen() as $mnr => $runden) {
+            $mnr = (int) $mnr;
 
-        foreach ($turnier->getPaarungen() as $tnr => $runden) {
-            $tnr = (int) $tnr;
-            $eigene = (int) ($spieler[$tnr]['mannschaftsnummer'] ?? 0);
-
-            if (0 === $eigene || isset($platzhalter[$eigene]) || ($spieler[$tnr]['spielfrei'] ?? false)) {
+            if ($mannschaften[$mnr]['spielfrei'] ?? false) {
                 continue;
             }
 
             foreach ($runden as $runde => $satz) {
-                $gegnerNr = (int) ($satz['gegner'] ?? 0);
+                $gegner = (int) ($satz['gegner'] ?? 0);
 
-                if (0 === $gegnerNr || !isset($spieler[$gegnerNr]) || ($spieler[$gegnerNr]['spielfrei'] ?? false)) {
+                // Eine spielfreie Runde hat keine Gegenseite und steht deshalb
+                // nur einmal in der Datei.
+                if (0 === $gegner) {
+                    if (self::rundeAusgelost($turnier, (int) $runde)) {
+                        $kaempfe[(int) $runde][] = self::freilos($mnr, $mannschaften[$mnr]['name'] ?? '', (int) $runde);
+                    }
+
                     continue;
                 }
 
-                $fremde = (int) ($spieler[$gegnerNr]['mannschaftsnummer'] ?? 0);
-
-                // Partien innerhalb derselben Mannschaft gehören zu keinem
-                // Wettkampf; sie kommen in Turnieren mit Restplätzen vor.
-                if (0 === $fremde || $fremde === $eigene || isset($platzhalter[$fremde])) {
+                // Jeden Wettkampf nur von einer Seite aufnehmen.
+                if ($mnr > $gegner) {
                     continue;
                 }
 
-                // Jede Partie wird von beiden Seiten gesehen. Der Schlüssel
-                // aus den beiden Mannschaftsnummern in fester Reihenfolge
-                // sorgt dafür, dass sie nur einmal im Wettkampf landet.
-                $paar = $eigene < $fremde ? $eigene.'-'.$fremde : $fremde.'-'.$eigene;
-
-                $roh[(int) $runde][$paar]['punkte'][$eigene] = ($roh[(int) $runde][$paar]['punkte'][$eigene] ?? 0.0) + (float) ($satz['ergebnis'] ?? 0.0);
-                $roh[(int) $runde][$paar]['gespielt'][$eigene] = true;
-
-                if ($eigene < $fremde) {
-                    $roh[(int) $runde][$paar]['partien'][$tnr] = self::partie($turnier, $tnr, (int) $runde, $satz, $eigene, $fremde);
-                }
+                $kaempfe[(int) $runde][] = self::kampf($turnier, $mnr, $gegner, (int) $runde, $satz);
             }
         }
 
-        // Schritt 2: Wettkämpfe zusammensetzen, Runde für Runde.
-        $kaempfe = [];
-        $rundennummern = array_keys($roh);
-        sort($rundennummern);
+        ksort($kaempfe);
 
-        foreach ($rundennummern as $runde) {
-            $angetreten = [];
-
-            foreach ($roh[$runde] as $paar => $daten) {
-                [$erste, $zweite] = array_map('intval', explode('-', (string) $paar));
-                $angetreten[$erste] = true;
-                $angetreten[$zweite] = true;
-
-                $partien = $daten['partien'] ?? [];
-                usort($partien, static fn (array $a, array $b): int => $a['brett'] <=> $b['brett']);
-
-                // Links steht, wer am niedrigsten Brett Weiß führt.
-                $tausch = ($partien[0]['weissMannschaft'] ?? $erste) !== $erste;
-                $heim = $tausch ? $zweite : $erste;
-                $gast = $tausch ? $erste : $zweite;
-
-                $bpHeim = (float) ($daten['punkte'][$heim] ?? 0.0);
-                $bpGast = (float) ($daten['punkte'][$gast] ?? 0.0);
-
-                $kaempfe[$runde][] = [
-                    'heim' => $heim,
-                    'gast' => $gast,
-                    'heimName' => (string) ($mannschaften[$heim]['name'] ?? ''),
-                    'gastName' => (string) ($mannschaften[$gast]['name'] ?? ''),
-                    'brettpunkteHeim' => $bpHeim,
-                    'brettpunkteGast' => $bpGast,
-                    'mannschaftspunkteHeim' => self::mannschaftspunkte($bpHeim, $bpGast),
-                    'mannschaftspunkteGast' => self::mannschaftspunkte($bpGast, $bpHeim),
-                    'spielfrei' => false,
-                    'partien' => array_values($partien),
-                ];
-            }
-
-            // Wer in einer gespielten Runde nirgends antrat, hat ein Freilos.
-            foreach ($mannschaften as $nr => $mannschaft) {
-                if (isset($angetreten[$nr]) || isset($platzhalter[$nr])) {
-                    continue;
-                }
-
-                $kaempfe[$runde][] = [
-                    'heim' => $nr,
-                    'gast' => null,
-                    'heimName' => (string) ($mannschaft['name'] ?? ''),
-                    'gastName' => '',
-                    'brettpunkteHeim' => (float) $bretter,
-                    'brettpunkteGast' => 0.0,
-                    'mannschaftspunkteHeim' => 2.0,
-                    'mannschaftspunkteGast' => 0.0,
-                    'spielfrei' => true,
-                    'partien' => [],
-                ];
-            }
+        foreach ($kaempfe as $runde => $liste) {
+            usort($liste, static fn (array $a, array $b): int => [$a['spielfrei'], $a['tisch']] <=> [$b['spielfrei'], $b['tisch']]);
+            $kaempfe[$runde] = $liste;
         }
 
         return $kaempfe;
@@ -195,34 +108,38 @@ final class Mannschaftswertung
     /**
      * Stellt die Mannschaftstabelle auf.
      *
-     * Gewertet wird mit zwei Punkten für einen gewonnenen und einem für einen
-     * unentschiedenen Wettkampf; die Brettpunkte sind die zweite Wertung. Die
-     * Reihenfolge ergibt sich aus Mannschafts- und Brettpunkten. Bei
-     * völligem Gleichstand entscheidet die im Turnier gespeicherte
-     * Platzierung, damit die Tabelle nicht bei jedem Aufruf springt.
+     * Summiert wird über die Wettkampfsätze der jeweiligen Mannschaft, so wie
+     * der Leser sie liefert. Die Reihenfolge ergibt sich aus Mannschafts- und
+     * Brettpunkten; bei völligem Gleichstand entscheidet die in der Datei
+     * gespeicherte Platzierung, damit die Tabelle nicht bei jedem Aufruf
+     * springt und die Feinwertungen des Turnierprogramms nicht verlorengehen.
      *
      * @param Turnier $turnier Das eingelesene Turnier
      *
      * @return array<int,array<string,mixed>> Die Mannschaften nach Platz
      *         sortiert, mit `platz`, `nummer`, `name`, `kaempfe`, `siege`,
      *         `unentschieden`, `niederlagen`, `freilose`,
-     *         `mannschaftspunkte`, `brettpunkte` und dem ursprünglichen
-     *         Datensatz unter `datensatz`
+     *         `mannschaftspunkte`, `brettpunkte`, `schnitt` und dem
+     *         ursprünglichen Datensatz unter `datensatz`
      */
     public static function tabelle(Turnier $turnier): array
     {
-        $mannschaften = $turnier->getMannschaften();
-        $platzhalter = self::platzhaltermannschaften($mannschaften);
+        if (!$turnier->istMannschaftsturnier()) {
+            return [];
+        }
+
+        $spieler = $turnier->getSpieler();
         $zeilen = [];
 
-        foreach ($mannschaften as $nr => $mannschaft) {
-            if (isset($platzhalter[$nr])) {
+        foreach ($turnier->getMannschaften() as $mnr => $mannschaft) {
+            if ($mannschaft['spielfrei'] ?? false) {
                 continue;
             }
 
-            $zeilen[$nr] = [
+            $mnr = (int) $mnr;
+            $zeile = [
                 'platz' => 0,
-                'nummer' => $nr,
+                'nummer' => $mnr,
                 'name' => (string) ($mannschaft['name'] ?? ''),
                 'kaempfe' => 0,
                 'siege' => 0,
@@ -231,49 +148,45 @@ final class Mannschaftswertung
                 'freilose' => 0,
                 'mannschaftspunkte' => 0.0,
                 'brettpunkte' => 0.0,
+                'schnitt' => self::wertungsschnitt($spieler, $mannschaft['spieler'] ?? []),
                 'datensatz' => $mannschaft,
             ];
-        }
 
-        foreach (self::kaempfe($turnier) as $kaempfeDerRunde) {
-            foreach ($kaempfeDerRunde as $kampf) {
-                foreach ([['heim', 'gast'], ['gast', 'heim']] as [$seite, $gegenseite]) {
-                    $nr = $kampf[$seite];
+            foreach ($turnier->getMannschaftspaarungen()[$mnr] ?? [] as $runde => $satz) {
+                $zeile['brettpunkte'] += (float) ($satz['brettpunkte'] ?? 0.0);
 
-                    if (null === $nr || !isset($zeilen[$nr])) {
-                        continue;
+                if (0 === (int) ($satz['gegner'] ?? 0)) {
+                    // Nur ausgeloste Runden zählen als Freilos; die noch nicht
+                    // ausgelosten stehen ebenfalls ohne Gegner in der Datei.
+                    if (self::rundeAusgelost($turnier, (int) $runde)) {
+                        ++$zeile['freilose'];
                     }
 
-                    $eigen = (float) $kampf['brettpunkte'.ucfirst($seite)];
-                    $fremd = (float) $kampf['brettpunkte'.ucfirst($gegenseite)];
+                    continue;
+                }
 
-                    $zeilen[$nr]['brettpunkte'] += $eigen;
-                    $zeilen[$nr]['mannschaftspunkte'] += (float) $kampf['mannschaftspunkte'.ucfirst($seite)];
+                // Ein Kampf ohne Mannschaftspunkte ist noch nicht gespielt.
+                if (null === ($satz['mannschaftspunkte'] ?? null)) {
+                    continue;
+                }
 
-                    // Ein Freilos ist kein gewonnener Wettkampf. Die Punkte
-                    // zählen mit, die Bilanz aus Siegen, Unentschieden und
-                    // Niederlagen bleibt davon unberührt und wird gesondert
-                    // ausgewiesen.
-                    if ($kampf['spielfrei']) {
-                        ++$zeilen[$nr]['freilose'];
+                $zeile['mannschaftspunkte'] += (float) $satz['mannschaftspunkte'];
+                ++$zeile['kaempfe'];
 
-                        continue;
-                    }
+                $eigen = (float) ($satz['brettpunkte'] ?? 0.0);
+                $fremd = (float) ($satz['brettpunkteGegner'] ?? 0.0);
 
-                    ++$zeilen[$nr]['kaempfe'];
-
-                    if ($eigen > $fremd) {
-                        ++$zeilen[$nr]['siege'];
-                    } elseif ($eigen === $fremd) {
-                        ++$zeilen[$nr]['unentschieden'];
-                    } else {
-                        ++$zeilen[$nr]['niederlagen'];
-                    }
+                if ($eigen > $fremd) {
+                    ++$zeile['siege'];
+                } elseif ($eigen === $fremd) {
+                    ++$zeile['unentschieden'];
+                } else {
+                    ++$zeile['niederlagen'];
                 }
             }
-        }
 
-        $zeilen = array_values($zeilen);
+            $zeilen[] = $zeile;
+        }
 
         usort(
             $zeilen,
@@ -318,21 +231,22 @@ final class Mannschaftswertung
             $zeilen[$index][$index] = '**';
         }
 
-        foreach (self::kaempfe($turnier) as $kaempfeDerRunde) {
-            foreach ($kaempfeDerRunde as $kampf) {
-                if ($kampf['spielfrei'] || null === $kampf['gast']) {
+        foreach ($turnier->getMannschaftspaarungen() as $mnr => $runden) {
+            $zeile = $spalte[(int) $mnr] ?? null;
+
+            if (null === $zeile) {
+                continue;
+            }
+
+            foreach ($runden as $satz) {
+                $gegenspalte = $spalte[(int) ($satz['gegner'] ?? 0)] ?? null;
+
+                if (null === $gegenspalte || null === ($satz['mannschaftspunkte'] ?? null)) {
                     continue;
                 }
 
-                $zeileHeim = $spalte[$kampf['heim']] ?? null;
-                $zeileGast = $spalte[$kampf['gast']] ?? null;
-
-                if (null === $zeileHeim || null === $zeileGast) {
-                    continue;
-                }
-
-                $zeilen[$zeileHeim][$zeileGast] = self::punkteText($kampf['brettpunkteHeim']).':'.self::punkteText($kampf['brettpunkteGast']);
-                $zeilen[$zeileGast][$zeileHeim] = self::punkteText($kampf['brettpunkteGast']).':'.self::punkteText($kampf['brettpunkteHeim']);
+                $zeilen[$zeile][$gegenspalte] = self::punkteText((float) $satz['brettpunkte'])
+                    .':'.self::punkteText((float) $satz['brettpunkteGegner']);
             }
         }
 
@@ -340,156 +254,203 @@ final class Mannschaftswertung
     }
 
     /**
-     * Vergleicht die zurückgerechnete Wertung mit den gespeicherten Werten.
+     * Stellt einen einzelnen Wettkampf zusammen.
      *
-     * Dient der Selbstkontrolle, wie sie der SWT-Leser für die Einzelwertung
-     * schon vornimmt. Weichen die Zahlen ab, ist das kein Fehler der
-     * Rückrechnung — bei alten Dateiformaten stehen auf den Karteikarten
-     * ohnehin Unsinnswerte —, aber der Betrachter soll es erwähnen dürfen.
+     * @param Turnier             $turnier Das eingelesene Turnier
+     * @param int                 $eine    Mannschaftsnummer der einen Seite
+     * @param int                 $andere  Mannschaftsnummer der anderen Seite
+     * @param int                 $runde   Rundennummer
+     * @param array<string,mixed> $satz    Der Wettkampfsatz aus Sicht von $eine
      *
-     * Verglichen wird nur, wenn die gespeicherten Werte überhaupt plausibel
-     * sind: mehr Brettpunkte als Bretter mal Runden kann keine Mannschaft
-     * erreicht haben, und solche Werte kommen in alten Dateien massenhaft vor.
-     *
-     * @param Turnier $turnier Das eingelesene Turnier
-     *
-     * @return string[] Ein Hinweis je Abweichung, leer wenn alles zusammenpasst
-     *                  oder die gespeicherten Werte nicht vergleichbar sind
+     * @return array<string,mixed> Der Wettkampf mit beiden Seiten, Punkten und
+     *                             den Einzelpartien nach Brett sortiert
      */
-    public static function hinweise(Turnier $turnier): array
+    private static function kampf(Turnier $turnier, int $eine, int $andere, int $runde, array $satz): array
     {
-        if (!$turnier->istMannschaftsturnier()) {
-            return [];
-        }
+        $mannschaften = $turnier->getMannschaften();
+        $partien = self::partien($turnier, $eine, $andere, $runde);
 
-        $hoechstwert = $turnier->getBretter() * max(1, $turnier->getLetzteRunde());
-        $hinweise = [];
-        $abweichungen = 0;
-        $vergleichbar = 0;
+        // Links steht, wer am niedrigsten Brett Weiß führt.
+        $tausch = ($partien[0]['weissMannschaft'] ?? $eine) !== $eine;
+        $heim = $tausch ? $andere : $eine;
+        $gast = $tausch ? $eine : $andere;
 
-        foreach (self::tabelle($turnier) as $zeile) {
-            $gespeichert = $zeile['datensatz']['brettpunkte'] ?? null;
-
-            if (!is_numeric($gespeichert) || (float) $gespeichert > $hoechstwert) {
-                continue;
-            }
-
-            ++$vergleichbar;
-
-            if (abs((float) $gespeichert - $zeile['brettpunkte']) > 0.001) {
-                ++$abweichungen;
-            }
-        }
-
-        if ($vergleichbar > 0 && $abweichungen > 0) {
-            $hinweise[] = sprintf(
-                'Die aus den Einzelpartien errechneten Brettpunkte weichen bei %d von %d Mannschaften von den in der Datei gespeicherten ab. Angezeigt werden die errechneten Werte.',
-                $abweichungen,
-                $vergleichbar
-            );
-        }
-
-        if (0 === $vergleichbar && [] !== $turnier->getMannschaften()) {
-            $hinweise[] = 'Die Datei enthält keine brauchbaren Mannschaftspunkte. Die Mannschaftswertung wurde vollständig aus den Einzelpartien errechnet.';
-        }
-
-        return $hinweise;
-    }
-
-    /**
-     * Stellt eine einzelne Partie eines Wettkampfs zusammen.
-     *
-     * Die Partie wird immer aus Sicht des Spielers aufgenommen, dessen
-     * Mannschaft die kleinere Nummer trägt; die Ausrichtung nach Weiß und
-     * Schwarz erfolgt danach anhand der Farbe.
-     *
-     * @param Turnier             $turnier   Das Turnier, für den Zugriff auf die Spielerliste
-     * @param int                 $tnr       Teilnehmernummer des betrachteten Spielers
-     * @param int                 $runde     Rundennummer
-     * @param array<string,mixed> $satz      Der Paarungssatz dieses Spielers
-     * @param int                 $eigene    Mannschaftsnummer des betrachteten Spielers
-     * @param int                 $fremde    Mannschaftsnummer des Gegners
-     *
-     * @return array<string,mixed> Die Partie mit `brett`, `weiss`, `schwarz`,
-     *                             `weissMannschaft`, `schwarzMannschaft`,
-     *                             `ergebnis` und `ergebnisText`
-     */
-    private static function partie(Turnier $turnier, int $tnr, int $runde, array $satz, int $eigene, int $fremde): array
-    {
-        $spieler = $turnier->getSpieler();
-        $gegnerNr = (int) $satz['gegner'];
-        $istWeiss = 'w' === mb_strtolower(mb_substr(trim((string) ($satz['farbe'] ?? '')), 0, 1));
-
-        $weissNr = $istWeiss ? $tnr : $gegnerNr;
-        $schwarzNr = $istWeiss ? $gegnerNr : $tnr;
-
-        // Das Ergebnis liegt aus Sicht von $tnr vor und muss für die Ausgabe
-        // an Weiß ausgerichtet werden.
-        $ergebnis = $satz['ergebnis'];
-
-        if (null !== $ergebnis && !$istWeiss) {
-            $ergebnis = 1.0 - (float) $ergebnis;
-        }
+        $gegensatz = $turnier->getMannschaftspaarungen()[$andere][$runde] ?? [];
+        $punkte = [
+            $eine => (float) ($satz['brettpunkte'] ?? 0.0),
+            $andere => (float) ($satz['brettpunkteGegner'] ?? 0.0),
+        ];
+        $mannschaftspunkte = [
+            $eine => $satz['mannschaftspunkte'] ?? null,
+            $andere => $gegensatz['mannschaftspunkte'] ?? null,
+        ];
 
         return [
-            'brett' => (int) ($satz['brett'] ?? 0),
             'runde' => $runde,
-            'weiss' => $spieler[$weissNr] ?? [],
-            'schwarz' => $spieler[$schwarzNr] ?? [],
-            'weissMannschaft' => $istWeiss ? $eigene : $fremde,
-            'schwarzMannschaft' => $istWeiss ? $fremde : $eigene,
-            'ergebnis' => $ergebnis,
-            'ergebnisText' => self::ergebnisText($ergebnis),
+            'heim' => $heim,
+            'gast' => $gast,
+            'heimName' => (string) ($mannschaften[$heim]['name'] ?? ''),
+            'gastName' => (string) ($mannschaften[$gast]['name'] ?? ''),
+            'brettpunkteHeim' => $punkte[$heim],
+            'brettpunkteGast' => $punkte[$gast],
+            'mannschaftspunkteHeim' => $mannschaftspunkte[$heim],
+            'mannschaftspunkteGast' => $mannschaftspunkte[$gast],
+            'gespielt' => null !== $mannschaftspunkte[$heim],
+            'amGruenenTisch' => (bool) ($satz['amGruenenTisch'] ?? false),
+            'spielfrei' => false,
+            'tisch' => (int) ($satz['tisch'] ?? 0),
+            'partien' => $partien,
         ];
     }
 
     /**
-     * Ermittelt die Mannschaftspunkte einer Seite.
+     * Erzeugt den Eintrag für eine spielfreie Runde.
      *
-     * Zwei Punkte für den Sieg, einer für ein Unentschieden. Diese Wertung
-     * stimmt in allen geprüften Dateien mit den gespeicherten Werten überein.
-     * Ligen, die anders werten (etwa 1 und ½), gäben abweichende Zahlen; ein
-     * entsprechender Schalter steht in den Dateien nicht.
+     * Punkte werden keine vergeben; siehe Klassenkommentar.
      *
-     * @param float $eigen Brettpunkte der betrachteten Mannschaft
-     * @param float $fremd Brettpunkte des Gegners
+     * @param int    $mnr   Mannschaftsnummer
+     * @param string $name  Name der Mannschaft
+     * @param int    $runde Rundennummer
      *
-     * @return float 2, 1 oder 0
+     * @return array<string,mixed> Der Eintrag in derselben Form wie ein Wettkampf
      */
-    private static function mannschaftspunkte(float $eigen, float $fremd): float
+    private static function freilos(int $mnr, string $name, int $runde): array
     {
-        if ($eigen > $fremd) {
-            return 2.0;
-        }
-
-        return $eigen === $fremd ? 1.0 : 0.0;
+        return [
+            'runde' => $runde,
+            'heim' => $mnr,
+            'gast' => null,
+            'heimName' => $name,
+            'gastName' => '',
+            'brettpunkteHeim' => 0.0,
+            'brettpunkteGast' => 0.0,
+            'mannschaftspunkteHeim' => null,
+            'mannschaftspunkteGast' => null,
+            'gespielt' => false,
+            'amGruenenTisch' => false,
+            'spielfrei' => true,
+            'tisch' => PHP_INT_MAX,
+            'partien' => [],
+        ];
     }
 
     /**
-     * Findet Platzhaltermannschaften.
+     * Sammelt die Einzelpartien eines Wettkampfs.
      *
-     * Bei ungerader Mannschaftszahl legt Swiss-Chess eine Mannschaft an, gegen
-     * die spielt, wer aussetzt. Sie heißt „spielfrei" oder trägt gar keinen
-     * Namen. In Tabelle und Wettkampflisten hat sie nichts verloren, und die
-     * Freilosregel würde sie zu einem Tabellenführer machen.
+     * Grundlage ist die Spielerliste beider Mannschaften; aufgenommen wird
+     * jede Partie, deren Gegner zur anderen Mannschaft gehört. Jede Partie
+     * erscheint einmal, ausgerichtet an Weiß.
      *
-     * @param array<int,array<string,mixed>> $mannschaften Die Mannschaftsliste
+     * @param Turnier $turnier Das eingelesene Turnier
+     * @param int     $eine    Mannschaftsnummer der einen Seite
+     * @param int     $andere  Mannschaftsnummer der anderen Seite
+     * @param int     $runde   Rundennummer
      *
-     * @return array<int,true> Mannschaftsnummern der Platzhalter als Schlüssel
+     * @return array<int,array<string,mixed>> Die Partien nach Brett sortiert
      */
-    private static function platzhaltermannschaften(array $mannschaften): array
+    private static function partien(Turnier $turnier, int $eine, int $andere, int $runde): array
     {
-        $platzhalter = [];
+        $spieler = $turnier->getSpieler();
+        $paarungen = $turnier->getPaarungen();
+        $mannschaften = $turnier->getMannschaften();
+        $partien = [];
 
-        foreach ($mannschaften as $nr => $mannschaft) {
-            $name = mb_strtolower(trim((string) ($mannschaft['name'] ?? '')));
+        foreach ($mannschaften[$eine]['spieler'] ?? [] as $tnr) {
+            $tnr = (int) $tnr;
+            $satz = $paarungen[$tnr][$runde] ?? null;
+            $gegnerNr = (int) ($satz['gegner'] ?? 0);
 
-            if ('' === $name || 'spielfrei' === $name || 'bye' === $name) {
-                $platzhalter[$nr] = true;
+            if (null === $satz || 0 === $gegnerNr) {
+                continue;
+            }
+
+            if ((int) ($spieler[$gegnerNr]['mannschaftsnummer'] ?? 0) !== $andere) {
+                continue;
+            }
+
+            $istWeiss = 'w' === mb_strtolower(mb_substr(trim((string) ($satz['farbe'] ?? '')), 0, 1));
+            $ergebnis = $satz['ergebnis'];
+
+            if (null !== $ergebnis && !$istWeiss) {
+                $ergebnis = 1.0 - (float) $ergebnis;
+            }
+
+            $partien[] = [
+                'brett' => (int) ($satz['brett'] ?? 0),
+                'runde' => $runde,
+                'weiss' => $spieler[$istWeiss ? $tnr : $gegnerNr] ?? [],
+                'schwarz' => $spieler[$istWeiss ? $gegnerNr : $tnr] ?? [],
+                'weissMannschaft' => $istWeiss ? $eine : $andere,
+                'schwarzMannschaft' => $istWeiss ? $andere : $eine,
+                'ergebnis' => $ergebnis,
+                'status' => (string) ($satz['status'] ?? ''),
+            ];
+        }
+
+        usort($partien, static fn (array $a, array $b): int => $a['brett'] <=> $b['brett']);
+
+        return $partien;
+    }
+
+    /**
+     * Prüft, ob eine Runde überhaupt ausgelost ist.
+     *
+     * Nicht ausgeloste Runden stehen in der Datei genauso ohne Gegner wie
+     * spielfreie. Ohne diese Unterscheidung bekäme in einem laufenden Turnier
+     * jede Mannschaft für jede kommende Runde ein Freilos.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier
+     * @param int     $runde   Rundennummer
+     *
+     * @return bool true, wenn für diese Runde Partien vorliegen
+     */
+    private static function rundeAusgelost(Turnier $turnier, int $runde): bool
+    {
+        return [] !== $turnier->getRunde($runde);
+    }
+
+    /**
+     * Errechnet die durchschnittliche Turnierwertungszahl einer Mannschaft.
+     *
+     * Gemittelt wird über **alle gemeldeten Spieler** der Mannschaft, die eine
+     * Wertungszahl führen. Das ist genau der Kreis, den die Mannschaftsliste
+     * mit eingeschalteter Aufstellung darunter zeigt; eine Zahl, die sich auf
+     * einen anderen Kreis bezöge, wäre dort nicht nachzuvollziehen.
+     *
+     * **Diese Zahl ist nicht die von Swiss-Chess.** Nach welcher Regel dessen
+     * TWZ-Spalte gebildet wird, ließ sich an den vorliegenden Ausgaben nicht
+     * bestimmen — die beiden Referenzturniere widersprechen sich:
+     *
+     * | Regel | Blitz-MM 2012 (25 Mannschaften) | Betriebs-MM 2012 (37) |
+     * | --- | ---: | ---: |
+     * | alle gemeldeten Spieler | 24 | 10 |
+     * | nur die Bretter 1 bis zur Brettzahl | 12 | 35 |
+     * | die stärksten Spieler in Brettzahl | 12 | 24 |
+     *
+     * Beide Turniere haben vier Bretter; im ersten zählt Swiss-Chess den
+     * fünften Spieler mit, im zweiten nicht. Ein Fall bleibt selbst dann
+     * unerklärt, wenn eine Mannschaft genau vier Spieler an den Brettern 1
+     * bis 4 führt und beide Rechnungen dasselbe ergeben. Solange die Regel
+     * nicht feststeht, ist die einfache und nachvollziehbare die bessere.
+     *
+     * @param array<int,array<string,mixed>> $spieler  Alle Teilnehmer des Turniers
+     * @param array<int,int>                 $tnrs     Teilnehmernummern der Mannschaft
+     *
+     * @return int Der Schnitt, oder 0 wenn kein Spieler eine Wertungszahl hat
+     */
+    public static function wertungsschnitt(array $spieler, array $tnrs): int
+    {
+        $werte = [];
+
+        foreach ($tnrs as $tnr) {
+            $twz = (int) ($spieler[(int) $tnr]['twz'] ?? 0);
+
+            if ($twz > 0) {
+                $werte[] = $twz;
             }
         }
 
-        return $platzhalter;
+        return [] === $werte ? 0 : (int) round(array_sum($werte) / \count($werte));
     }
 
     /**
@@ -512,23 +473,5 @@ final class Mannschaftswertung
         }
 
         return (0 === $ganz ? '' : (string) $ganz).'½';
-    }
-
-    /**
-     * Formt das Ergebnis einer Partie aus Sicht von Weiß.
-     *
-     * @param float|null $ergebnis Punkte für Weiß, oder null wenn die Partie
-     *                             noch nicht gewertet ist
-     *
-     * @return string „1", „½", „0" oder eine leere Zeichenkette
-     */
-    private static function ergebnisText(?float $ergebnis): string
-    {
-        return match (true) {
-            null === $ergebnis => '',
-            $ergebnis >= 1.0 => '1',
-            $ergebnis >= 0.5 => '½',
-            default => '0',
-        };
     }
 }
