@@ -1,0 +1,31 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+?>
+<div class="ctv-rollbar">
+  <table class="ctv-tabelle ctv-tabelle--kreuz">
+    <thead>
+      <tr>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('platz') ?></th>
+        <th scope="col"><?= Ausgabe::spalte('name') ?></th>
+        <?php foreach ($this->spieler as $nummer => $unused): ?>
+          <th scope="col" class="ctv-zahl ctv-kreuz__kopf"><?= $nummer + 1 ?></th>
+        <?php endforeach; ?>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('punkte') ?></th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($this->spieler as $index => $spieler): ?>
+        <tr>
+          <td class="ctv-zahl"><?= $index + 1 ?></td>
+          <td class="ctv-kreuz__name"><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
+          <?php foreach ($this->zeilen[$index] as $spalte => $symbol): ?>
+            <td class="ctv-zahl<?= '**' === $symbol ? ' ctv-kreuz__diagonale' : '' ?>"><?= '**' === $symbol ? '' : Ausgabe::esc($symbol) ?></td>
+          <?php endforeach; ?>
+          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($spieler['punkte']) ?></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>

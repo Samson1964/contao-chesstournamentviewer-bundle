@@ -1,0 +1,37 @@
+# Quelle fuer die Metadaten im Contao Manager (contao/package-metadata).
+# Aenderungen hier werden in den Fork uebertragen.
+
+de:
+    title: Turnier-Betrachter
+    description: >
+        Gibt Dateien von Schachturnierverwaltungen als Inhaltselement aus:
+        Turnierdaten, Teilnehmer, Rangliste, Kreuztabelle, Fortschrittstabelle,
+        Paarungen und Ergebnisse, bei Mannschaftsturnieren zusaetzlich
+        Mannschaftstabelle, Wettkaempfe und Kreuztabelle der Mannschaften.
+        Mehrere Listen erscheinen als Reiter. Erstes Format ist SWT
+        (Swiss-Chess); weitere lassen sich ergaenzen. Laeuft unter Contao 4.13
+        und Contao 5.
+    keywords:
+        - Schach
+        - Turnier
+        - Kreuztabelle
+        - Rangliste
+        - Swiss-Chess
+        - SWT
+
+en:
+    title: Tournament viewer
+    description: >
+        Displays files of chess tournament management programs as a content
+        element: tournament data, players, standings, cross table, progress
+        table, pairings and results; for team tournaments also team standings,
+        matches and the team cross table. Several lists are shown as tabs. The
+        first supported format is SWT (Swiss-Chess); further formats can be
+        added. Runs on Contao 4.13 and Contao 5.
+    keywords:
+        - chess
+        - tournament
+        - cross table
+        - standings
+        - swiss-chess
+        - swt

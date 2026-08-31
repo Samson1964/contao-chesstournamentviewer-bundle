@@ -1,0 +1,11 @@
+/vendor/
+/composer.lock
+/.phpunit.cache/
+/.phpunit.result.cache
+
+# Erzeugte HTML-Seiten zur Sichtpruefung, siehe TODO.md
+/.pruefstand/
+
+# Private Arbeitsnotiz
+TODO.md
+CLAUDE.md

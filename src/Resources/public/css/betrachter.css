@@ -1,0 +1,248 @@
+/*
+ * Turnier-Betrachter — Grundgestaltung.
+ *
+ * Bewusst sparsam: Farben und Schriften kommen aus dem Theme der Seite. Die
+ * Stilvorlage regelt nur, was das Theme nicht wissen kann — dass die
+ * Reiternavigation ohne JavaScript nicht verstecken darf, dass Tabellen mit
+ * vielen Runden waagerecht rollen müssen und dass Zahlenspalten rechtsbündig
+ * gehören.
+ *
+ * Alle Farben stehen als Eigenschaften am Wurzelelement und lassen sich im
+ * Theme überschreiben, ohne diese Datei anzufassen.
+ */
+
+.ctv {
+    --ctv-linie: #d5d5d5;
+    --ctv-kopf: rgba(0, 0, 0, .05);
+    --ctv-wechsel: rgba(0, 0, 0, .025);
+    --ctv-gedaempft: rgba(0, 0, 0, .45);
+    --ctv-hinweis: #8a6d3b;
+    --ctv-hinweis-grund: rgba(240, 173, 78, .15);
+    --ctv-fehler: #a94442;
+
+    margin-block: 1rem;
+}
+
+/* --- Hinweise und Fehler ------------------------------------------------ */
+
+.ctv-hinweis {
+    margin: 0 0 .5rem;
+    padding: .5rem .75rem;
+    border-left: 3px solid var(--ctv-hinweis);
+    background: var(--ctv-hinweis-grund);
+    color: var(--ctv-hinweis);
+    font-size: .9em;
+}
+
+.ctv-fehler {
+    padding: .5rem .75rem;
+    border-left: 3px solid var(--ctv-fehler);
+    color: var(--ctv-fehler);
+}
+
+/* --- Reiternavigation ---------------------------------------------------
+ *
+ * Ohne JavaScript stehen alle Listen untereinander und die Reiterleiste
+ * bleibt verborgen. Erst das Skript setzt die Klasse `ctv--bereit`, und erst
+ * dann wird versteckt. Andernfalls wäre bei abgeschaltetem JavaScript nur
+ * die erste Liste zu sehen — und keine Möglichkeit, an die übrigen zu kommen.
+ */
+
+.ctv-reiter {
+    display: none;
+}
+
+.ctv--bereit .ctv-reiter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    margin-bottom: -1px;
+    border-bottom: 1px solid var(--ctv-linie);
+}
+
+.ctv-reiter__knopf {
+    padding: .4rem .9rem;
+    border: 1px solid var(--ctv-linie);
+    border-bottom-color: transparent;
+    border-radius: 3px 3px 0 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.ctv-reiter__knopf:hover,
+.ctv-reiter__knopf:focus-visible {
+    background: var(--ctv-kopf);
+}
+
+.ctv-reiter__knopf--aktiv,
+.ctv-reiter__knopf--aktiv:hover {
+    background: var(--ctv-kopf);
+    font-weight: 700;
+}
+
+.ctv--bereit .ctv-liste {
+    display: none;
+    padding-top: 1rem;
+    border-top: 1px solid var(--ctv-linie);
+}
+
+.ctv--bereit .ctv-liste--aktiv {
+    display: block;
+}
+
+.ctv-liste + .ctv-liste {
+    margin-top: 2rem;
+}
+
+.ctv--bereit .ctv-liste + .ctv-liste {
+    margin-top: 0;
+}
+
+.ctv-liste__titel {
+    margin: 0 0 .5rem;
+}
+
+/* --- Tabellen ----------------------------------------------------------- */
+
+.ctv-rollbar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ctv-tabelle {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .95em;
+}
+
+.ctv-tabelle th,
+.ctv-tabelle td {
+    padding: .25rem .5rem;
+    border-bottom: 1px solid var(--ctv-linie);
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+.ctv-tabelle thead th {
+    background: var(--ctv-kopf);
+    font-weight: 700;
+}
+
+/*
+ * Zeilenwechsel über nth-child und nicht über die Selektorstufe 4
+ * (`:nth-child(even of …)`): Diese wird von älteren Browsern nicht
+ * verstanden, und dort bliebe die Streifung ganz aus. Eingeschobene
+ * Aufstellungszeilen verschieben dadurch den Wechsel; sie bekommen deshalb
+ * gar keinen Hintergrund.
+ */
+.ctv-tabelle tbody tr:nth-child(even) {
+    background: var(--ctv-wechsel);
+}
+
+.ctv-tabelle tbody tr.ctv-aufstellung {
+    background: transparent;
+}
+
+.ctv-zahl {
+    text-align: right;
+}
+
+.ctv-punkte {
+    font-weight: 700;
+}
+
+.ctv-partie--frei {
+    color: var(--ctv-gedaempft);
+}
+
+/* Die Turnierdaten sind eine Aufzählung, keine Tabelle mit Spalten. */
+
+.ctv-tabelle--turnierdaten th {
+    width: 14rem;
+    white-space: normal;
+}
+
+.ctv-tabelle--turnierdaten td {
+    white-space: normal;
+}
+
+/* --- Kreuztabelle -------------------------------------------------------
+ *
+ * Die Spaltenköpfe sind Zahlen; sie brauchen nur die Breite einer Ziffernzahl.
+ * Der Name bleibt lesbar breit, alles Übrige wird schmal, damit auch ein
+ * Turnier mit dreißig Teilnehmern noch auf einen Bildschirm passt.
+ */
+
+.ctv-tabelle--kreuz td,
+.ctv-tabelle--kreuz th {
+    padding-inline: .35rem;
+}
+
+.ctv-kreuz__kopf {
+    text-align: center;
+    font-weight: 400;
+}
+
+.ctv-kreuz__name {
+    max-width: 16rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ctv-kreuz__diagonale {
+    background: var(--ctv-kopf);
+}
+
+/* --- Fortschrittstabelle ------------------------------------------------ */
+
+.ctv-fortschritt__zelle {
+    text-align: center;
+}
+
+.ctv-fortschritt__farbe {
+    color: var(--ctv-gedaempft);
+    font-size: .85em;
+}
+
+.ctv-fortschritt__ergebnis {
+    font-weight: 700;
+}
+
+.ctv-fortschritt__stand {
+    display: block;
+    color: var(--ctv-gedaempft);
+    font-size: .85em;
+}
+
+.ctv-fortschritt__frei {
+    color: var(--ctv-gedaempft);
+}
+
+/* --- Aufstellungen und Einzelpartien innerhalb einer Zeile --------------- */
+
+.ctv-aufstellung > td {
+    padding: 0 0 .75rem;
+    border-bottom: 1px solid var(--ctv-linie);
+}
+
+.ctv-tabelle--aufstellung {
+    font-size: .9em;
+}
+
+.ctv-tabelle--aufstellung th,
+.ctv-tabelle--aufstellung td {
+    border-bottom: 0;
+}
+
+.ctv-runde {
+    margin: 1.25rem 0 .35rem;
+}
+
+.ctv-liste > .ctv-runde:first-child,
+.ctv-liste__titel + .ctv-runde {
+    margin-top: 0;
+}

@@ -1,0 +1,57 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+?>
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<?php if ($this->fehler): ?>
+
+  <p class="ctv-fehler"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['fehler'] ?? '%s', $this->fehler)) ?></p>
+
+<?php else: ?>
+
+  <div class="ctv" id="<?= $this->kennung ?>"<?= $this->mitReitern ? ' data-ctv-reiter' : '' ?>>
+
+    <?php if ($this->hinweise): ?>
+      <div class="ctv-hinweise">
+        <?php foreach ($this->hinweise as $hinweis): ?>
+          <p class="ctv-hinweis"><?= Ausgabe::esc($hinweis) ?></p>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+
+    <?php if ($this->mitReitern): ?>
+      <div class="ctv-reiter" role="tablist">
+        <?php foreach ($this->listen as $i => $liste): ?>
+          <button type="button"
+                  class="ctv-reiter__knopf<?= 0 === $i ? ' ctv-reiter__knopf--aktiv' : '' ?>"
+                  role="tab"
+                  id="<?= $this->kennung ?>-reiter-<?= $liste['schluessel'] ?>"
+                  aria-controls="<?= $this->kennung ?>-<?= $liste['schluessel'] ?>"
+                  aria-selected="<?= 0 === $i ? 'true' : 'false' ?>"><?= Ausgabe::esc($liste['name']) ?></button>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+
+    <?php foreach ($this->listen as $i => $liste): ?>
+      <section class="ctv-liste ctv-liste--<?= $liste['schluessel'] ?><?= 0 === $i ? ' ctv-liste--aktiv' : '' ?>"
+               id="<?= $this->kennung ?>-<?= $liste['schluessel'] ?>"
+               <?php if ($this->mitReitern): ?>role="tabpanel" aria-labelledby="<?= $this->kennung ?>-reiter-<?= $liste['schluessel'] ?>"<?php endif; ?>>
+
+        <?php if (!$this->mitReitern): ?>
+          <h3 class="ctv-liste__titel"><?= Ausgabe::esc($liste['name']) ?></h3>
+        <?php endif; ?>
+
+        <?php $this->insert($liste['template'], array_merge($liste['daten'], ['turnier' => $this->turnier])); ?>
+
+      </section>
+    <?php endforeach; ?>
+
+  </div>
+
+<?php endif; ?>
+
+<?php $this->endblock(); ?>

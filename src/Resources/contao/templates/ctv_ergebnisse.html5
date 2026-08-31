@@ -1,0 +1,13 @@
+<?php
+
+/*
+ * Ergebnisliste.
+ *
+ * Paarungs- und Ergebnisliste zeigen dieselben Partien; der einzige
+ * Unterschied ist die Ergebnisspalte, die über `mitErgebnissen` gesteuert
+ * wird. Das Markup steht deshalb nur einmal in ctv_paarungen. Wer das
+ * Aussehen beider Listen ändern will, überschreibt jenes Template; wer nur
+ * die Ergebnisliste ändern will, ersetzt dieses hier durch eigenes Markup.
+ */
+
+$this->insert('ctv_paarungen', $this->getData());

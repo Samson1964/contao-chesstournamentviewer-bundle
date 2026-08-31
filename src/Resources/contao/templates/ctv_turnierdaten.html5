@@ -1,0 +1,15 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+?>
+<table class="ctv-tabelle ctv-tabelle--turnierdaten">
+  <tbody>
+    <?php foreach ($this->angaben as $angabe): ?>
+      <tr>
+        <th scope="row"><?= Ausgabe::esc($angabe['label']) ?></th>
+        <td><?= Ausgabe::esc($angabe['wert']) ?></td>
+      </tr>
+    <?php endforeach; ?>
+  </tbody>
+</table>

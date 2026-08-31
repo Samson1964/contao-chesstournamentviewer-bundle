@@ -1,0 +1,55 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    _instanceof:
+        # Jede Umsetzung der Formatschnittstelle bekommt den Tag von allein.
+        # Ein neues Turnierformat braucht damit nur einen Dienst-Eintrag und
+        # keine Änderung am Verzeichnis.
+        Schachbulle\ContaoChesstournamentviewerBundle\Format\TurnierFormatInterface:
+            tags: ['schachbulle_ctv.format']
+
+    # --- Turnierformate ----------------------------------------------------
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Format\Swt\SwtFormat: ~
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Format\FormatVerzeichnis:
+        arguments:
+            $formate: !tagged_iterator schachbulle_ctv.format
+
+    # --- Rückrufe des Data Containers --------------------------------------
+
+    # Der Tag hängt an `target` selbsttätig `_callback` an; daraus werden
+    # `config.onload_callback` und `fields.ctvFormat.options_callback`. Die
+    # Schreibweise ist in Contao 4.13 und Contao 5 dieselbe.
+    Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener:
+        tags:
+            - name: contao.callback
+              table: tl_content
+              target: config.onload
+              method: setzeDateiendungen
+            - name: contao.callback
+              table: tl_content
+              target: fields.ctvFormat.options
+              method: formatOptionen
+
+    # --- Aufbereitung der Listen -------------------------------------------
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer: ~
+
+    # --- Frontend ----------------------------------------------------------
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Controller\ContentElement\TurnierBetrachterController:
+        arguments:
+            # Der Dienst hat in keiner der beiden Contao-Fassungen einen Alias
+            # auf den Klassennamen und muss deshalb über die Dienst-ID kommen.
+            $tokenChecker: '@contao.security.token_checker'
+            $logger: '@monolog.logger.contao.error'
+            $projectDir: '%kernel.project_dir%'
+        tags:
+            - name: contao.content_element
+              category: schach
+              type: chesstournamentviewer
+              template: ce_chesstournamentviewer

@@ -1,0 +1,55 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+?>
+<div class="ctv-rollbar">
+  <table class="ctv-tabelle ctv-tabelle--mannschaften">
+    <thead>
+      <tr>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('nr') ?></th>
+        <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('spieler') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('schnitt') ?></th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($this->mannschaften as $zeile): ?>
+        <tr>
+          <td class="ctv-zahl"><?= (int) $zeile['nummer'] ?></td>
+          <td><?= Ausgabe::esc($zeile['mannschaft']['name']) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::zahl($zeile['anzahl']) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::zahl($zeile['schnitt']) ?></td>
+        </tr>
+
+        <?php if ($this->mitSpielern && $zeile['spieler']): ?>
+          <tr class="ctv-aufstellung">
+            <td></td>
+            <td colspan="3">
+              <table class="ctv-tabelle ctv-tabelle--aufstellung">
+                <thead>
+                  <tr>
+                    <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('brett') ?></th>
+                    <th scope="col"><?= Ausgabe::spalte('name') ?></th>
+                    <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('twz') ?></th>
+                    <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('punkte') ?></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php foreach ($zeile['spieler'] as $spieler): ?>
+                    <tr>
+                      <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['brett']) ?></td>
+                      <td><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
+                      <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
+                      <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($spieler['punkte']) ?></td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        <?php endif; ?>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>

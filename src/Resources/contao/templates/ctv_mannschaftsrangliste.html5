@@ -1,0 +1,47 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+$freilose = false;
+
+foreach ($this->mannschaften as $zeile) {
+    if ($zeile['freilose'] > 0) {
+        $freilose = true;
+
+        break;
+    }
+}
+
+?>
+<div class="ctv-rollbar">
+  <table class="ctv-tabelle ctv-tabelle--mannschaftsrangliste">
+    <thead>
+      <tr>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('platz') ?></th>
+        <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('kaempfe') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('bilanz') ?></th>
+        <?php if ($freilose): ?>
+          <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('freilose') ?></th>
+        <?php endif; ?>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('mannschaftspunkte') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('brettpunkte') ?></th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($this->mannschaften as $zeile): ?>
+        <tr>
+          <td class="ctv-zahl"><?= (int) $zeile['platz'] ?></td>
+          <td><?= Ausgabe::esc($zeile['name']) ?></td>
+          <td class="ctv-zahl"><?= (int) $zeile['kaempfe'] ?></td>
+          <td class="ctv-zahl"><?= sprintf('%d/%d/%d', $zeile['siege'], $zeile['unentschieden'], $zeile['niederlagen']) ?></td>
+          <?php if ($freilose): ?>
+            <td class="ctv-zahl"><?= Ausgabe::zahl($zeile['freilose']) ?></td>
+          <?php endif; ?>
+          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($zeile['mannschaftspunkte']) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::punkte($zeile['brettpunkte']) ?></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>

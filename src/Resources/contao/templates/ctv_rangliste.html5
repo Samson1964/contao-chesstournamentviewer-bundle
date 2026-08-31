@@ -1,0 +1,47 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+?>
+<div class="ctv-rollbar">
+  <table class="ctv-tabelle ctv-tabelle--rangliste">
+    <thead>
+      <tr>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('platz') ?></th>
+        <th scope="col"><?= Ausgabe::spalte('name') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('twz') ?></th>
+        <?php if ($this->mannschaftsspalte): ?>
+          <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
+        <?php endif; ?>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('bilanz') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('punkte') ?></th>
+        <?php if ($this->feinwertung1): ?>
+          <th scope="col" class="ctv-zahl"><?= Ausgabe::esc($this->feinwertung1) ?></th>
+        <?php endif; ?>
+        <?php if ($this->feinwertung2): ?>
+          <th scope="col" class="ctv-zahl"><?= Ausgabe::esc($this->feinwertung2) ?></th>
+        <?php endif; ?>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($this->spieler as $spieler): ?>
+        <tr>
+          <td class="ctv-zahl"><?= (int) $spieler['platz'] ?></td>
+          <td><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
+          <?php if ($this->mannschaftsspalte): ?>
+            <td><?= Ausgabe::esc($spieler['mannschaft']) ?></td>
+          <?php endif; ?>
+          <td class="ctv-zahl"><?= Ausgabe::bilanz($spieler) ?></td>
+          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($spieler['punkte']) ?></td>
+          <?php if ($this->feinwertung1): ?>
+            <td class="ctv-zahl"><?= Ausgabe::punkte($spieler['feinwertung1']) ?></td>
+          <?php endif; ?>
+          <?php if ($this->feinwertung2): ?>
+            <td class="ctv-zahl"><?= Ausgabe::punkte($spieler['feinwertung2']) ?></td>
+          <?php endif; ?>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>

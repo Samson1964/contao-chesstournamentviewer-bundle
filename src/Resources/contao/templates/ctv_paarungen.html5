@@ -1,0 +1,43 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+?>
+<?php foreach ($this->runden as $runde => $partien): ?>
+
+  <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+
+  <div class="ctv-rollbar">
+    <table class="ctv-tabelle ctv-tabelle--paarungen">
+      <thead>
+        <tr>
+          <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte($this->spalte) ?></th>
+          <th scope="col"><?= Ausgabe::spalte('weiss') ?></th>
+          <?php if ($this->mitErgebnissen): ?>
+            <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('ergebnis') ?></th>
+          <?php endif; ?>
+          <th scope="col"><?= Ausgabe::spalte('schwarz') ?></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($partien as $partie): ?>
+          <tr<?= $partie['spielfrei'] ? ' class="ctv-partie--frei"' : '' ?>>
+            <td class="ctv-zahl"><?= Ausgabe::zahl($partie[$this->spalte]) ?></td>
+            <td><?= Ausgabe::esc(Ausgabe::name($partie['weiss'])) ?></td>
+            <?php if ($this->mitErgebnissen): ?>
+              <td class="ctv-zahl ctv-punkte"><?= Ausgabe::esc($partie['ergebnisText']) ?></td>
+            <?php endif; ?>
+            <td>
+              <?php if ($partie['spielfrei']): ?>
+                <em><?= Ausgabe::wort('spielfrei', 'spielfrei') ?></em>
+              <?php else: ?>
+                <?= Ausgabe::esc(Ausgabe::name($partie['schwarz'])) ?>
+              <?php endif; ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+
+<?php endforeach; ?>

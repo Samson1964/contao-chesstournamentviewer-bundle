@@ -1,0 +1,60 @@
+{
+    "name": "schachbulle/contao-chesstournamentviewer-bundle",
+    "type": "contao-bundle",
+    "description": "Zeigt Dateien von Schachturnierverwaltungen im Frontend an: Teilnehmerliste, Rangliste, Kreuztabelle, Fortschrittstabelle, Paarungen und Ergebnisse, bei Mannschaftsturnieren auch Mannschaftstabelle und Wettkämpfe. Erstes Format ist SWT (Swiss-Chess).",
+    "keywords": [
+        "contao",
+        "schach",
+        "turnier",
+        "swt",
+        "swiss-chess",
+        "kreuztabelle"
+    ],
+    "homepage": "https://github.com/Samson1964/contao-chesstournamentviewer-bundle",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Frank Hoppe",
+            "homepage": "https://www.schachbulle.de/"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "contao/core-bundle": "^4.13 || ^5.0",
+        "symfony/config": "^5.4 || ^6.4 || ^7.0",
+        "symfony/dependency-injection": "^5.4 || ^6.4 || ^7.0",
+        "symfony/http-foundation": "^5.4 || ^6.4 || ^7.0",
+        "symfony/http-kernel": "^5.4 || ^6.4 || ^7.0"
+    },
+    "conflict": {
+        "contao/core": "*",
+        "contao/manager-plugin": "<2.0 || >=3.0"
+    },
+    "require-dev": {
+        "contao/manager-plugin": "^2.0",
+        "phpunit/phpunit": "^9.6 || ^10.5"
+    },
+    "extra": {
+        "contao-manager-plugin": "Schachbulle\\ContaoChesstournamentviewerBundle\\ContaoManager\\Plugin"
+    },
+    "autoload": {
+        "psr-4": {
+            "Schachbulle\\ContaoChesstournamentviewerBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Schachbulle\\ContaoChesstournamentviewerBundle\\Tests\\": "tests/"
+        }
+    },
+    "support": {
+        "issues": "https://github.com/Samson1964/contao-chesstournamentviewer-bundle/issues",
+        "source": "https://github.com/Samson1964/contao-chesstournamentviewer-bundle"
+    },
+    "config": {
+        "allow-plugins": {
+            "contao-components/installer": true,
+            "contao/manager-plugin": true
+        }
+    }
+}

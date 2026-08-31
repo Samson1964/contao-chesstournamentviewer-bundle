@@ -1,0 +1,39 @@
+<?php
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+$mannschaftsspalte = $this->turnier->istMannschaftsturnier();
+
+?>
+<div class="ctv-rollbar">
+  <table class="ctv-tabelle ctv-tabelle--teilnehmer">
+    <thead>
+      <tr>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('nr') ?></th>
+        <th scope="col"><?= Ausgabe::spalte('name') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('elo') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('dwz') ?></th>
+        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('twz') ?></th>
+        <th scope="col"><?= $mannschaftsspalte ? Ausgabe::spalte('mannschaft') : Ausgabe::spalte('verein') ?></th>
+        <?php if ($mannschaftsspalte): ?>
+          <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('brett') ?></th>
+        <?php endif; ?>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($this->teilnehmer as $spieler): ?>
+        <tr>
+          <td class="ctv-zahl"><?= (int) $spieler['tnr'] ?></td>
+          <td><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['elo']) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['dwz']) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
+          <td><?= Ausgabe::esc($spieler['mannschaft']) ?></td>
+          <?php if ($mannschaftsspalte): ?>
+            <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['brett']) ?></td>
+          <?php endif; ?>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
