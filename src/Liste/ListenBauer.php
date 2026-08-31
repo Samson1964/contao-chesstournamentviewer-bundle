@@ -87,7 +87,8 @@ class ListenBauer
             'teilnehmer' => $this->schluessellos('teilnehmer', $turnier->getTeilnehmer()),
             'rangliste' => $this->rangliste($turnier),
             'kreuztabelle' => $this->kreuztabelle($turnier),
-            'fortschritt' => $this->fortschritt($turnier),
+            'fortschritt' => $this->fortschritt($turnier, true),
+            'fortschrittohne' => $this->fortschritt($turnier, false),
             'paarungen', 'ergebnisse' => $this->runden($turnier, 'ergebnisse' === $schluessel),
             'mannschaften' => $this->mannschaften($turnier, $mitSpielern),
             'mannschaftsrangliste' => $this->schluessellos('mannschaften', Mannschaftswertung::tabelle($turnier)),
@@ -250,24 +251,31 @@ class ListenBauer
 
         $zusatz = ($turnier->kopf('feinwertungSicher', true) ? '' : ' '.($GLOBALS['TL_LANG']['ctv']['unsicher'] ?? '(Bezeichnung unsicher)'));
 
-        // Die Spaltenüberschrift ist die Bezeichnung der Feinwertung. Fehlt
-        // sie — weil in der Datei keine eingestellt ist, die Zahlen aber
-        // dennoch belegt sind —, springt eine allgemeine Beschriftung ein;
-        // eine namenlose Zahlenspalte wäre nicht einzuordnen.
-        $spaltenname = static function (Turnier $turnier, int $nummer) use ($zusatz): string {
+        // Im Spaltenkopf steht die Kurzform der Feinwertung, damit die
+        // Zahlenspalte nicht durch ihre Überschrift breit wird; der volle
+        // Name geht als Titel mit und erscheint beim Überfahren. Fehlt die
+        // Bezeichnung — weil in der Datei keine eingestellt ist, die Zahlen
+        // aber dennoch belegt sind —, springt eine allgemeine Beschriftung
+        // ein; eine namenlose Zahlenspalte wäre nicht einzuordnen.
+        $spalte = static function (Turnier $turnier, int $nummer) use ($zusatz): array {
             $name = trim((string) $turnier->kopf('feinwertung'.$nummer.'Text', ''));
 
             if ('' === $name) {
-                return (string) ($GLOBALS['TL_LANG']['ctv']['spalte']['feinwertung'.$nummer] ?? 'Feinwertung '.$nummer);
+                $allgemein = (string) ($GLOBALS['TL_LANG']['ctv']['spalte']['feinwertung'.$nummer] ?? 'Feinwertung '.$nummer);
+
+                return ['name' => $allgemein, 'titel' => $allgemein];
             }
 
-            return $name.$zusatz;
+            return [
+                'name' => Ausgabe::feinwertungKurz($name),
+                'titel' => $name.$zusatz,
+            ];
         };
 
         return [
             'spieler' => $rangliste,
-            'feinwertung1' => $benutzt($rangliste, 'feinwertung1') ? $spaltenname($turnier, 1) : null,
-            'feinwertung2' => $benutzt($rangliste, 'feinwertung2') ? $spaltenname($turnier, 2) : null,
+            'feinwertung1' => $benutzt($rangliste, 'feinwertung1') ? $spalte($turnier, 1) : null,
+            'feinwertung2' => $benutzt($rangliste, 'feinwertung2') ? $spalte($turnier, 2) : null,
             'mannschaftsspalte' => $turnier->istMannschaftsturnier(),
         ];
     }
@@ -303,12 +311,18 @@ class ListenBauer
     /**
      * Bereitet die Fortschrittstabelle auf.
      *
-     * @param Turnier $turnier Das eingelesene Turnier
+     * Es gibt sie in zwei Fassungen: mit dem laufenden Punktestand unter
+     * jedem Rundenergebnis und ohne ihn. Die zweite ist die schmalere und
+     * für den bloßen Verlauf oft die bessere; welche gebraucht wird, hängt
+     * vom Turnier ab und wird deshalb im Backend gewählt statt festgelegt.
+     *
+     * @param Turnier $turnier  Das eingelesene Turnier
+     * @param bool    $mitStand Ob der laufende Punktestand mitgeht
      *
      * @return array<string,mixed> Unter `zeilen` die Tabellenzeilen, unter
      *                             `runden` die Rundennummern für den Tabellenkopf
      */
-    private function fortschritt(Turnier $turnier): array
+    private function fortschritt(Turnier $turnier, bool $mitStand): array
     {
         $zeilen = Fortschritt::zeilen($turnier);
 
@@ -319,7 +333,7 @@ class ListenBauer
         $runden = array_keys($turnier->getRunden());
         sort($runden);
 
-        return ['zeilen' => $zeilen, 'runden' => $runden];
+        return ['zeilen' => $zeilen, 'runden' => $runden, 'mitStand' => $mitStand];
     }
 
     /**

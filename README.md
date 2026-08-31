@@ -47,7 +47,8 @@ an derselben Stelle steht.
 | Teilnehmer | Startliste mit Elo, DWZ, TWZ und Verein |
 | Rangliste | Endstand mit Bilanz, Punkten und Feinwertungen |
 | Kreuztabelle | Jeder gegen jeden, in Ranglistenreihenfolge |
-| Fortschrittstabelle | Je Runde Gegner, Farbe, Ergebnis und Punktestand |
+| Fortschrittstabelle | Je Runde Ergebnis, Farbe und Gegner, darunter der Punktestand |
+| Fortschritt ohne Punktestand | Dieselbe Tabelle, nur der Verlauf |
 | Paarungen | Auslosung je Runde, ohne Ergebnisse |
 | Ergebnisse | Dieselben Partien mit Ergebnis |
 | Mannschaften | Mannschaftsliste, auf Wunsch mit Aufstellung |
@@ -75,7 +76,8 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 | `ctv_teilnehmer` | Teilnehmer |
 | `ctv_rangliste` | Rangliste |
 | `ctv_kreuztabelle` | Kreuztabelle |
-| `ctv_fortschritt` | Fortschrittstabelle |
+| `ctv_fortschritt` | Fortschrittstabelle — und über einen Verweis auch die Fassung ohne Punktestand |
+| `ctv_fortschrittohne` | Fortschritt ohne Punktestand |
 | `ctv_paarungen` | Paarungen — und über einen Verweis auch die Ergebnisse |
 | `ctv_ergebnisse` | Ergebnisse |
 | `ctv_mannschaften` | Mannschaften |
@@ -88,16 +90,26 @@ Für die Formatierung steht in den Templates die Klasse
 `punkte()` schreibt halbe Punkte als ½, `esc()` maskiert Werte aus der
 Turnierdatei, `spalte()` holt eine Spaltenbeschriftung aus der Sprachdatei.
 
-Farben und Abstände kommen aus `betrachter.css`. Die Farben stehen als
+Farben und Abstände kommen aus `betrachter.css`. Alle Farben stehen als
 CSS-Eigenschaften am Element `.ctv` und lassen sich im eigenen Theme
 überschreiben, ohne die Datei zu ersetzen:
 
 ```css
 .ctv {
-    --ctv-linie: #c8d6e5;
-    --ctv-kopf: #eef3f8;
+    --ctv-grund: #fff;            /* Grund des aktiven Reiters */
+    --ctv-text: #1c1c1c;          /* Schrift in Reitern und Tabellen */
+    --ctv-linie: #d5d5d5;         /* Tabellen- und Reiterlinien */
+    --ctv-kopf: #eceef0;          /* Tabellenkopf, Blindfelder */
+    --ctv-wechsel: #f6f7f8;       /* jede zweite Zeile, ruhende Reiter */
+    --ctv-gedaempft: #6b6b6b;     /* Nebenangaben wie Farbe und Punktestand */
+    --ctv-akzent: #1c5a8c;        /* Balken über dem aktiven Reiter */
 }
 ```
+
+Auf einer dunklen Seite sind mindestens `--ctv-grund`, `--ctv-text` und
+`--ctv-wechsel` zu setzen: Die Reiter bringen ihre Farben ausdrücklich mit,
+statt sie vom Theme zu erben — sonst stünde je nach Theme dunkle Schrift auf
+dunklem Grund.
 
 ## Was der Betrachter über die Zahlen sagt
 

@@ -1,5 +1,30 @@
 # Änderungen
 
+## Version 1.1.0 (2026-08-31)
+
+* Add: Neue Liste „Fortschritt ohne Punktestand" — dieselbe
+  Fortschrittstabelle, aber ohne den laufenden Punktestand unter jedem
+  Rundenergebnis.
+* Change: Ergebnis- und Paarungsliste in der Spaltenfolge Brett, Weiß,
+  Wertungszahl, Ergebnis, Schwarz, Wertungszahl. Das Ergebnis steht
+  vollständig als `1:0`, `½:½` oder `0:1` statt als einzelne Zahl; in der
+  Paarungsliste steht dort ein Strich. Weiß und Schwarz bekommen dieselbe
+  Breite, Brett- und Ergebnisspalte bleiben schmal.
+* Change: Der Spaltenkopf der Wertungszahl nennt die Zahl, die im Turnier den
+  Ausschlag gibt — Elo, NWZ oder TWZ, je nach Einstellung der Datei.
+* Change: Fortschrittstabelle in der Reihenfolge Ergebnis, Farbe, Gegner
+  (`1w10`); die Rundenspalten tragen die Nummer ohne Punkt.
+* Change: Kreuztabelle mit gleich breiten, mittig gesetzten Ergebnisfeldern.
+  Die Blindfelder der Diagonale sind mit einem König gekennzeichnet und
+  deutlicher abgesetzt.
+* Change: Kurzformen in schmalen Spaltenköpfen — `Pl.`, `Pkt.`, `Br.` und
+  Feinwertungen wie `SoBe` statt `Sonneborn-Berger`. Die volle Bezeichnung
+  steht als Titel am Spaltenkopf.
+* Fix: Die Reiter setzen Schrift- und Hintergrundfarbe ausdrücklich, statt sie
+  vom Theme zu erben — dort konnte dunkle Schrift auf dunklem Grund stehen.
+  Der aktive Reiter ist zusätzlich durch einen farbigen Balken, hellen Grund
+  und eine offene Unterkante hervorgehoben.
+
 ## Version 1.0.0 (2026-08-31)
 
 * Add: Inhaltselement „Turnier-Betrachter" für Contao 4.13 und Contao 5,

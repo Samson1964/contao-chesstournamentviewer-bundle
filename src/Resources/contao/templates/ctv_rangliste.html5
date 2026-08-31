@@ -7,19 +7,19 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
   <table class="ctv-tabelle ctv-tabelle--rangliste">
     <thead>
       <tr>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('platz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('platz') ?>"><?= Ausgabe::spalte('platzKurz') ?></th>
         <th scope="col"><?= Ausgabe::spalte('name') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('twz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('twz') ?></th>
         <?php if ($this->mannschaftsspalte): ?>
           <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
         <?php endif; ?>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('bilanz') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('punkte') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('bilanz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('punkte') ?>"><?= Ausgabe::spalte('punkteKurz') ?></th>
         <?php if ($this->feinwertung1): ?>
-          <th scope="col" class="ctv-zahl"><?= Ausgabe::esc($this->feinwertung1) ?></th>
+          <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::esc($this->feinwertung1['titel']) ?>"><?= Ausgabe::esc($this->feinwertung1['name']) ?></th>
         <?php endif; ?>
         <?php if ($this->feinwertung2): ?>
-          <th scope="col" class="ctv-zahl"><?= Ausgabe::esc($this->feinwertung2) ?></th>
+          <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::esc($this->feinwertung2['titel']) ?>"><?= Ausgabe::esc($this->feinwertung2['name']) ?></th>
         <?php endif; ?>
       </tr>
     </thead>

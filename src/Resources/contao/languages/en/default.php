@@ -16,6 +16,7 @@ $GLOBALS['TL_LANG']['ctv']['listen']['teilnehmer'] = 'Players';
 $GLOBALS['TL_LANG']['ctv']['listen']['rangliste'] = 'Standings';
 $GLOBALS['TL_LANG']['ctv']['listen']['kreuztabelle'] = 'Cross table';
 $GLOBALS['TL_LANG']['ctv']['listen']['fortschritt'] = 'Progress table';
+$GLOBALS['TL_LANG']['ctv']['listen']['fortschrittohne'] = 'Progress without running total';
 $GLOBALS['TL_LANG']['ctv']['listen']['paarungen'] = 'Pairings';
 $GLOBALS['TL_LANG']['ctv']['listen']['ergebnisse'] = 'Results';
 $GLOBALS['TL_LANG']['ctv']['listen']['mannschaften'] = 'Teams';
@@ -84,3 +85,28 @@ $GLOBALS['TL_LANG']['ctv']['weiss'] = 'White';
 $GLOBALS['TL_LANG']['ctv']['schwarz'] = 'Black';
 $GLOBALS['TL_LANG']['ctv']['keineDaten'] = 'No data available for this list.';
 $GLOBALS['TL_LANG']['ctv']['fehler'] = 'The tournament file could not be read: %s';
+
+$GLOBALS['TL_LANG']['ctv']['spalte']['platzKurz'] = 'Rk.';
+$GLOBALS['TL_LANG']['ctv']['spalte']['punkteKurz'] = 'Pts.';
+$GLOBALS['TL_LANG']['ctv']['spalte']['brettKurz'] = 'Bd.';
+$GLOBALS['TL_LANG']['ctv']['spalte']['ergebnisKurz'] = '-';
+$GLOBALS['TL_LANG']['ctv']['spalte']['wertung'] = 'Rtg';
+
+$GLOBALS['TL_LANG']['ctv']['wertung']['twz'] = 'Rtg';
+$GLOBALS['TL_LANG']['ctv']['wertung']['elo'] = 'Elo';
+$GLOBALS['TL_LANG']['ctv']['wertung']['nwz'] = 'NWZ';
+
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Sonneborn-Berger'] = 'SB';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Buchholzwertung'] = 'Buchholz';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Mittlere Buchholz'] = 'Ø Buchholz';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Buchholzsumme'] = 'Σ Buchholz';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Mannschaftspunkte'] = 'MP';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Brettpunkte'] = 'BP';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Summenwertung'] = 'Sum';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Gegner-NWZ/Elo-Mittel'] = 'Ø Opp.';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Rating-Leistung (NWZ/TWZ)'] = 'Perf.';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Rating-Differenz (NWZ/TWZ)'] = 'Diff.';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Wertung'] = '3 points';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Farbwertung'] = '3 points colour';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Berliner Wertung'] = 'Berlin';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan';

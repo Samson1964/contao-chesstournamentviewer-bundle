@@ -47,6 +47,7 @@ final class Listen
         'rangliste' => ['template' => 'ctv_rangliste', 'gilt' => self::IMMER],
         'kreuztabelle' => ['template' => 'ctv_kreuztabelle', 'gilt' => self::IMMER],
         'fortschritt' => ['template' => 'ctv_fortschritt', 'gilt' => self::IMMER],
+        'fortschrittohne' => ['template' => 'ctv_fortschrittohne', 'gilt' => self::IMMER],
         'paarungen' => ['template' => 'ctv_paarungen', 'gilt' => self::IMMER],
         'ergebnisse' => ['template' => 'ctv_ergebnisse', 'gilt' => self::IMMER],
         'mannschaften' => ['template' => 'ctv_mannschaften', 'gilt' => self::MANNSCHAFT],

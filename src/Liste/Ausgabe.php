@@ -111,6 +111,85 @@ final class Ausgabe
     }
 
     /**
+     * Schreibt das Ergebnis einer Partie als vollständige Paarung.
+     *
+     * In einer Ergebnisliste steht die Zahl zwischen zwei Namen; eine
+     * einzelne „1" ließe offen, für welche Seite sie gilt. Ausgegeben wird
+     * deshalb beides — „1:0", „½:½", „0:1" —, wie es auch Swiss-Chess und
+     * chess-results tun.
+     *
+     * @param float|null $ergebnis Punkte für Weiß, oder null wenn die Partie
+     *                             noch nicht gewertet ist
+     *
+     * @return string Das Ergebnis beider Seiten, leer wenn keines vorliegt
+     */
+    public static function ergebnisPaar(mixed $ergebnis): string
+    {
+        if (null === $ergebnis || '' === $ergebnis) {
+            return '';
+        }
+
+        $weiss = (float) $ergebnis;
+
+        // Bei zwei Partien je Runde kann das Ergebnis über 1 liegen. Die
+        // Gegenseite ergibt sich dann aus der Zahl der Partien, die hier nicht
+        // bekannt ist — in dem Fall bleibt es bei der einzelnen Zahl.
+        if ($weiss > 1.0) {
+            return self::punkte($weiss);
+        }
+
+        return self::punkte($weiss).':'.self::punkte(1.0 - $weiss);
+    }
+
+    /**
+     * Nennt die Wertungszahl, die im Turnier den Ausschlag gibt.
+     *
+     * Die Turnierwertungszahl wird je nach Einstellung aus Elo oder aus der
+     * DWZ/NWZ gebildet. In einer Paarungsliste soll im Spaltenkopf stehen,
+     * welche Zahl der Leser vor sich hat, und nicht der Sammelbegriff.
+     *
+     * @param mixed $turnier Das Turnier; erwartet wird ein Objekt mit der
+     *                       Methode kopf(), andere Werte ergeben die
+     *                       allgemeine Bezeichnung
+     *
+     * @return string „Elo", „NWZ" oder „TWZ", bereits maskiert
+     */
+    public static function wertungsname(mixed $turnier): string
+    {
+        $einstellung = null;
+
+        if (\is_object($turnier) && method_exists($turnier, 'kopf')) {
+            $einstellung = $turnier->kopf('twzErmittlung');
+        }
+
+        $schluessel = match ((int) $einstellung) {
+            0 => 'elo',
+            1 => 'nwz',
+            default => 'twz',
+        };
+
+        return self::esc($GLOBALS['TL_LANG']['ctv']['wertung'][$schluessel] ?? 'TWZ');
+    }
+
+    /**
+     * Kürzt die Bezeichnung einer Feinwertung für den Spaltenkopf ab.
+     *
+     * Namen wie „Sonneborn-Berger" oder „Rating-Differenz (NWZ/TWZ)" machen
+     * eine Zahlenspalte doppelt so breit wie nötig. Gibt es keine Kurzform,
+     * bleibt der volle Name stehen — lieber breit als unverständlich.
+     *
+     * @param string $bezeichnung Die volle Bezeichnung aus der Turnierdatei
+     *
+     * @return string Die Kurzform oder die unveränderte Bezeichnung
+     */
+    public static function feinwertungKurz(string $bezeichnung): string
+    {
+        $kurz = $GLOBALS['TL_LANG']['ctv']['feinwertungKurz'][trim($bezeichnung)] ?? null;
+
+        return \is_string($kurz) && '' !== $kurz ? $kurz : $bezeichnung;
+    }
+
+    /**
      * Gibt eine Rundenüberschrift aus.
      *
      * @param int $runde Die Rundennummer

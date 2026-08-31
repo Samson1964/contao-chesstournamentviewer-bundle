@@ -1,0 +1,13 @@
+<?php
+
+/*
+ * Fortschrittstabelle ohne laufenden Punktestand.
+ *
+ * Beide Fassungen zeigen dieselben Zellen; der einzige Unterschied ist der
+ * Punktestand, den `mitStand` steuert. Das Markup steht deshalb nur einmal in
+ * ctv_fortschritt. Wer das Aussehen beider Tabellen ändern will,
+ * überschreibt jenes Template; wer nur diese hier ändern will, ersetzt sie
+ * durch eigenes Markup.
+ */
+
+$this->insert('ctv_fortschritt', $this->getData());

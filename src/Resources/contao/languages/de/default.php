@@ -21,6 +21,7 @@ $GLOBALS['TL_LANG']['ctv']['listen']['teilnehmer'] = 'Teilnehmer';
 $GLOBALS['TL_LANG']['ctv']['listen']['rangliste'] = 'Rangliste';
 $GLOBALS['TL_LANG']['ctv']['listen']['kreuztabelle'] = 'Kreuztabelle';
 $GLOBALS['TL_LANG']['ctv']['listen']['fortschritt'] = 'Fortschrittstabelle';
+$GLOBALS['TL_LANG']['ctv']['listen']['fortschrittohne'] = 'Fortschritt ohne Punktestand';
 $GLOBALS['TL_LANG']['ctv']['listen']['paarungen'] = 'Paarungen';
 $GLOBALS['TL_LANG']['ctv']['listen']['ergebnisse'] = 'Ergebnisse';
 $GLOBALS['TL_LANG']['ctv']['listen']['mannschaften'] = 'Mannschaften';
@@ -93,3 +94,33 @@ $GLOBALS['TL_LANG']['ctv']['weiss'] = 'Weiß';
 $GLOBALS['TL_LANG']['ctv']['schwarz'] = 'Schwarz';
 $GLOBALS['TL_LANG']['ctv']['keineDaten'] = 'Zu dieser Liste liegen keine Daten vor.';
 $GLOBALS['TL_LANG']['ctv']['fehler'] = 'Die Turnierdatei konnte nicht gelesen werden: %s';
+
+// Kurzformen fuer schmale Spalten. Wo eine Tabelle viele Spalten traegt,
+// bestimmt der Kopf die Breite, nicht der Inhalt — dort steht die Kurzform.
+$GLOBALS['TL_LANG']['ctv']['spalte']['platzKurz'] = 'Pl.';
+$GLOBALS['TL_LANG']['ctv']['spalte']['punkteKurz'] = 'Pkt.';
+$GLOBALS['TL_LANG']['ctv']['spalte']['brettKurz'] = 'Br.';
+$GLOBALS['TL_LANG']['ctv']['spalte']['ergebnisKurz'] = '-';
+$GLOBALS['TL_LANG']['ctv']['spalte']['wertung'] = 'TWZ';
+
+// Bezeichnung der Wertungszahl, die im Turnier den Ausschlag gibt
+$GLOBALS['TL_LANG']['ctv']['wertung']['twz'] = 'TWZ';
+$GLOBALS['TL_LANG']['ctv']['wertung']['elo'] = 'Elo';
+$GLOBALS['TL_LANG']['ctv']['wertung']['nwz'] = 'NWZ';
+
+// Kurzformen der Feinwertungen. Der Schluessel ist die Bezeichnung, wie sie
+// aus der Turnierdatei kommt; fehlt ein Eintrag, bleibt der volle Name stehen.
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Sonneborn-Berger'] = 'SoBe';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Buchholzwertung'] = 'Buchholz';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Mittlere Buchholz'] = 'Ø Buchholz';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Buchholzsumme'] = 'Σ Buchholz';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Mannschaftspunkte'] = 'MP';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Brettpunkte'] = 'BP';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Summenwertung'] = 'Summe';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Gegner-NWZ/Elo-Mittel'] = 'Ø Gegner';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Rating-Leistung (NWZ/TWZ)'] = 'Leistung';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Rating-Differenz (NWZ/TWZ)'] = 'Differenz';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Wertung'] = '3 Punkte';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Farbwertung'] = '3 Punkte Farbe';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Berliner Wertung'] = 'Berliner';
+$GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan';

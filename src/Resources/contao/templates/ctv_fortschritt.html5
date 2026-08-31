@@ -4,16 +4,16 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
 ?>
 <div class="ctv-rollbar">
-  <table class="ctv-tabelle ctv-tabelle--fortschritt">
+  <table class="ctv-tabelle ctv-tabelle--fortschritt<?= $this->mitStand ? '' : ' ctv-tabelle--fortschritt-schmal' ?>">
     <thead>
       <tr>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('platz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('platz') ?>"><?= Ausgabe::spalte('platzKurz') ?></th>
         <th scope="col"><?= Ausgabe::spalte('name') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('twz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('twz') ?></th>
         <?php foreach ($this->runden as $runde): ?>
-          <th scope="col" class="ctv-zahl"><?= (int) $runde ?>.</th>
+          <th scope="col" class="ctv-fortschritt__kopf"><?= (int) $runde ?></th>
         <?php endforeach; ?>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('punkte') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('punkte') ?>"><?= Ausgabe::spalte('punkteKurz') ?></th>
       </tr>
     </thead>
     <tbody>
@@ -24,15 +24,21 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
           <td class="ctv-zahl"><?= Ausgabe::zahl($zeile['spieler']['twz']) ?></td>
           <?php foreach ($this->runden as $runde): ?>
             <?php $zelle = $zeile['runden'][$runde] ?? null; ?>
-            <td class="ctv-zahl ctv-fortschritt__zelle">
+            <td class="ctv-fortschritt__zelle">
               <?php if (null === $zelle || $zelle['leer']): ?>
                 &nbsp;
               <?php elseif ($zelle['spielfrei']): ?>
                 <span class="ctv-fortschritt__frei" title="<?= Ausgabe::wort('spielfrei', 'spielfrei') ?>">&mdash;</span>
-                <span class="ctv-fortschritt__stand"><?= Ausgabe::punkte($zelle['stand']) ?></span>
+                <?php if ($this->mitStand): ?>
+                  <span class="ctv-fortschritt__stand"><?= Ausgabe::punkte($zelle['stand']) ?></span>
+                <?php endif; ?>
               <?php else: ?>
-                <span class="ctv-fortschritt__gegner"<?php if ($zelle['gegnerName']): ?> title="<?= Ausgabe::esc($zelle['gegnerName']) ?>"<?php endif; ?>><?= (int) $zelle['gegner'] ?></span><span class="ctv-fortschritt__farbe ctv-farbe--<?= $zelle['farbe'] ?: 'ohne' ?>"><?= Ausgabe::esc($zelle['farbe']) ?></span><span class="ctv-fortschritt__ergebnis"><?= Ausgabe::punkte($zelle['ergebnis']) ?></span>
-                <span class="ctv-fortschritt__stand"><?= Ausgabe::punkte($zelle['stand']) ?></span>
+                <?php /* Reihenfolge wie in den Ausdrucken der Turnierprogramme:
+                         erst das Ergebnis, dann die Farbe, dann der Gegner. */ ?>
+                <span class="ctv-fortschritt__ergebnis"><?= Ausgabe::punkte($zelle['ergebnis']) ?></span><span class="ctv-fortschritt__farbe ctv-farbe--<?= $zelle['farbe'] ?: 'ohne' ?>"><?= Ausgabe::esc($zelle['farbe']) ?></span><span class="ctv-fortschritt__gegner"<?php if ($zelle['gegnerName']): ?> title="<?= Ausgabe::esc($zelle['gegnerName']) ?>"<?php endif; ?>><?= (int) $zelle['gegner'] ?></span>
+                <?php if ($this->mitStand): ?>
+                  <span class="ctv-fortschritt__stand"><?= Ausgabe::punkte($zelle['stand']) ?></span>
+                <?php endif; ?>
               <?php endif; ?>
             </td>
           <?php endforeach; ?>

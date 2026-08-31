@@ -2,6 +2,8 @@
 
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
+$wertung = Ausgabe::wertungsname($this->turnier);
+
 ?>
 <?php foreach ($this->runden as $runde => $partien): ?>
 
@@ -11,29 +13,33 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
     <table class="ctv-tabelle ctv-tabelle--paarungen">
       <thead>
         <tr>
-          <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte($this->spalte) ?></th>
-          <th scope="col"><?= Ausgabe::spalte('weiss') ?></th>
-          <?php if ($this->mitErgebnissen): ?>
-            <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('ergebnis') ?></th>
-          <?php endif; ?>
-          <th scope="col"><?= Ausgabe::spalte('schwarz') ?></th>
+          <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte($this->spalte) ?>"><?= Ausgabe::spalte('brettKurz') ?></th>
+          <th scope="col" class="ctv-paarung__seite"><?= Ausgabe::spalte('weiss') ?></th>
+          <th scope="col" class="ctv-zahl ctv-schmal"><?= $wertung ?></th>
+          <th scope="col" class="ctv-paarung__ergebnis" title="<?= Ausgabe::spalte('ergebnis') ?>"><?= Ausgabe::spalte('ergebnisKurz') ?></th>
+          <th scope="col" class="ctv-paarung__seite"><?= Ausgabe::spalte('schwarz') ?></th>
+          <th scope="col" class="ctv-zahl ctv-schmal"><?= $wertung ?></th>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($partien as $partie): ?>
+          <?php
+            // In der Paarungsliste steht statt des Ergebnisses ein Strich: Sie
+            // wird vor der Runde ausgehaengt, wenn es noch keines gibt.
+            $ergebnis = $this->mitErgebnissen ? Ausgabe::ergebnisPaar($partie['ergebnis']) : '';
+          ?>
           <tr<?= $partie['spielfrei'] ? ' class="ctv-partie--frei"' : '' ?>>
             <td class="ctv-zahl"><?= Ausgabe::zahl($partie[$this->spalte]) ?></td>
             <td><?= Ausgabe::esc(Ausgabe::name($partie['weiss'])) ?></td>
-            <?php if ($this->mitErgebnissen): ?>
-              <td class="ctv-zahl ctv-punkte"><?= Ausgabe::esc($partie['ergebnisText']) ?></td>
+            <td class="ctv-zahl"><?= Ausgabe::zahl($partie['weiss']['twz']) ?></td>
+            <td class="ctv-paarung__ergebnis ctv-punkte"><?= '' === $ergebnis ? '&ndash;' : Ausgabe::esc($ergebnis) ?></td>
+            <?php if ($partie['spielfrei']): ?>
+              <td><em><?= Ausgabe::wort('spielfrei', 'spielfrei') ?></em></td>
+              <td class="ctv-zahl"></td>
+            <?php else: ?>
+              <td><?= Ausgabe::esc(Ausgabe::name($partie['schwarz'])) ?></td>
+              <td class="ctv-zahl"><?= Ausgabe::zahl($partie['schwarz']['twz']) ?></td>
             <?php endif; ?>
-            <td>
-              <?php if ($partie['spielfrei']): ?>
-                <em><?= Ausgabe::wort('spielfrei', 'spielfrei') ?></em>
-              <?php else: ?>
-                <?= Ausgabe::esc(Ausgabe::name($partie['schwarz'])) ?>
-              <?php endif; ?>
-            </td>
           </tr>
         <?php endforeach; ?>
       </tbody>
