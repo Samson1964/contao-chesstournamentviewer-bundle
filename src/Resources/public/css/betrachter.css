@@ -369,3 +369,57 @@
 .ctv-liste__titel + .ctv-runde {
     margin-top: 0;
 }
+
+/* --- Gliederung nach Mannschaften ---------------------------------------
+ *
+ * Bei einem Mannschaftsturnier steht vor jeder Gruppe eine Kopfzeile mit
+ * Startnummer und Name — in der Teilnehmerliste, in der Rangliste und je
+ * Wettkampf in den Paarungen. Sie ist kein Tabellenkopf, sondern eine
+ * Zwischenüberschrift, und hebt sich deshalb anders ab als `thead`.
+ */
+
+.ctv .ctv-tabelle .ctv-gruppe__kopf > th {
+    padding-top: .6rem !important;
+    border-bottom: 2px solid var(--ctv-linie) !important;
+    background: transparent !important;
+    text-align: left !important;
+    font-weight: 700;
+}
+
+.ctv-gruppe + .ctv-gruppe .ctv-gruppe__kopf > th {
+    padding-top: 1.1rem !important;
+}
+
+.ctv-gruppe__nummer {
+    display: inline-block;
+    min-width: 1.8em;
+    color: var(--ctv-gedaempft);
+    font-weight: 400;
+}
+
+.ctv-gruppe__ergebnis {
+    margin-left: .5em;
+    color: var(--ctv-gedaempft);
+    font-weight: 400;
+}
+
+/* Der Wettkampf selbst tritt gegenüber seinen Brettern hervor. */
+.ctv .ctv-tabelle .ctv-wettkampf > td {
+    padding-top: .5rem !important;
+    border-bottom-width: 0 !important;
+    font-weight: 700;
+}
+
+.ctv-gruppe + .ctv-gruppe .ctv-wettkampf > td {
+    padding-top: 1rem !important;
+}
+
+/* Streifung greift innerhalb der Gruppen, nicht über sie hinweg. */
+.ctv-tabelle tbody.ctv-gruppe tr:nth-child(even) {
+    background: var(--ctv-wechsel);
+}
+
+.ctv-tabelle tbody.ctv-gruppe .ctv-gruppe__kopf,
+.ctv-tabelle tbody.ctv-gruppe .ctv-wettkampf {
+    background: transparent;
+}

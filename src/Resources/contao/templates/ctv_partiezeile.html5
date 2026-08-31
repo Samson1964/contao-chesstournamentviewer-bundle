@@ -1,0 +1,34 @@
+<?php
+
+/*
+ * Eine Partiezeile in der Paarungs- und Ergebnisliste.
+ *
+ * Ausgelagert, weil sie an mehreren Stellen gebraucht wird — durchgehend beim
+ * Einzelturnier, innerhalb der Wettkämpfe beim Mannschaftsturnier und unter
+ * den Wettkämpfen selbst.
+ *
+ * Erwartet `partie`, den Namen der Nummernspalte unter `spalte` und
+ * `mitErgebnissen`. Partien aus einem Wettkampf führen kein `spielfrei`;
+ * dort gibt es beide Seiten immer.
+ */
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+$partie = $this->partie;
+$frei = (bool) ($partie['spielfrei'] ?? false);
+$ergebnis = $this->mitErgebnissen ? Ausgabe::ergebnisPaar($partie['ergebnis'], (string) ($partie['status'] ?? '')) : '';
+
+?>
+<tr<?= $frei ? ' class="ctv-partie--frei"' : '' ?>>
+  <td class="ctv-zahl"><?= Ausgabe::zahl($partie[$this->spalte] ?? 0) ?></td>
+  <td><?= Ausgabe::esc(Ausgabe::name($partie['weiss'])) ?></td>
+  <td class="ctv-zahl"><?= Ausgabe::zahl($partie['weiss']['twz'] ?? 0) ?></td>
+  <td class="ctv-paarung__ergebnis ctv-punkte"><?= '' === $ergebnis ? '&ndash;' : Ausgabe::esc($ergebnis) ?></td>
+  <?php if ($frei): ?>
+    <td><em><?= Ausgabe::wort('spielfrei', 'spielfrei') ?></em></td>
+    <td class="ctv-zahl"></td>
+  <?php else: ?>
+    <td><?= Ausgabe::esc(Ausgabe::name($partie['schwarz'])) ?></td>
+    <td class="ctv-zahl"><?= Ausgabe::zahl($partie['schwarz']['twz'] ?? 0) ?></td>
+  <?php endif; ?>
+</tr>

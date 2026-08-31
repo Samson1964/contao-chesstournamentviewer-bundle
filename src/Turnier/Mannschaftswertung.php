@@ -209,13 +209,19 @@ final class Mannschaftswertung
      * „3½:½". Mannschaften, die nicht gegeneinander angetreten sind, bleiben
      * leer; die Diagonale ist mit `**` gefüllt.
      *
+     * Mit `$kurz` steht in der Zelle nur die eigene Zahl — „3½" statt „3½:½".
+     * So hält es auch Swiss-Chess in seinen Ausdrucken: Die Gegenzahl steht
+     * ohnehin gespiegelt in der Zelle des Gegners, und die Tabelle wird um
+     * die Hälfte schmaler.
+     *
      * @param Turnier $turnier Das eingelesene Turnier
+     * @param bool    $kurz    Ob nur die eigenen Brettpunkte ausgegeben werden
      *
      * @return array{mannschaften:array<int,array<string,mixed>>,zeilen:array<int,array<int,string>>}
      *         `mannschaften` gibt die Reihenfolge vor, `zeilen` enthält je
      *         Zeilenindex ein Array von Spaltenindex auf Text
      */
-    public static function kreuztabelle(Turnier $turnier): array
+    public static function kreuztabelle(Turnier $turnier, bool $kurz = false): array
     {
         $tabelle = self::tabelle($turnier);
         $spalte = [];
@@ -245,8 +251,11 @@ final class Mannschaftswertung
                     continue;
                 }
 
-                $zeilen[$zeile][$gegenspalte] = self::punkteText((float) $satz['brettpunkte'])
-                    .':'.self::punkteText((float) $satz['brettpunkteGegner']);
+                $eigene = self::punkteText((float) $satz['brettpunkte']);
+
+                $zeilen[$zeile][$gegenspalte] = $kurz
+                    ? $eigene
+                    : $eigene.':'.self::punkteText((float) $satz['brettpunkteGegner']);
             }
         }
 
@@ -285,12 +294,30 @@ final class Mannschaftswertung
             $andere => $gegensatz['mannschaftspunkte'] ?? null,
         ];
 
+        // Der Schnitt gilt für die Mannschaft, die in diesem Wettkampf antrat,
+        // nicht für den gemeldeten Kader: Wer nicht am Brett saß, sagt über
+        // die Stärke dieser Begegnung nichts aus.
+        $schnitt = [$heim => [], $gast => []];
+
+        foreach ($partien as $partie) {
+            foreach (['weiss', 'schwarz'] as $seite) {
+                $twz = (int) ($partie[$seite]['twz'] ?? 0);
+                $nummer = $partie[$seite.'Mannschaft'] ?? null;
+
+                if ($twz > 0 && isset($schnitt[$nummer])) {
+                    $schnitt[$nummer][] = $twz;
+                }
+            }
+        }
+
         return [
             'runde' => $runde,
             'heim' => $heim,
             'gast' => $gast,
             'heimName' => (string) ($mannschaften[$heim]['name'] ?? ''),
             'gastName' => (string) ($mannschaften[$gast]['name'] ?? ''),
+            'schnittHeim' => [] === $schnitt[$heim] ? 0 : (int) round(array_sum($schnitt[$heim]) / \count($schnitt[$heim])),
+            'schnittGast' => [] === $schnitt[$gast] ? 0 : (int) round(array_sum($schnitt[$gast]) / \count($schnitt[$gast])),
             'brettpunkteHeim' => $punkte[$heim],
             'brettpunkteGast' => $punkte[$gast],
             'mannschaftspunkteHeim' => $mannschaftspunkte[$heim],
@@ -322,6 +349,8 @@ final class Mannschaftswertung
             'gast' => null,
             'heimName' => $name,
             'gastName' => '',
+            'schnittHeim' => 0,
+            'schnittGast' => 0,
             'brettpunkteHeim' => 0.0,
             'brettpunkteGast' => 0.0,
             'mannschaftspunkteHeim' => null,

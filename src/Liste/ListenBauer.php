@@ -38,13 +38,15 @@ class ListenBauer
      * @param string[] $gewaehlt      Die im Inhaltselement gewählten Listen
      * @param bool     $mitSpielern   Ob bei Mannschaftslisten die Einzelpartien
      *                                und Aufstellungen mit ausgegeben werden
+     * @param bool     $kreuzKurz     Ob die Kreuztabelle der Mannschaften nur
+     *                                die eigenen Brettpunkte zeigt
      *
      * @return array<int,array{schluessel:string,name:string,template:string,daten:array<string,mixed>}>
      *         Die Listen in der Reihenfolge des Verzeichnisses, nicht in der
      *         Reihenfolge der Auswahl — die Auswahl ist ein Kästchensatz und
      *         hat keine verlässliche Ordnung
      */
-    public function baue(Turnier $turnier, array $gewaehlt, bool $mitSpielern = false): array
+    public function baue(Turnier $turnier, array $gewaehlt, bool $mitSpielern = false, bool $kreuzKurz = false): array
     {
         $listen = [];
 
@@ -53,7 +55,7 @@ class ListenBauer
                 continue;
             }
 
-            $daten = $this->daten($schluessel, $turnier, $mitSpielern);
+            $daten = $this->daten($schluessel, $turnier, $mitSpielern, $kreuzKurz);
 
             if ([] === $daten) {
                 continue;
@@ -76,15 +78,16 @@ class ListenBauer
      * @param string  $schluessel  Schlüssel der Liste
      * @param Turnier $turnier     Das eingelesene Turnier
      * @param bool    $mitSpielern Ob Aufstellungen und Einzelpartien mitgehen
+     * @param bool    $kreuzKurz   Ob die Mannschaftskreuztabelle gekürzt wird
      *
      * @return array<string,mixed> Die Daten für das Template, oder ein leeres
      *                             Array, wenn die Liste nichts zu zeigen hat
      */
-    private function daten(string $schluessel, Turnier $turnier, bool $mitSpielern): array
+    private function daten(string $schluessel, Turnier $turnier, bool $mitSpielern, bool $kreuzKurz): array
     {
         return match ($schluessel) {
             'turnierdaten' => $this->turnierdaten($turnier),
-            'teilnehmer' => $this->schluessellos('teilnehmer', $turnier->getTeilnehmer()),
+            'teilnehmer' => $this->teilnehmer($turnier),
             'rangliste' => $this->rangliste($turnier),
             'kreuztabelle' => $this->kreuztabelle($turnier),
             'fortschritt' => $this->fortschritt($turnier, true),
@@ -93,9 +96,97 @@ class ListenBauer
             'mannschaften' => $this->mannschaften($turnier, $mitSpielern),
             'mannschaftsrangliste' => $this->schluessellos('mannschaften', Mannschaftswertung::tabelle($turnier)),
             'mannschaftspaarungen' => $this->mannschaftspaarungen($turnier, $mitSpielern),
-            'mannschaftskreuztabelle' => $this->mannschaftskreuztabelle($turnier),
+            'mannschaftskreuztabelle' => $this->mannschaftskreuztabelle($turnier, $kreuzKurz),
             default => [],
         };
+    }
+
+    /**
+     * Stellt die Teilnehmerliste zusammen.
+     *
+     * Bei einem Mannschaftsturnier wird nach Mannschaften gegliedert: je
+     * Mannschaft eine Kopfzeile mit Startnummer und Name, darunter deren
+     * Spieler nach Brett. Eine durchgehende Liste mit einer Spalte
+     * „Mannschaft" wäre bei zweihundert Teilnehmern kaum zu lesen, und die
+     * Aufstellung ist genau das, was an einem Mannschaftsturnier interessiert.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier
+     *
+     * @return array<string,mixed> Unter `teilnehmer` die flache Liste, bei
+     *                             Mannschaftsturnieren zusätzlich `gruppen`
+     */
+    private function teilnehmer(Turnier $turnier): array
+    {
+        $teilnehmer = $turnier->getTeilnehmer();
+
+        if ([] === $teilnehmer) {
+            return [];
+        }
+
+        return [
+            'teilnehmer' => $teilnehmer,
+            'gruppen' => $turnier->istMannschaftsturnier() ? $this->nachMannschaften($turnier, $teilnehmer, true) : [],
+        ];
+    }
+
+    /**
+     * Gliedert eine Teilnehmerliste nach Mannschaften.
+     *
+     * Mannschaften ohne einen einzigen Spieler in der übergebenen Liste
+     * fallen heraus; ebenso die Platzhaltermannschaft. Spieler ohne
+     * Mannschaftszugehörigkeit — in gemischten Turnieren kommt das vor —
+     * landen in einer Gruppe ohne Namen am Ende, damit niemand verschwindet.
+     *
+     * @param Turnier                        $turnier    Das eingelesene Turnier
+     * @param array<int,array<string,mixed>> $spieler    Die zu gliedernde Liste
+     * @param bool                           $nachBrett  Ob innerhalb der Mannschaft
+     *                                                   nach Brett sortiert wird;
+     *                                                   sonst bleibt die Reihenfolge
+     *
+     * @return array<int,array{nummer:int,name:string,startnummer:int,spieler:array<int,array<string,mixed>>}>
+     */
+    private function nachMannschaften(Turnier $turnier, array $spieler, bool $nachBrett): array
+    {
+        $mannschaften = $turnier->getMannschaften();
+        $gruppen = [];
+
+        foreach ($spieler as $einzelner) {
+            $nummer = (int) ($einzelner['mannschaftsnummer'] ?? 0);
+
+            if (!isset($mannschaften[$nummer]) || ($mannschaften[$nummer]['spielfrei'] ?? false)) {
+                $nummer = 0;
+            }
+
+            $gruppen[$nummer][] = $einzelner;
+        }
+
+        // Ohne Mannschaft ans Ende: PHP sortiert die 0 sonst nach vorn.
+        $ohne = $gruppen[0] ?? null;
+        unset($gruppen[0]);
+        ksort($gruppen);
+
+        if (null !== $ohne) {
+            $gruppen[0] = $ohne;
+        }
+
+        $ergebnis = [];
+
+        foreach ($gruppen as $nummer => $liste) {
+            if ($nachBrett) {
+                usort($liste, static fn (array $a, array $b): int => [(int) $a['brett'] ?: PHP_INT_MAX, (int) $a['tnr']] <=> [(int) $b['brett'] ?: PHP_INT_MAX, (int) $b['tnr']]);
+            }
+
+            $mannschaft = $mannschaften[$nummer] ?? [];
+
+            $ergebnis[] = [
+                'nummer' => (int) $nummer,
+                'name' => (string) ($mannschaft['name'] ?? ''),
+                'startnummer' => (int) ($mannschaft['startnummer'] ?? 0) ?: (int) $nummer,
+                'spieler' => $liste,
+            ];
+        }
+
+        return $ergebnis;
     }
 
     /**
@@ -249,35 +340,70 @@ class ListenBauer
             return false;
         };
 
-        $zusatz = ($turnier->kopf('feinwertungSicher', true) ? '' : ' '.($GLOBALS['TL_LANG']['ctv']['unsicher'] ?? '(Bezeichnung unsicher)'));
+        [$feinwertung1, $feinwertung2] = $this->feinwertungsspalten($turnier, $rangliste);
 
-        // Im Spaltenkopf steht die Kurzform der Feinwertung, damit die
-        // Zahlenspalte nicht durch ihre Überschrift breit wird; der volle
-        // Name geht als Titel mit und erscheint beim Überfahren. Fehlt die
-        // Bezeichnung — weil in der Datei keine eingestellt ist, die Zahlen
-        // aber dennoch belegt sind —, springt eine allgemeine Beschriftung
-        // ein; eine namenlose Zahlenspalte wäre nicht einzuordnen.
-        $spalte = static function (Turnier $turnier, int $nummer) use ($zusatz): array {
+        return [
+            'spieler' => $rangliste,
+            'gruppen' => $turnier->istMannschaftsturnier() ? $this->nachMannschaften($turnier, $rangliste, false) : [],
+            'feinwertung1' => $feinwertung1,
+            'feinwertung2' => $feinwertung2,
+            'mannschaftsspalte' => $turnier->istMannschaftsturnier(),
+        ];
+    }
+
+    /**
+     * Ermittelt die Spaltenköpfe der beiden Feinwertungen.
+     *
+     * Im Spaltenkopf steht die Kurzform der Feinwertung, damit die
+     * Zahlenspalte nicht durch ihre Überschrift breit wird; der volle Name
+     * geht als Titel mit und erscheint beim Überfahren. Fehlt die Bezeichnung
+     * — weil in der Datei keine eingestellt ist, die Zahlen aber dennoch
+     * belegt sind —, springt eine allgemeine Beschriftung ein; eine namenlose
+     * Zahlenspalte wäre nicht einzuordnen.
+     *
+     * Eine Feinwertung, die in keiner Zeile einen Wert trägt, bekommt keine
+     * Spalte.
+     *
+     * @param Turnier                        $turnier Das eingelesene Turnier
+     * @param array<int,array<string,mixed>> $zeilen  Die Teilnehmerzeilen
+     *
+     * @return array{0:array{name:string,titel:string}|null,1:array{name:string,titel:string}|null}
+     */
+    private function feinwertungsspalten(Turnier $turnier, array $zeilen): array
+    {
+        $zusatz = ($turnier->kopf('feinwertungSicher', true) ? '' : ' '.($GLOBALS['TL_LANG']['ctv']['unsicher'] ?? '(Bezeichnung unsicher)'));
+        $spalten = [];
+
+        foreach ([1, 2] as $nummer) {
+            $benutzt = false;
+
+            foreach ($zeilen as $zeile) {
+                if (!empty($zeile['feinwertung'.$nummer])) {
+                    $benutzt = true;
+
+                    break;
+                }
+            }
+
+            if (!$benutzt) {
+                $spalten[] = null;
+
+                continue;
+            }
+
             $name = trim((string) $turnier->kopf('feinwertung'.$nummer.'Text', ''));
 
             if ('' === $name) {
                 $allgemein = (string) ($GLOBALS['TL_LANG']['ctv']['spalte']['feinwertung'.$nummer] ?? 'Feinwertung '.$nummer);
+                $spalten[] = ['name' => $allgemein, 'titel' => $allgemein];
 
-                return ['name' => $allgemein, 'titel' => $allgemein];
+                continue;
             }
 
-            return [
-                'name' => Ausgabe::feinwertungKurz($name),
-                'titel' => $name.$zusatz,
-            ];
-        };
+            $spalten[] = ['name' => Ausgabe::feinwertungKurz($name), 'titel' => $name.$zusatz];
+        }
 
-        return [
-            'spieler' => $rangliste,
-            'feinwertung1' => $benutzt($rangliste, 'feinwertung1') ? $spalte($turnier, 1) : null,
-            'feinwertung2' => $benutzt($rangliste, 'feinwertung2') ? $spalte($turnier, 2) : null,
-            'mannschaftsspalte' => $turnier->istMannschaftsturnier(),
-        ];
+        return $spalten;
     }
 
     /**
@@ -301,10 +427,14 @@ class ListenBauer
             return [];
         }
 
+        [$feinwertung1, $feinwertung2] = $this->feinwertungsspalten($turnier, $tabelle['spieler']);
+
         return [
             'spieler' => $tabelle['spieler'],
             'zeilen' => $tabelle['zeilen'],
             'anzahl' => \count($tabelle['spieler']),
+            'feinwertung1' => $feinwertung1,
+            'feinwertung2' => $feinwertung2,
         ];
     }
 
@@ -377,6 +507,12 @@ class ListenBauer
             'mitErgebnissen' => $mitErgebnissen,
             'mannschaftsturnier' => $turnier->istMannschaftsturnier(),
             'spalte' => $spalte,
+            // Bei einem Mannschaftsturnier steht statt einer flachen Liste
+            // aller Partien je Wettkampf eine Kopfzeile mit den beiden
+            // Mannschaften, darunter die Bretter. Eine Runde einer
+            // Betriebsmeisterschaft hat sonst hundert Zeilen ohne jede
+            // Gliederung.
+            'kaempfe' => $turnier->istMannschaftsturnier() ? Mannschaftswertung::kaempfe($turnier) : [],
         ];
     }
 
@@ -469,12 +605,14 @@ class ListenBauer
      * Bereitet die Kreuztabelle der Mannschaften auf.
      *
      * @param Turnier $turnier Das eingelesene Turnier
+     * @param bool    $kurz    Ob in jeder Zelle nur die eigenen Brettpunkte
+     *                         stehen statt beider Seiten
      *
      * @return array<string,mixed> Unter `mannschaften`, `zeilen` und `anzahl`
      */
-    private function mannschaftskreuztabelle(Turnier $turnier): array
+    private function mannschaftskreuztabelle(Turnier $turnier, bool $kurz): array
     {
-        $tabelle = Mannschaftswertung::kreuztabelle($turnier);
+        $tabelle = Mannschaftswertung::kreuztabelle($turnier, $kurz);
 
         if ([] === $tabelle['mannschaften']) {
             return [];
@@ -484,6 +622,7 @@ class ListenBauer
             'mannschaften' => $tabelle['mannschaften'],
             'zeilen' => $tabelle['zeilen'],
             'anzahl' => \count($tabelle['mannschaften']),
+            'kurz' => $kurz,
         ];
     }
 }

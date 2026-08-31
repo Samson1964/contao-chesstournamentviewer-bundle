@@ -110,3 +110,6 @@ $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Wertung'] = '3 points
 $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Farbwertung'] = '3 points colour';
 $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Berliner Wertung'] = 'Berlin';
 $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan';
+
+$GLOBALS['TL_LANG']['ctv']['ohneMannschaft'] = 'Without team';
+$GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'The file extension %s is missing under "Settings → Allowed file types". Tournament files therefore cannot be uploaded to the file manager.';

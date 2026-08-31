@@ -9,10 +9,17 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
       <tr>
         <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('platz') ?>"><?= Ausgabe::spalte('platzKurz') ?></th>
         <th scope="col"><?= Ausgabe::spalte('name') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('twz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('punkte') ?>"><?= Ausgabe::spalte('punkteKurz') ?></th>
+        <?php if ($this->feinwertung1): ?>
+          <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::esc($this->feinwertung1['titel']) ?>"><?= Ausgabe::esc($this->feinwertung1['name']) ?></th>
+        <?php endif; ?>
+        <?php if ($this->feinwertung2): ?>
+          <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::esc($this->feinwertung2['titel']) ?>"><?= Ausgabe::esc($this->feinwertung2['name']) ?></th>
+        <?php endif; ?>
         <?php foreach ($this->spieler as $nummer => $unused): ?>
           <th scope="col" class="ctv-kreuz__feld ctv-kreuz__kopf"><?= $nummer + 1 ?></th>
         <?php endforeach; ?>
-        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('punkte') ?>"><?= Ausgabe::spalte('punkteKurz') ?></th>
       </tr>
     </thead>
     <tbody>
@@ -20,6 +27,14 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
         <tr>
           <td class="ctv-zahl"><?= $index + 1 ?></td>
           <td class="ctv-kreuz__name"><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
+          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
+          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($spieler['punkte']) ?></td>
+          <?php if ($this->feinwertung1): ?>
+            <td class="ctv-zahl"><?= Ausgabe::punkte($spieler['feinwertung1']) ?></td>
+          <?php endif; ?>
+          <?php if ($this->feinwertung2): ?>
+            <td class="ctv-zahl"><?= Ausgabe::punkte($spieler['feinwertung2']) ?></td>
+          <?php endif; ?>
           <?php foreach ($this->zeilen[$index] as $spalte => $symbol): ?>
             <?php if ('**' === $symbol): ?>
               <?php /* Blindfeld: der Spieler trifft nicht auf sich selbst. Der
@@ -30,7 +45,6 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
               <td class="ctv-kreuz__feld"><?= Ausgabe::esc($symbol) ?></td>
             <?php endif; ?>
           <?php endforeach; ?>
-          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($spieler['punkte']) ?></td>
         </tr>
       <?php endforeach; ?>
     </tbody>

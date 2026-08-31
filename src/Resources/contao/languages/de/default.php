@@ -124,3 +124,6 @@ $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Wertung'] = '3 Punkte
 $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Drei-Punkte-Farbwertung'] = '3 Punkte Farbe';
 $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Berliner Wertung'] = 'Berliner';
 $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan';
+
+$GLOBALS['TL_LANG']['ctv']['ohneMannschaft'] = 'Ohne Mannschaft';
+$GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'Die Dateiendung %s fehlt unter „Einstellungen → Erlaubte Dateitypen". Turnierdateien lassen sich deshalb nicht in die Dateiverwaltung hochladen.';

@@ -2,6 +2,11 @@
 
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
+$gruppiert = (bool) $this->gruppen;
+
+// Platz, Name, TWZ, Bilanz, Punkte und die belegten Feinwertungen
+$spalten = 5 + ($this->feinwertung1 ? 1 : 0) + ($this->feinwertung2 ? 1 : 0);
+
 ?>
 <div class="ctv-rollbar">
   <table class="ctv-tabelle ctv-tabelle--rangliste">
@@ -10,9 +15,6 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
         <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('platz') ?>"><?= Ausgabe::spalte('platzKurz') ?></th>
         <th scope="col"><?= Ausgabe::spalte('name') ?></th>
         <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('twz') ?></th>
-        <?php if ($this->mannschaftsspalte): ?>
-          <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
-        <?php endif; ?>
         <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('bilanz') ?></th>
         <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('punkte') ?>"><?= Ausgabe::spalte('punkteKurz') ?></th>
         <?php if ($this->feinwertung1): ?>
@@ -23,25 +25,35 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
         <?php endif; ?>
       </tr>
     </thead>
-    <tbody>
-      <?php foreach ($this->spieler as $spieler): ?>
-        <tr>
-          <td class="ctv-zahl"><?= (int) $spieler['platz'] ?></td>
-          <td><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
-          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
-          <?php if ($this->mannschaftsspalte): ?>
-            <td><?= Ausgabe::esc($spieler['mannschaft']) ?></td>
-          <?php endif; ?>
-          <td class="ctv-zahl"><?= Ausgabe::bilanz($spieler) ?></td>
-          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($spieler['punkte']) ?></td>
-          <?php if ($this->feinwertung1): ?>
-            <td class="ctv-zahl"><?= Ausgabe::punkte($spieler['feinwertung1']) ?></td>
-          <?php endif; ?>
-          <?php if ($this->feinwertung2): ?>
-            <td class="ctv-zahl"><?= Ausgabe::punkte($spieler['feinwertung2']) ?></td>
-          <?php endif; ?>
-        </tr>
+
+    <?php if ($gruppiert): ?>
+
+      <?php foreach ($this->gruppen as $gruppe): ?>
+        <tbody class="ctv-gruppe">
+          <tr class="ctv-gruppe__kopf">
+            <th scope="colgroup" colspan="<?= $spalten ?>">
+              <?php if ($gruppe['nummer'] > 0): ?>
+                <span class="ctv-gruppe__nummer"><?= (int) $gruppe['startnummer'] ?></span>
+                <?= Ausgabe::esc($gruppe['name']) ?>
+              <?php else: ?>
+                <?= Ausgabe::wort('ohneMannschaft', 'Ohne Mannschaft') ?>
+              <?php endif; ?>
+            </th>
+          </tr>
+          <?php foreach ($gruppe['spieler'] as $spieler): ?>
+            <?php $this->insert('ctv_ranglistenzeile', ['spieler' => $spieler, 'feinwertung1' => $this->feinwertung1, 'feinwertung2' => $this->feinwertung2]); ?>
+          <?php endforeach; ?>
+        </tbody>
       <?php endforeach; ?>
-    </tbody>
+
+    <?php else: ?>
+
+      <tbody>
+        <?php foreach ($this->spieler as $spieler): ?>
+          <?php $this->insert('ctv_ranglistenzeile', ['spieler' => $spieler, 'feinwertung1' => $this->feinwertung1, 'feinwertung2' => $this->feinwertung2]); ?>
+        <?php endforeach; ?>
+      </tbody>
+
+    <?php endif; ?>
   </table>
 </div>

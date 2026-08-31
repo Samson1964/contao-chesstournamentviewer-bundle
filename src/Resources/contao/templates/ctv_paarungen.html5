@@ -3,6 +3,7 @@
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
 $wertung = Ausgabe::wertungsname($this->turnier);
+$gruppiert = (bool) $this->kaempfe;
 
 ?>
 <?php foreach ($this->runden as $runde => $partien): ?>
@@ -21,28 +22,41 @@ $wertung = Ausgabe::wertungsname($this->turnier);
           <th scope="col" class="ctv-zahl ctv-schmal"><?= $wertung ?></th>
         </tr>
       </thead>
-      <tbody>
-        <?php foreach ($partien as $partie): ?>
-          <?php
-            // In der Paarungsliste steht statt des Ergebnisses ein Strich: Sie
-            // wird vor der Runde ausgehaengt, wenn es noch keines gibt.
-            $ergebnis = $this->mitErgebnissen ? Ausgabe::ergebnisPaar($partie['ergebnis'], (string) $partie['status']) : '';
-          ?>
-          <tr<?= $partie['spielfrei'] ? ' class="ctv-partie--frei"' : '' ?>>
-            <td class="ctv-zahl"><?= Ausgabe::zahl($partie[$this->spalte]) ?></td>
-            <td><?= Ausgabe::esc(Ausgabe::name($partie['weiss'])) ?></td>
-            <td class="ctv-zahl"><?= Ausgabe::zahl($partie['weiss']['twz']) ?></td>
-            <td class="ctv-paarung__ergebnis ctv-punkte"><?= '' === $ergebnis ? '&ndash;' : Ausgabe::esc($ergebnis) ?></td>
-            <?php if ($partie['spielfrei']): ?>
-              <td><em><?= Ausgabe::wort('spielfrei', 'spielfrei') ?></em></td>
-              <td class="ctv-zahl"></td>
-            <?php else: ?>
-              <td><?= Ausgabe::esc(Ausgabe::name($partie['schwarz'])) ?></td>
-              <td class="ctv-zahl"><?= Ausgabe::zahl($partie['schwarz']['twz']) ?></td>
-            <?php endif; ?>
-          </tr>
+
+      <?php if ($gruppiert): ?>
+
+        <?php /* Mannschaftsturnier: je Wettkampf eine Kopfzeile mit beiden
+                 Mannschaften, darunter die Bretter dieses Wettkampfs. */ ?>
+        <?php foreach ($this->kaempfe[$runde] ?? [] as $kampf): ?>
+          <tbody class="ctv-gruppe">
+            <tr class="ctv-gruppe__kopf<?= $kampf['spielfrei'] ? ' ctv-partie--frei' : '' ?>">
+              <th scope="colgroup" colspan="6">
+                <?= Ausgabe::esc($kampf['heimName']) ?>
+                <?php if ($kampf['spielfrei']): ?>
+                  <em>&ndash; <?= Ausgabe::wort('freilos', 'Freilos') ?></em>
+                <?php else: ?>
+                  &ndash; <?= Ausgabe::esc($kampf['gastName']) ?>
+                  <?php if ($this->mitErgebnissen && $kampf['gespielt']): ?>
+                    <span class="ctv-gruppe__ergebnis"><?= Ausgabe::punkte($kampf['brettpunkteHeim']) ?>:<?= Ausgabe::punkte($kampf['brettpunkteGast']) ?></span>
+                  <?php endif; ?>
+                <?php endif; ?>
+              </th>
+            </tr>
+            <?php foreach ($kampf['partien'] as $partie): ?>
+              <?php $this->insert('ctv_partiezeile', ['partie' => $partie, 'spalte' => 'brett', 'mitErgebnissen' => $this->mitErgebnissen]); ?>
+            <?php endforeach; ?>
+          </tbody>
         <?php endforeach; ?>
-      </tbody>
+
+      <?php else: ?>
+
+        <tbody>
+          <?php foreach ($partien as $partie): ?>
+            <?php $this->insert('ctv_partiezeile', ['partie' => $partie, 'spalte' => $this->spalte, 'mitErgebnissen' => $this->mitErgebnissen]); ?>
+          <?php endforeach; ?>
+        </tbody>
+
+      <?php endif; ?>
     </table>
   </div>
 

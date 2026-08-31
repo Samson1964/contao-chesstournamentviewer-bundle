@@ -1,5 +1,35 @@
 # Änderungen
 
+## Version 1.3.0 (2026-08-31)
+
+* Add: Die Eingabemaske richtet sich nach der gewählten Datei. Ist es ein
+  Einzelturnier, verschwinden die Feldgruppe „Mannschaftsturniere" und die
+  Mannschaftslisten aus der Auswahl; bei einem Mannschaftsturnier stehen sie
+  bereit. Die Anpassung greift nach dem Speichern, weil die Datei vorher
+  nicht im Datensatz steht.
+* Add: Warnung in der Eingabemaske, wenn die Dateiendung der Turnierformate
+  nicht unter „Einstellungen → Erlaubte Dateitypen" steht. Ohne sie lassen
+  sich Turnierdateien gar nicht erst hochladen, und die Dateiauswahl bleibt
+  ohne erkennbaren Grund leer.
+* Add: Kästchen „Hinweise zu den Zahlen anzeigen". Die Hinweise über den
+  Tabellen erscheinen jetzt nur noch auf Wunsch.
+* Add: Kästchen „Kreuztabelle der Mannschaften kürzen" — zeigt in jeder Zelle
+  nur die eigenen Brettpunkte („3½") statt beider Seiten („3½:½").
+* Change: Bei Mannschaftsturnieren werden Teilnehmerliste und Rangliste nach
+  Mannschaften gegliedert: je Mannschaft eine Kopfzeile mit Startnummer und
+  Name, darunter die Spieler. In der Rangliste bleibt die Platzierung des
+  ganzen Turniers in der Spalte `Pl.` sichtbar.
+* Change: Paarungs- und Ergebnisliste eines Mannschaftsturniers stehen
+  ebenfalls nach Wettkämpfen gegliedert, mit den beiden Mannschaften und dem
+  Wettkampfergebnis in der Kopfzeile.
+* Change: Die Wettkämpfe sind neu aufgebaut — Tisch, Mannschaft,
+  Wertungsschnitt der eingesetzten Bretter, Ergebnis, Mannschaft,
+  Wertungsschnitt. Die Einzelpartien stehen darunter in denselben Spalten und
+  brauchen deshalb keine eigene Kopfzeile mehr.
+* Change: In der Kreuztabelle stehen Wertungszahl, Punkte und Feinwertungen
+  jetzt vor den Ergebnisspalten statt dahinter; die Wertungszahl folgt
+  unmittelbar auf den Namen.
+
 ## Version 1.2.0 (2026-08-31)
 
 * Change: Der SWT-Leser wurde auf die Fassung vom 2026-08-31 gebracht. Er

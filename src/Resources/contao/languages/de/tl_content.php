@@ -17,3 +17,6 @@ $GLOBALS['TL_LANG']['tl_content']['ctvMannschaftSpieler'] = ['Spieler mit ausgeb
 // Überschriften der Feldgruppen
 $GLOBALS['TL_LANG']['tl_content']['ctv_legend'] = 'Turnier-Betrachter';
 $GLOBALS['TL_LANG']['tl_content']['ctv_mannschaft_legend'] = 'Mannschaftsturniere';
+
+$GLOBALS['TL_LANG']['tl_content']['ctvHinweise'] = ['Hinweise zu den Zahlen anzeigen', 'Zeigt über den Tabellen, wenn die gespeicherten Zahlen der Turnierdatei mit den eingetragenen Ergebnissen nicht zusammengehen — etwa weil die Rangliste älter ist als die letzte Runde.'];
+$GLOBALS['TL_LANG']['tl_content']['ctvKreuzKurz'] = ['Kreuztabelle der Mannschaften kürzen', 'Zeigt in jeder Zelle nur die eigenen Brettpunkte („3½") statt beider Seiten („3½:½"). Die Gegenzahl steht gespiegelt in der Zelle des Gegners.'];

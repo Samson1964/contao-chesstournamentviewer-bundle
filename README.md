@@ -25,35 +25,43 @@ composer require schachbulle/contao-chesstournamentviewer-bundle
 ## Benutzung
 
 Im Artikel ein Inhaltselement der Gruppe **Schach-Elemente** vom Typ
-**Turnier-Betrachter** anlegen. Dort stehen vier Einstellungen:
+**Turnier-Betrachter** anlegen. Dort stehen diese Einstellungen:
 
 | Feld | Bedeutung |
 | --- | --- |
 | **Turnierdatei** | Die Datei aus der Dateiverwaltung. Angeboten werden nur Dateien mit einer Endung, die ein registriertes Format kennt. |
 | **Format der Turnierdatei** | „Automatisch erkennen" ist der Regelfall; die Formate erkennen ihre Dateien am Inhalt, nicht an der Endung. Ein Format von Hand zu wählen hilft nur, wenn eine Datei nicht erkannt wird, obwohl sie dazugehört. |
 | **Auszugebende Listen** | Mehrfachauswahl. Ab zwei Listen erscheinen Reiter. |
-| **Spieler mit ausgeben** | Betrifft nur Mannschaftsturniere: Aufstellungen in der Mannschaftsliste und Einzelpartien in den Wettkämpfen. |
+| **Hinweise zu den Zahlen anzeigen** | Zeigt über den Tabellen, wenn die gespeicherten Zahlen der Datei mit den eingetragenen Ergebnissen nicht zusammengehen. |
+| **Spieler mit ausgeben** | Nur bei Mannschaftsturnieren: Aufstellungen in der Mannschaftsliste und Einzelpartien in den Wettkämpfen. |
+| **Kreuztabelle der Mannschaften kürzen** | Nur bei Mannschaftsturnieren: In jeder Zelle stehen nur die eigenen Brettpunkte statt beider Seiten. |
 
-Listen für Mannschaftsturniere werden bei einem Einzelturnier stillschweigend
-übergangen. Dieselbe Auswahl taugt damit für beide Turnierarten, und man muss
-das Inhaltselement nicht ändern, wenn im nächsten Jahr ein Mannschaftsturnier
-an derselben Stelle steht.
+**Die Maske richtet sich nach der Datei.** Ist die gewählte Datei ein
+Einzelturnier, verschwinden die Feldgruppe „Mannschaftsturniere" und die
+Mannschaftslisten aus der Auswahl; bei einem Mannschaftsturnier stehen sie
+bereit. Die Anpassung greift nach dem Speichern, denn vorher steht die Datei
+nicht im Datensatz.
+
+Steht die Dateiendung der Turnierformate nicht unter **Einstellungen →
+Erlaubte Dateitypen**, warnt das Inhaltselement: Ohne den Eintrag lässt sich
+gar keine Turnierdatei hochladen, und die Dateiauswahl bliebe ohne
+erkennbaren Grund leer.
 
 ### Die Listen
 
 | Liste | Inhalt |
 | --- | --- |
 | Turnierdaten | Name, Ort, Zeitraum, Turnierform, Runden, Feinwertungen |
-| Teilnehmer | Startliste mit Elo, DWZ, TWZ und Verein |
-| Rangliste | Endstand mit Bilanz, Punkten und Feinwertungen |
+| Teilnehmer | Startliste mit Elo, DWZ, TWZ und Verein; bei Mannschaftsturnieren nach Mannschaften gegliedert |
+| Rangliste | Endstand mit Bilanz, Punkten und Feinwertungen; bei Mannschaftsturnieren nach Mannschaften gegliedert |
 | Kreuztabelle | Jeder gegen jeden, in Ranglistenreihenfolge |
 | Fortschrittstabelle | Je Runde Ergebnis, Farbe und Gegner, darunter der Punktestand |
 | Fortschritt ohne Punktestand | Dieselbe Tabelle, nur der Verlauf |
-| Paarungen | Auslosung je Runde, ohne Ergebnisse |
+| Paarungen | Auslosung je Runde, ohne Ergebnisse; bei Mannschaftsturnieren nach Wettkämpfen gegliedert |
 | Ergebnisse | Dieselben Partien mit Ergebnis |
 | Mannschaften | Mannschaftsliste, auf Wunsch mit Aufstellung |
 | Mannschaftstabelle | Wettkämpfe, Bilanz, Mannschafts- und Brettpunkte |
-| Wettkämpfe | Die Begegnungen je Runde, auf Wunsch mit Einzelpartien |
+| Wettkämpfe | Die Begegnungen je Runde mit Wertungsschnitt, auf Wunsch mit Einzelpartien |
 | Kreuztabelle der Mannschaften | Die Wettkampfergebnisse als Kreuztabelle |
 
 ### Reiternavigation
@@ -80,6 +88,8 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 | `ctv_fortschrittohne` | Fortschritt ohne Punktestand |
 | `ctv_paarungen` | Paarungen — und über einen Verweis auch die Ergebnisse |
 | `ctv_ergebnisse` | Ergebnisse |
+| `ctv_partiezeile` | Eine Partiezeile — von Paarungen, Ergebnissen und Wettkämpfen benutzt |
+| `ctv_ranglistenzeile` | Eine Ranglistenzeile — durchgehend wie in den Mannschaftsgruppen |
 | `ctv_mannschaften` | Mannschaften |
 | `ctv_mannschaftsrangliste` | Mannschaftstabelle |
 | `ctv_mannschaftspaarungen` | Wettkämpfe |
@@ -103,6 +113,8 @@ CSS-Eigenschaften am Element `.ctv` und lassen sich im eigenen Theme
     --ctv-wechsel: #f6f7f8;       /* jede zweite Zeile, ruhende Reiter */
     --ctv-gedaempft: #6b6b6b;     /* Nebenangaben wie Farbe und Punktestand */
     --ctv-akzent: #1c5a8c;        /* Balken über dem aktiven Reiter */
+    --ctv-blind: #c9ced3;         /* Blindfelder der Kreuztabelle */
+    --ctv-blind-figur: #6b7379;   /* der König darin */
 }
 ```
 

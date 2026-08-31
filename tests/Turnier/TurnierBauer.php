@@ -72,6 +72,7 @@ final class TurnierBauer
                 'mnr' => $nummer,
                 'name' => 'Mannschaft '.$nummer,
                 'spielfrei' => false,
+                'startnummer' => $nummer,
                 'spieler' => [$nummer * 2 - 1, $nummer * 2],
                 'spielerzahl' => 2,
                 'platz' => $nummer,

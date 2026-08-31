@@ -2,38 +2,64 @@
 
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
-$mannschaftsspalte = $this->turnier->istMannschaftsturnier();
+$gruppiert = (bool) $this->gruppen;
 
 ?>
 <div class="ctv-rollbar">
   <table class="ctv-tabelle ctv-tabelle--teilnehmer">
     <thead>
       <tr>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('nr') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= $gruppiert ? Ausgabe::spalte('brettKurz') : Ausgabe::spalte('nr') ?></th>
         <th scope="col"><?= Ausgabe::spalte('name') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('elo') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('dwz') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('twz') ?></th>
-        <th scope="col"><?= $mannschaftsspalte ? Ausgabe::spalte('mannschaft') : Ausgabe::spalte('verein') ?></th>
-        <?php if ($mannschaftsspalte): ?>
-          <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('brett') ?></th>
-        <?php endif; ?>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('elo') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('dwz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('twz') ?></th>
+        <th scope="col"><?= $gruppiert ? Ausgabe::spalte('land') : Ausgabe::spalte('verein') ?></th>
       </tr>
     </thead>
-    <tbody>
-      <?php foreach ($this->teilnehmer as $spieler): ?>
-        <tr>
-          <td class="ctv-zahl"><?= (int) $spieler['tnr'] ?></td>
-          <td><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
-          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['elo']) ?></td>
-          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['dwz']) ?></td>
-          <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
-          <td><?= Ausgabe::esc($spieler['mannschaft']) ?></td>
-          <?php if ($mannschaftsspalte): ?>
-            <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['brett']) ?></td>
-          <?php endif; ?>
-        </tr>
+
+    <?php if ($gruppiert): ?>
+
+      <?php foreach ($this->gruppen as $gruppe): ?>
+        <tbody class="ctv-gruppe">
+          <tr class="ctv-gruppe__kopf">
+            <th scope="colgroup" colspan="6">
+              <?php if ($gruppe['nummer'] > 0): ?>
+                <span class="ctv-gruppe__nummer"><?= (int) $gruppe['startnummer'] ?></span>
+                <?= Ausgabe::esc($gruppe['name']) ?>
+              <?php else: ?>
+                <?= Ausgabe::wort('ohneMannschaft', 'Ohne Mannschaft') ?>
+              <?php endif; ?>
+            </th>
+          </tr>
+          <?php foreach ($gruppe['spieler'] as $spieler): ?>
+            <tr>
+              <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['brett']) ?></td>
+              <td><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
+              <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['elo']) ?></td>
+              <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['dwz']) ?></td>
+              <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
+              <td><?= Ausgabe::esc($spieler['land']) ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
       <?php endforeach; ?>
-    </tbody>
+
+    <?php else: ?>
+
+      <tbody>
+        <?php foreach ($this->teilnehmer as $spieler): ?>
+          <tr>
+            <td class="ctv-zahl"><?= (int) $spieler['tnr'] ?></td>
+            <td><?= Ausgabe::esc(Ausgabe::name($spieler)) ?></td>
+            <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['elo']) ?></td>
+            <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['dwz']) ?></td>
+            <td class="ctv-zahl"><?= Ausgabe::zahl($spieler['twz']) ?></td>
+            <td><?= Ausgabe::esc($spieler['mannschaft']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+
+    <?php endif; ?>
   </table>
 </div>

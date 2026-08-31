@@ -19,11 +19,19 @@ services:
         arguments:
             $formate: !tagged_iterator schachbulle_ctv.format
 
+    # --- Turnierdaten ------------------------------------------------------
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer: ~
+
     # --- Rückrufe des Data Containers --------------------------------------
 
     # Der Tag hängt an `target` selbsttätig `_callback` an; daraus werden
-    # `config.onload_callback` und `fields.ctvFormat.options_callback`. Die
-    # Schreibweise ist in Contao 4.13 und Contao 5 dieselbe.
+    # `config.onload_callback`, `fields.ctvFormat.options_callback` und so
+    # fort. Die Schreibweise ist in Contao 4.13 und Contao 5 dieselbe.
     Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener:
         tags:
             - name: contao.callback
@@ -32,12 +40,20 @@ services:
               method: setzeDateiendungen
             - name: contao.callback
               table: tl_content
+              target: config.onload
+              method: passeAnTurnierart
+            - name: contao.callback
+              table: tl_content
               target: fields.ctvFormat.options
               method: formatOptionen
-
-    # --- Aufbereitung der Listen -------------------------------------------
-
-    Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer: ~
+            - name: contao.callback
+              table: tl_content
+              target: fields.ctvListen.options
+              method: listenOptionen
+            - name: contao.callback
+              table: tl_content
+              target: fields.ctvDatei.load
+              method: pruefeUploadTypen
 
     # --- Frontend ----------------------------------------------------------
 
@@ -47,7 +63,6 @@ services:
             # auf den Klassennamen und muss deshalb über die Dienst-ID kommen.
             $tokenChecker: '@contao.security.token_checker'
             $logger: '@monolog.logger.contao.error'
-            $projectDir: '%kernel.project_dir%'
         tags:
             - name: contao.content_element
               category: schach
