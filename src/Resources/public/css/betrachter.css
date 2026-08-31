@@ -21,6 +21,8 @@
     --ctv-akzent: #1c5a8c;
     --ctv-blind: #c9ced3;
     --ctv-blind-figur: #6b7379;
+    --ctv-weiss: #fff;
+    --ctv-schwarz: #e2e5e8;
     --ctv-hinweis: #8a6d3b;
     --ctv-hinweis-grund: #fdf5e6;
     --ctv-fehler: #a94442;
@@ -422,4 +424,31 @@
 .ctv-tabelle tbody.ctv-gruppe .ctv-gruppe__kopf,
 .ctv-tabelle tbody.ctv-gruppe .ctv-wettkampf {
     background: transparent;
+}
+
+/*
+ * Ungekürzte Zellen der Mannschaftskreuztabelle tragen „3½:½" und brauchen
+ * mehr als die Breite einer Ziffer.
+ */
+.ctv .ctv-tabelle--kreuz th.ctv-kreuz__feld--breit,
+.ctv .ctv-tabelle--kreuz td.ctv-kreuz__feld--breit {
+    width: 4em !important;
+    min-width: 4em !important;
+    max-width: 4em !important;
+}
+
+/* --- Farben am Brett ----------------------------------------------------
+ *
+ * In der Wettkampfansicht stehen die Mannschaften über den Spalten, nicht
+ * die Farben. Damit trotzdem abzulesen ist, wer Weiß führte, bekommt sein
+ * Feld hellen, das des Schwarzspielers grauen Grund. Der Streifenwechsel der
+ * Zeilen liegt am `tr` und wird davon überdeckt — genau so ist es gemeint.
+ */
+
+.ctv .ctv-tabelle td.ctv-farbe--w {
+    background: var(--ctv-weiss);
+}
+
+.ctv .ctv-tabelle td.ctv-farbe--s {
+    background: var(--ctv-schwarz);
 }

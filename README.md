@@ -61,7 +61,7 @@ erkennbaren Grund leer.
 | Ergebnisse | Dieselben Partien mit Ergebnis |
 | Mannschaften | Mannschaftsliste, auf Wunsch mit Aufstellung |
 | Mannschaftstabelle | Wettkämpfe, Bilanz, Mannschafts- und Brettpunkte |
-| Wettkämpfe | Die Begegnungen je Runde mit Wertungsschnitt, auf Wunsch mit Einzelpartien |
+| Wettkämpfe | Die Begegnungen je Runde mit Wertungsschnitt, auf Wunsch mit Einzelpartien; die Bretter stehen nach Mannschaft ausgerichtet, die Farbe ist am Grund der Felder abzulesen |
 | Kreuztabelle der Mannschaften | Die Wettkampfergebnisse als Kreuztabelle |
 
 ### Reiternavigation
@@ -88,7 +88,8 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 | `ctv_fortschrittohne` | Fortschritt ohne Punktestand |
 | `ctv_paarungen` | Paarungen — und über einen Verweis auch die Ergebnisse |
 | `ctv_ergebnisse` | Ergebnisse |
-| `ctv_partiezeile` | Eine Partiezeile — von Paarungen, Ergebnissen und Wettkämpfen benutzt |
+| `ctv_partiezeile` | Eine Partiezeile der Paarungs- und Ergebnisliste, nach Farbe ausgerichtet |
+| `ctv_wettkampfzeile` | Eine Brettzeile im Wettkampf, nach Mannschaft ausgerichtet |
 | `ctv_ranglistenzeile` | Eine Ranglistenzeile — durchgehend wie in den Mannschaftsgruppen |
 | `ctv_mannschaften` | Mannschaften |
 | `ctv_mannschaftsrangliste` | Mannschaftstabelle |
@@ -115,6 +116,8 @@ CSS-Eigenschaften am Element `.ctv` und lassen sich im eigenen Theme
     --ctv-akzent: #1c5a8c;        /* Balken über dem aktiven Reiter */
     --ctv-blind: #c9ced3;         /* Blindfelder der Kreuztabelle */
     --ctv-blind-figur: #6b7379;   /* der König darin */
+    --ctv-weiss: #fff;            /* Feld des Weißspielers im Wettkampf */
+    --ctv-schwarz: #e2e5e8;       /* Feld des Schwarzspielers */
 }
 ```
 

@@ -299,6 +299,21 @@ final class Turnier
     }
 
     /**
+     * Nennt die Zahl der Partien, die eine Paarung je Runde austrägt.
+     *
+     * Üblich ist eine. Bei Doppelrunden — verbreitet bei Blitzturnieren —
+     * sind es zwei, und ein Rundenergebnis läuft dann von 0 bis 2. Wer das
+     * übersieht, rechnet das Gegenergebnis als `1 − x` aus und landet bei
+     * negativen Punktzahlen.
+     *
+     * @return int Partien je Paarung und Runde, mindestens 1
+     */
+    public function getPartienProRunde(): int
+    {
+        return max(1, (int) ($this->kopf['partienProRunde'] ?? 1));
+    }
+
+    /**
      * Nennt die Zahl der Bretter je Mannschaftskampf.
      *
      * Wird für die Wertung kampfloser Mannschaftskämpfe gebraucht: Wer

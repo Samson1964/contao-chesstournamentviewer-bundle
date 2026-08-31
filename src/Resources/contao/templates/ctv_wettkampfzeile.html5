@@ -1,0 +1,28 @@
+<?php
+
+/*
+ * Eine Brettzeile innerhalb eines Wettkampfs.
+ *
+ * Anders als in der Paarungsliste stehen hier die Mannschaften über den
+ * Spalten. Die Zeile richtet sich deshalb an ihnen aus, nicht an der Farbe —
+ * sonst stünden in einer Spalte abwechselnd Spieler beider Mannschaften,
+ * weil die Farben von Brett zu Brett wechseln.
+ *
+ * Damit die Farbe nicht verlorengeht, ist sie am Feld abzulesen: Wer Weiß
+ * führt, sitzt auf hellem Grund, wer Schwarz führt, auf grauem.
+ */
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+$partie = $this->partie;
+$ergebnis = Ausgabe::ergebnisPaar($partie['ergebnisHeim'], (string) ($partie['status'] ?? ''), (float) ($partie['hoechstwert'] ?? 1.0));
+
+?>
+<tr>
+  <td class="ctv-zahl"><?= Ausgabe::zahl($partie['brett']) ?></td>
+  <td class="ctv-farbe--<?= $partie['heimFarbe'] ?>"><?= Ausgabe::esc(Ausgabe::name($partie['heimSpieler'])) ?></td>
+  <td class="ctv-zahl ctv-farbe--<?= $partie['heimFarbe'] ?>"><?= Ausgabe::zahl($partie['heimSpieler']['twz'] ?? 0) ?></td>
+  <td class="ctv-paarung__ergebnis ctv-punkte"><?= '' === $ergebnis ? '&ndash;' : Ausgabe::esc($ergebnis) ?></td>
+  <td class="ctv-farbe--<?= $partie['gastFarbe'] ?>"><?= Ausgabe::esc(Ausgabe::name($partie['gastSpieler'])) ?></td>
+  <td class="ctv-zahl ctv-farbe--<?= $partie['gastFarbe'] ?>"><?= Ausgabe::zahl($partie['gastSpieler']['twz'] ?? 0) ?></td>
+</tr>

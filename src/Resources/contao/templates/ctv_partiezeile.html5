@@ -16,7 +16,7 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
 $partie = $this->partie;
 $frei = (bool) ($partie['spielfrei'] ?? false);
-$ergebnis = $this->mitErgebnissen ? Ausgabe::ergebnisPaar($partie['ergebnis'], (string) ($partie['status'] ?? '')) : '';
+$ergebnis = $this->mitErgebnissen ? Ausgabe::ergebnisPaar($partie['ergebnis'], (string) ($partie['status'] ?? ''), (float) ($this->hoechstwert ?: 1.0)) : '';
 
 ?>
 <tr<?= $frei ? ' class="ctv-partie--frei"' : '' ?>>

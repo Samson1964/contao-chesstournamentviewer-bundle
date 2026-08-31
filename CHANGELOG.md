@@ -1,5 +1,33 @@
 # Änderungen
 
+## Version 1.4.0 (2026-08-31)
+
+* Fix: In den Wettkämpfen standen die Bretter nach **Farbe** ausgerichtet,
+  während über den Spalten die **Mannschaften** stehen. Weil die Farben von
+  Brett zu Brett wechseln, stand in einer Spalte abwechselnd ein Spieler
+  jeder Mannschaft. Die Zeilen richten sich jetzt an den Mannschaften aus.
+* Add: Damit die Farbe dabei nicht verlorengeht, ist sie am Feld abzulesen —
+  wer Weiß führt, sitzt auf hellem Grund, wer Schwarz führt, auf grauem. Die
+  Farben stehen als `--ctv-weiss` und `--ctv-schwarz` zur Verfügung.
+* Fix: Bei **Doppelrunden** — zwei Partien je Paarung und Runde, verbreitet
+  bei Blitzturnieren — wurde das Gegenergebnis als `1 − x` gerechnet statt
+  als `2 − x`. Aus einem Wettkampf mit 1½ wurden dadurch −½ Punkte für die
+  Gegenseite. Betroffen waren 515 von 14.159 Wettkämpfen im geprüften
+  Bestand; die Ergebnisliste eines doppelrundigen Einzelturniers zeigte
+  ebenfalls falsche Paare.
+* Fix: Partien gegen den Platzhalterteilnehmer zählten in den Wettkämpfen
+  mit, obwohl der Leser sie aus den Brettpunkten heraushält.
+* Fix: Die Kreuztabelle der Mannschaften hatte die Überarbeitung von 1.1.0
+  nicht mitbekommen: keine Königsfigur in den Blindfeldern, keine zentrierten
+  Ergebnisse, keine gleich breiten Spalten.
+* Add: Die Kreuztabelle der Mannschaften zeigt Mannschafts- und Brettpunkte
+  vor den Ergebnisspalten, wie die Kreuztabelle der Einzelturniere.
+* Add: Gegenprobe über den gesamten Bestand — für jeden Wettkampf muss der
+  Heimspieler jeder Partie zur Heimmannschaft gehören und die Summe der
+  Brettergebnisse das Wettkampfergebnis ergeben. Geprüft an 14.159
+  Wettkämpfen mit 60.584 Einzelpartien, ohne Abweichung. Zwei Testfälle
+  halten die Bedingung fest.
+
 ## Version 1.3.0 (2026-08-31)
 
 * Add: Die Eingabemaske richtet sich nach der gewählten Datei. Ist es ein

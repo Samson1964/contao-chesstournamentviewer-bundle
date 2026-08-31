@@ -79,6 +79,68 @@ class MannschaftswertungTest extends TestCase
     }
 
     /**
+     * Prüft, dass die Partien eines Wettkampfs an den Mannschaften ausgerichtet sind.
+     *
+     * In der Wettkampfansicht stehen die Mannschaften über den Spalten. Wird
+     * dort nach Farbe ausgerichtet, stehen in einer Spalte abwechselnd
+     * Spieler beider Mannschaften — die Farben wechseln von Brett zu Brett.
+     * Genau das war bis Fassung 1.3.0 der Fall.
+     *
+     * Im Prüfturnier führt Spieler 1 an Brett 1 Weiß, Spieler 2 an Brett 2
+     * Schwarz; beide gehören zu Mannschaft 1. Auf der Heimseite müssen
+     * deshalb beide stehen, obwohl sie verschiedene Farben führen.
+     *
+     * @return void
+     */
+    public function testPartienSindNachMannschaftAusgerichtet(): void
+    {
+        $kaempfe = Mannschaftswertung::kaempfe(TurnierBauer::mannschaftsturnier());
+        $kampf = $this->findeKampf($kaempfe[1], 1, 2);
+
+        $this->assertSame(1, $kampf['heim']);
+
+        $heim = array_map(static fn (array $p): int => (int) $p['heimSpieler']['tnr'], $kampf['partien']);
+        $gast = array_map(static fn (array $p): int => (int) $p['gastSpieler']['tnr'], $kampf['partien']);
+
+        $this->assertSame([1, 2], $heim, 'Auf der Heimseite stehen die Spieler von Mannschaft 1.');
+        $this->assertSame([3, 4], $gast, 'Auf der Gastseite die von Mannschaft 2.');
+        $this->assertSame(['w', 's'], array_column($kampf['partien'], 'heimFarbe'), 'Die Farben wechseln von Brett zu Brett.');
+    }
+
+    /**
+     * Prüft, dass die Brettergebnisse den Wettkampf ergeben.
+     *
+     * Das ist die Gegenprobe zur Ausrichtung: Summiert man die Ergebnisse aus
+     * Sicht der Heimmannschaft, muss die Brettpunktzahl des Wettkampfs
+     * herauskommen. Wäre eine Partie verkehrt herum zugeordnet, ginge die
+     * Summe nicht auf.
+     *
+     * @return void
+     */
+    public function testBrettergebnisseErgebenDenWettkampf(): void
+    {
+        foreach (Mannschaftswertung::kaempfe(TurnierBauer::mannschaftsturnier()) as $runde => $kaempfe) {
+            foreach ($kaempfe as $kampf) {
+                if ($kampf['spielfrei'] || [] === $kampf['partien']) {
+                    continue;
+                }
+
+                $summe = 0.0;
+
+                foreach ($kampf['partien'] as $partie) {
+                    $summe += (float) $partie['ergebnisHeim'];
+                }
+
+                $this->assertSame(
+                    (float) $kampf['brettpunkteHeim'],
+                    $summe,
+                    sprintf('Runde %d, %s gegen %s', $runde, $kampf['heimName'], $kampf['gastName'])
+                );
+            }
+        }
+    }
+
+    /**
      * Prüft, dass ein Freilos ohne Punkte bleibt.
      *
      * In der Datei steht zu einer spielfreien Runde nichts als das Fehlen

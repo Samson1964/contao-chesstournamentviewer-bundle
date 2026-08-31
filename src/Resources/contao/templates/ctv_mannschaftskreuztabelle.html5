@@ -7,13 +7,13 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
   <table class="ctv-tabelle ctv-tabelle--kreuz ctv-tabelle--mannschaftskreuz">
     <thead>
       <tr>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('platz') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('platz') ?>"><?= Ausgabe::spalte('platzKurz') ?></th>
         <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('mannschaftspunkte') ?>"><?= Ausgabe::spalte('mannschaftspunkte') ?></th>
+        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('brettpunkte') ?>"><?= Ausgabe::spalte('brettpunkte') ?></th>
         <?php foreach ($this->mannschaften as $index => $unused): ?>
-          <th scope="col" class="ctv-zahl ctv-kreuz__kopf"><?= $index + 1 ?></th>
+          <th scope="col" class="ctv-kreuz__feld ctv-kreuz__kopf<?= $this->kurz ? '' : ' ctv-kreuz__feld--breit' ?>"><?= $index + 1 ?></th>
         <?php endforeach; ?>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('mannschaftspunkte') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('brettpunkte') ?></th>
       </tr>
     </thead>
     <tbody>
@@ -21,11 +21,16 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
         <tr>
           <td class="ctv-zahl"><?= (int) $zeile['platz'] ?></td>
           <td class="ctv-kreuz__name"><?= Ausgabe::esc($zeile['name']) ?></td>
-          <?php foreach ($this->zeilen[$index] as $symbol): ?>
-            <td class="ctv-zahl<?= '**' === $symbol ? ' ctv-kreuz__diagonale' : '' ?>"><?= '**' === $symbol ? '' : Ausgabe::esc($symbol) ?></td>
-          <?php endforeach; ?>
           <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($zeile['mannschaftspunkte']) ?></td>
           <td class="ctv-zahl"><?= Ausgabe::punkte($zeile['brettpunkte']) ?></td>
+          <?php foreach ($this->zeilen[$index] as $symbol): ?>
+            <?php if ('**' === $symbol): ?>
+              <?php /* Blindfeld: die Mannschaft trifft nicht auf sich selbst. */ ?>
+              <td class="ctv-kreuz__feld ctv-kreuz__diagonale<?= $this->kurz ? '' : ' ctv-kreuz__feld--breit' ?>"><span aria-hidden="true">&#9818;</span></td>
+            <?php else: ?>
+              <td class="ctv-kreuz__feld<?= $this->kurz ? '' : ' ctv-kreuz__feld--breit' ?>"><?= Ausgabe::esc($symbol) ?></td>
+            <?php endif; ?>
+          <?php endforeach; ?>
         </tr>
       <?php endforeach; ?>
     </tbody>

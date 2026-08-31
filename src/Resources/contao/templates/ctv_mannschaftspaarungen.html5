@@ -46,7 +46,7 @@ $wertung = Ausgabe::wertungsname($this->turnier);
 
           <?php if ($this->mitSpielern): ?>
             <?php foreach ($kampf['partien'] as $partie): ?>
-              <?php $this->insert('ctv_partiezeile', ['partie' => $partie, 'spalte' => 'brett', 'mitErgebnissen' => true]); ?>
+              <?php $this->insert('ctv_wettkampfzeile', ['partie' => $partie]); ?>
             <?php endforeach; ?>
           <?php endif; ?>
         </tbody>

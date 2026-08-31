@@ -43,7 +43,7 @@ $gruppiert = (bool) $this->kaempfe;
               </th>
             </tr>
             <?php foreach ($kampf['partien'] as $partie): ?>
-              <?php $this->insert('ctv_partiezeile', ['partie' => $partie, 'spalte' => 'brett', 'mitErgebnissen' => $this->mitErgebnissen]); ?>
+              <?php $this->insert('ctv_partiezeile', ['partie' => $partie, 'spalte' => 'brett', 'mitErgebnissen' => $this->mitErgebnissen, 'hoechstwert' => $this->hoechstwert]); ?>
             <?php endforeach; ?>
           </tbody>
         <?php endforeach; ?>
@@ -52,7 +52,7 @@ $gruppiert = (bool) $this->kaempfe;
 
         <tbody>
           <?php foreach ($partien as $partie): ?>
-            <?php $this->insert('ctv_partiezeile', ['partie' => $partie, 'spalte' => $this->spalte, 'mitErgebnissen' => $this->mitErgebnissen]); ?>
+            <?php $this->insert('ctv_partiezeile', ['partie' => $partie, 'spalte' => $this->spalte, 'mitErgebnissen' => $this->mitErgebnissen, 'hoechstwert' => $this->hoechstwert]); ?>
           <?php endforeach; ?>
         </tbody>
 

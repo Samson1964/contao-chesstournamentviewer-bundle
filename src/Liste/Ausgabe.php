@@ -123,33 +123,30 @@ final class Ausgabe
      *
      * @return string Das Ergebnis beider Seiten, leer wenn keines vorliegt
      */
-    public static function ergebnisPaar(mixed $ergebnis, string $status = ''): string
+    public static function ergebnisPaar(mixed $ergebnis, string $status = '', float $hoechstwert = 1.0): string
     {
         if (null === $ergebnis || '' === $ergebnis) {
             return '';
         }
 
-        $weiss = (float) $ergebnis;
+        $eigen = (float) $ergebnis;
+        $hoechstwert = max(1.0, $hoechstwert);
 
         // Kampflose Partien werden nicht mit Zahlen geschrieben, sondern mit
         // + und -, wie es Swiss-Chess und chess-results halten: Eine 1:0 ließe
         // eine gespielte Partie vermuten, die es nie gab.
         if (self::istKampflos($status)) {
             return match (true) {
-                $weiss >= 1.0 => '+:-',
-                $weiss <= 0.0 => '-:+',
+                $eigen >= $hoechstwert => '+:-',
+                $eigen <= 0.0 => '-:+',
                 default => '½:½',
             };
         }
 
-        // Bei zwei Partien je Runde kann das Ergebnis über 1 liegen. Die
-        // Gegenseite ergibt sich dann aus der Zahl der Partien, die hier nicht
-        // bekannt ist — in dem Fall bleibt es bei der einzelnen Zahl.
-        if ($weiss > 1.0) {
-            return self::punkte($weiss);
-        }
-
-        return self::punkte($weiss).':'.self::punkte(1.0 - $weiss);
+        // Die Gegenseite ist der Höchstwert minus dem eigenen Ergebnis. Bei
+        // zwei Partien je Runde — verbreitet bei Blitzturnieren — läuft ein
+        // Rundenergebnis von 0 bis 2, und aus „1½" wird „1½:½".
+        return self::punkte($eigen).':'.self::punkte($hoechstwert - $eigen);
     }
 
     /**

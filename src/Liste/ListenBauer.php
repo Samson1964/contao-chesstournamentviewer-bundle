@@ -513,6 +513,7 @@ class ListenBauer
             // Betriebsmeisterschaft hat sonst hundert Zeilen ohne jede
             // Gliederung.
             'kaempfe' => $turnier->istMannschaftsturnier() ? Mannschaftswertung::kaempfe($turnier) : [],
+            'hoechstwert' => (float) $turnier->getPartienProRunde(),
         ];
     }
 
@@ -598,7 +599,7 @@ class ListenBauer
             return [];
         }
 
-        return ['runden' => $kaempfe, 'mitSpielern' => $mitSpielern];
+        return ['runden' => $kaempfe, 'mitSpielern' => $mitSpielern, 'hoechstwert' => (float) $turnier->getPartienProRunde()];
     }
 
     /**

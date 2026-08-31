@@ -310,6 +310,8 @@ final class Mannschaftswertung
             }
         }
 
+        $partien = self::richteAus($partien, $heim, (float) $turnier->getPartienProRunde());
+
         return [
             'runde' => $runde,
             'heim' => $heim,
@@ -328,6 +330,48 @@ final class Mannschaftswertung
             'tisch' => (int) ($satz['tisch'] ?? 0),
             'partien' => $partien,
         ];
+    }
+
+    /**
+     * Richtet die Partien eines Wettkampfs an den Mannschaften aus.
+     *
+     * Die Partien liegen an Weiß ausgerichtet vor, wie es eine Paarungsliste
+     * braucht. In der Wettkampfansicht stehen aber die Mannschaften über den
+     * Spalten, und dort **darf nicht nach Farbe sortiert werden**: Die Farben
+     * wechseln von Brett zu Brett, sodass in einer Spalte abwechselnd Spieler
+     * beider Mannschaften stünden. Genau das war bis Fassung 1.3.0 der Fall.
+     *
+     * Ergänzt werden deshalb je Partie der Spieler beider Mannschaften, deren
+     * Farbe und das Ergebnis aus Sicht der Heimmannschaft. Die an Weiß
+     * ausgerichteten Felder bleiben daneben stehen, weil die Paarungsliste sie
+     * weiter braucht.
+     *
+     * @param array<int,array<string,mixed>> $partien     Die Partien des Wettkampfs
+     * @param int                            $heim        Nummer der Mannschaft, die links steht
+     * @param float                          $hoechstwert Punkte, die eine Paarung je Runde vergibt
+     *
+     * @return array<int,array<string,mixed>> Dieselben Partien mit den Feldern
+     *                                        `heimSpieler`, `gastSpieler`,
+     *                                        `heimFarbe`, `gastFarbe` und
+     *                                        `ergebnisHeim`
+     */
+    private static function richteAus(array $partien, int $heim, float $hoechstwert): array
+    {
+        foreach ($partien as $index => $partie) {
+            $heimIstWeiss = ($partie['weissMannschaft'] ?? null) === $heim;
+            $ergebnis = $partie['ergebnis'];
+
+            $partien[$index] = array_merge($partie, [
+                'heimSpieler' => $heimIstWeiss ? $partie['weiss'] : $partie['schwarz'],
+                'gastSpieler' => $heimIstWeiss ? $partie['schwarz'] : $partie['weiss'],
+                'heimFarbe' => $heimIstWeiss ? 'w' : 's',
+                'gastFarbe' => $heimIstWeiss ? 's' : 'w',
+                'ergebnisHeim' => null === $ergebnis ? null : ($heimIstWeiss ? (float) $ergebnis : $hoechstwert - (float) $ergebnis),
+                'hoechstwert' => $hoechstwert,
+            ]);
+        }
+
+        return $partien;
     }
 
     /**
@@ -382,6 +426,7 @@ final class Mannschaftswertung
         $spieler = $turnier->getSpieler();
         $paarungen = $turnier->getPaarungen();
         $mannschaften = $turnier->getMannschaften();
+        $hoechstwert = (float) $turnier->getPartienProRunde();
         $partien = [];
 
         foreach ($mannschaften[$eine]['spieler'] ?? [] as $tnr) {
@@ -397,11 +442,23 @@ final class Mannschaftswertung
                 continue;
             }
 
+            // Partien gegen den Platzhalterteilnehmer gehören nicht zum
+            // Wettkampf. Der Leser lässt ihn aus der Spielerliste der
+            // Mannschaft heraus und rechnet ihn deshalb auch nicht in die
+            // Brettpunkte ein; nähme man ihn hier auf, ginge die Summe der
+            // Bretter nicht mehr mit dem Wettkampfergebnis zusammen.
+            if (($spieler[$tnr]['spielfrei'] ?? false) || ($spieler[$gegnerNr]['spielfrei'] ?? false)) {
+                continue;
+            }
+
             $istWeiss = 'w' === mb_strtolower(mb_substr(trim((string) ($satz['farbe'] ?? '')), 0, 1));
             $ergebnis = $satz['ergebnis'];
 
+            // Das Gegenergebnis ist nicht 1 minus dem eigenen, sondern der
+            // Rundenhoechstwert minus dem eigenen: Bei zwei Partien je Runde
+            // laeuft ein Rundenergebnis von 0 bis 2.
             if (null !== $ergebnis && !$istWeiss) {
-                $ergebnis = 1.0 - (float) $ergebnis;
+                $ergebnis = $hoechstwert - (float) $ergebnis;
             }
 
             $partien[] = [
