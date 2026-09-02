@@ -31,16 +31,24 @@ Im Artikel ein Inhaltselement der Gruppe **Schach-Elemente** vom Typ
 | --- | --- |
 | **Turnierdatei** | Die Datei aus der Dateiverwaltung. Angeboten werden nur Dateien mit einer Endung, die ein registriertes Format kennt. |
 | **Format der Turnierdatei** | „Automatisch erkennen" ist der Regelfall; die Formate erkennen ihre Dateien am Inhalt, nicht an der Endung. Ein Format von Hand zu wählen hilft nur, wenn eine Datei nicht erkannt wird, obwohl sie dazugehört. |
-| **Auszugebende Listen** | Mehrfachauswahl. Ab zwei Listen erscheinen Reiter. |
+| **Auszugebende Listen** | Mehrfachauswahl. Ab zwei Listen erscheinen Reiter. Die Auswahl lässt sich **ziehen**; in dieser Reihenfolge stehen später die Reiter. |
+| **Stand nach Runde** | Versetzt das ganze Element auf den Stand nach dieser Runde zurück. Siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden). |
+| **Angezeigte Runden** | Beschränkt Paarungs-, Ergebnis- und Wettkampfliste auf einzelne Runden. Ohne Auswahl erscheinen alle. |
 | **Hinweise zu den Zahlen anzeigen** | Zeigt über den Tabellen, wenn die gespeicherten Zahlen der Datei mit den eingetragenen Ergebnissen nicht zusammengehen. |
 | **Spieler mit ausgeben** | Nur bei Mannschaftsturnieren: Aufstellungen in der Mannschaftsliste und Einzelpartien in den Wettkämpfen. |
 | **Kreuztabelle der Mannschaften kürzen** | Nur bei Mannschaftsturnieren: In jeder Zelle stehen nur die eigenen Brettpunkte statt beider Seiten. |
 
-**Die Maske richtet sich nach der Datei.** Ist die gewählte Datei ein
-Einzelturnier, verschwinden die Feldgruppe „Mannschaftsturniere" und die
-Mannschaftslisten aus der Auswahl; bei einem Mannschaftsturnier stehen sie
-bereit. Die Anpassung greift nach dem Speichern, denn vorher steht die Datei
-nicht im Datensatz.
+**Die Maske zeigt nur, was auch wirkt.** Sie richtet sich nach zwei Dingen:
+
+* **nach der Datei** — bei einem Einzelturnier verschwinden die Feldgruppe
+  „Mannschaftsturniere" und die Mannschaftslisten aus der Auswahl; ein
+  einrundiges Turnier bekommt keine Rundenfelder; eine Datei ohne Hinweise
+  bekommt kein Kästchen dafür. Das greift nach dem Speichern, denn vorher
+  steht die Datei nicht im Datensatz.
+* **nach den angehakten Listen** — „Kreuztabelle kürzen" erscheint nur mit
+  der Kreuztabelle der Mannschaften, „Spieler mit ausgeben" nur mit einer
+  Liste, in der Spieler vorkommen, „Angezeigte Runden" nur mit einer
+  Rundenliste. Das greift **sofort**: Das Auswahlfeld schickt die Maske ab.
 
 Steht die Dateiendung der Turnierformate nicht unter **Einstellungen →
 Erlaubte Dateitypen**, warnt das Inhaltselement: Ohne den Eintrag lässt sich
@@ -63,6 +71,57 @@ erkennbaren Grund leer.
 | Mannschaftstabelle | Wettkämpfe, Bilanz, Mannschafts- und Brettpunkte |
 | Wettkämpfe | Die Begegnungen je Runde mit Wertungsschnitt, auf Wunsch mit Einzelpartien; die Bretter stehen nach Mannschaft ausgerichtet, die Farbe ist am Grund der Felder abzulesen |
 | Kreuztabelle der Mannschaften | Die Wettkampfergebnisse als Kreuztabelle |
+
+### Zeitpunkt und Runden
+
+Zwei Felder steuern, **wann** und **was** gezeigt wird. Sie tun
+Verschiedenes:
+
+**Stand nach Runde** ist ein Schnitt durch das ganze Turnier. Alles, was
+danach gespielt wurde, ist weg — nicht ausgeblendet, sondern entfernt.
+Rangliste, Kreuztabelle und Fortschrittstabelle zeigen den damaligen Stand,
+die Mannschaftstabelle ebenso. Über der Ausgabe steht dann „Stand nach Runde
+4", damit niemand einen Zwischenstand für die Endtabelle hält.
+
+**Angezeigte Runden** wirkt innerhalb dieses Schnitts und nur auf die
+Rundenlisten: Paarungen, Ergebnisse und Wettkämpfe. Auf die Tabellen wirkt es
+nicht.
+
+Beide zusammen ergeben die üblichen Fälle:
+
+| Gewünscht | Stand nach Runde | Angezeigte Runden |
+| --- | --- | --- |
+| Alles, wie es am Ende war | Ganzes Turnier | (leer) |
+| Nur die Ergebnisse der Runden 4 und 5, dazu die Endtabelle | Ganzes Turnier | 4, 5 |
+| Der Zwischenstand nach Runde 4 mit den Ergebnissen dieser Runde | 4 | 4 |
+| Der Zwischenstand nach Runde 4, alle bisherigen Ergebnisse | 4 | (leer) |
+
+Die Rundennummern kommen aus der Datei: Ein Turnier über fünf Runden bietet
+fünf Kästchen an. „Ergebnisse der Runde 5 mit der Tabelle nach Runde 4" gibt
+es nicht — Runde 5 ist dann noch nicht gespielt.
+
+#### Woher die Zahlen eines Zwischenstands kommen
+
+Die Turnierdatei speichert Punkte und Feinwertungen **nur für den Endstand**.
+Ein Zwischenstand muss deshalb gerechnet werden, und zwar aus den Partien.
+Für die Punkte ist das eindeutig. Für die Feinwertungen nicht: Ob eine
+spielfreie Runde mitzählt, mit welchem Wert ein Gegner eingeht, der selbst
+ausgesetzt hat, und ob der schlechteste Wert gestrichen wird, sind
+Turniereinstellungen, die in der Datei an keiner bekannten Stelle stehen.
+
+Geraten wird deshalb nicht. Der Betrachter **rechnet zuerst den Endstand
+nach** und vergleicht ihn mit dem, was in der Datei steht. Nur die
+Regelfassung, die dabei jeden einzelnen Wert trifft, wird auf den
+Zwischenstand angewandt. Findet sich keine, bleibt die Spalte leer und ein
+Hinweis nennt den Grund — eine Zahl, die neben der amtlichen Tabelle steht
+und ihr widerspricht, wäre schlimmer als keine.
+
+Nachrechenbar sind Buchholzwertung, Buchholzsumme, mittlere Buchholz,
+Sonneborn-Berger und Summenwertung. Wertungen, die auf Wertungszahlen beruhen
+— Gegner-Elo-Mittel, Rating-Leistung —, fehlen im Zwischenstand immer.
+
+Ebenfalls nicht im Zwischenstand: **Sonderpunkte**. Die Datei nennt nur ihre
+Summe, nicht die Runde, in der sie vergeben wurden.
 
 ### Reiternavigation
 
@@ -189,7 +248,9 @@ vendor/bin/phpunit
 ```
 
 Geprüft werden die Rückrechnung der Mannschaftswertung, die
-Fortschrittstabelle, die Formaterkennung und das Listenverzeichnis.
+Fortschrittstabelle, die Formaterkennung, das Listenverzeichnis, der
+Rundenschnitt samt Kalibrierung der Feinwertungen und das Kürzen der
+Eingabemaske.
 
 ## Lizenz
 

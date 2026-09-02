@@ -30,6 +30,23 @@
     margin-block: 1rem;
 }
 
+/* --- Zwischenstand ------------------------------------------------------
+ *
+ * Steht ueber der ganzen Ausgabe, wenn das Element einen Rundenschnitt zeigt.
+ * Die Farbe kommt vom Akzent, damit sich die Zeile als Angabe zur Ausgabe
+ * liest und nicht als Warnung. Die Schriftgroesse traegt ein !important,
+ * weil Themes ihre Absaetze gern ueber ID-Selektoren gestalten.
+ */
+
+.ctv-stand {
+    margin: 0 0 .75rem !important;
+    padding: .35rem .6rem !important;
+    border-left: 3px solid var(--ctv-akzent) !important;
+    background: var(--ctv-wechsel) !important;
+    color: var(--ctv-text) !important;
+    font-weight: 600 !important;
+}
+
 /* --- Hinweise und Fehler ------------------------------------------------ */
 
 .ctv-hinweis {

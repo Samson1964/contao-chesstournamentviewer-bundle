@@ -113,3 +113,10 @@ $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan'
 
 $GLOBALS['TL_LANG']['ctv']['ohneMannschaft'] = 'Without team';
 $GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'The file extension %s is missing under "Settings → Allowed file types". Tournament files therefore cannot be uploaded to the file manager.';
+
+$GLOBALS['TL_LANG']['ctv']['standGanz'] = 'Whole tournament (final standings)';
+$GLOBALS['TL_LANG']['ctv']['standRunde'] = 'Standings after round %d';
+$GLOBALS['TL_LANG']['ctv']['rundeNummer'] = 'Round %d';
+$GLOBALS['TL_LANG']['ctv']['standTitel'] = 'Standings after round %d';
+$GLOBALS['TL_LANG']['ctv']['hinweisSchnitt'] = 'These are the standings after round %d. Points and placings are recalculated from the games, not taken from the tournament file.';
+$GLOBALS['TL_LANG']['ctv']['hinweisOhneFeinwertung'] = 'The tie-break %s is omitted: its calculation could not be confirmed against the final standings of the tournament.';

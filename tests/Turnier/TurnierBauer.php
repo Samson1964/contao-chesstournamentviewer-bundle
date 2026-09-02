@@ -182,9 +182,17 @@ final class TurnierBauer
      * Nummer 5 bereit, wie ihn die Turnierprogramme bei ungerader
      * Teilnehmerzahl anlegen.
      *
+     * Für die Prüfung des Rundenschnitts lässt sich eine Feinwertung
+     * mitgeben. Sie steht dann in den Karteikarten, so wie sie in einer
+     * echten Turnierdatei stünde — die Nachrechnung muss sich an ihr messen.
+     *
+     * @param string             $feinwertungArt Bezeichnung der Feinwertung,
+     *                                           leer für keine
+     * @param array<int,float>   $feinwertung    Gespeicherte Werte je Teilnehmernummer
+     *
      * @return Turnier Das zusammengebaute Turnier
      */
-    public static function einzelturnier(): Turnier
+    public static function einzelturnier(string $feinwertungArt = '', array $feinwertung = []): Turnier
     {
         $spieler = [];
 
@@ -204,10 +212,12 @@ final class TurnierBauer
                 'remis' => 0,
                 'niederlagen' => 0,
                 'spielfrei' => false,
+                'feinwertung1' => $feinwertung[$tnr] ?? 0.0,
+                'feinwertung2' => 0.0,
             ];
         }
 
-        $spieler[5] = array_merge($spieler[1], ['tnr' => 5, 'name' => 'spielfrei', 'spielfrei' => true, 'platz' => 0]);
+        $spieler[5] = array_merge($spieler[1], ['tnr' => 5, 'name' => 'spielfrei', 'spielfrei' => true, 'platz' => 0, 'feinwertung1' => 0.0]);
 
         $paarungen = [
             1 => [
@@ -239,6 +249,8 @@ final class TurnierBauer
                 'runden' => 3,
                 'teilnehmerzahl' => 5,
                 'modusText' => 'Rundenturnier',
+                'feinwertung1Text' => $feinwertungArt,
+                'feinwertung2Text' => '',
             ],
             $spieler,
             [],

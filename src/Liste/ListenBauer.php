@@ -12,6 +12,7 @@ namespace Schachbulle\ContaoChesstournamentviewerBundle\Liste;
 
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Fortschritt;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftswertung;
+use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Rundenschnitt;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
 
 /**
@@ -34,28 +35,31 @@ class ListenBauer
      * einem noch nicht ausgelosten Turnier aber keine bekommen kann, soll
      * lieber gar keinen Reiter sehen.
      *
-     * @param Turnier  $turnier       Das eingelesene Turnier
-     * @param string[] $gewaehlt      Die im Inhaltselement gewählten Listen
-     * @param bool     $mitSpielern   Ob bei Mannschaftslisten die Einzelpartien
-     *                                und Aufstellungen mit ausgegeben werden
-     * @param bool     $kreuzKurz     Ob die Kreuztabelle der Mannschaften nur
-     *                                die eigenen Brettpunkte zeigt
+     * Ist ein Rundenstand gewählt, wird das Turnier vorher zurückversetzt —
+     * einmal für alle Listen, damit Tabelle, Kreuztabelle und
+     * Fortschrittstabelle denselben Zeitpunkt zeigen.
+     *
+     * @param Turnier $turnier  Das eingelesene Turnier
+     * @param Auswahl $auswahl  Die Einstellungen des Inhaltselements
      *
      * @return array<int,array{schluessel:string,name:string,template:string,daten:array<string,mixed>}>
-     *         Die Listen in der Reihenfolge des Verzeichnisses, nicht in der
-     *         Reihenfolge der Auswahl — die Auswahl ist ein Kästchensatz und
-     *         hat keine verlässliche Ordnung
+     *         Die Listen in der vom Redakteur festgelegten Reihenfolge; wo
+     *         diese fehlt, in der Reihenfolge des Verzeichnisses
      */
-    public function baue(Turnier $turnier, array $gewaehlt, bool $mitSpielern = false, bool $kreuzKurz = false): array
+    public function baue(Turnier $turnier, Auswahl $auswahl): array
     {
+        if ($auswahl->stand > 0) {
+            $turnier = Rundenschnitt::bis($turnier, $auswahl->stand);
+        }
+
         $listen = [];
 
-        foreach (Listen::schluessel() as $schluessel) {
-            if (!\in_array($schluessel, $gewaehlt, true) || !Listen::passt($schluessel, $turnier)) {
+        foreach ($this->reihenfolge($auswahl->listen) as $schluessel) {
+            if (!Listen::passt($schluessel, $turnier)) {
                 continue;
             }
 
-            $daten = $this->daten($schluessel, $turnier, $mitSpielern, $kreuzKurz);
+            $daten = $this->daten($schluessel, $turnier, $auswahl);
 
             if ([] === $daten) {
                 continue;
@@ -73,17 +77,47 @@ class ListenBauer
     }
 
     /**
+     * Bringt die gewählten Listen in ihre Ausgabereihenfolge.
+     *
+     * Das Auswahlfeld im Backend lässt sich sortieren; die gespeicherte
+     * Reihenfolge ist deshalb die des Redakteurs und wird übernommen. Was
+     * dabei durchfällt — unbekannte Schlüssel aus einer älteren Fassung —
+     * wird verworfen, und Listen ohne festgelegte Stellung folgen in der
+     * Reihenfolge des Verzeichnisses.
+     *
+     * @param string[] $gewaehlt Die gewählten Schlüssel in gespeicherter Ordnung
+     *
+     * @return string[] Die gültigen Schlüssel in Ausgabereihenfolge
+     */
+    private function reihenfolge(array $gewaehlt): array
+    {
+        $bekannt = Listen::schluessel();
+        $sortiert = array_values(array_filter(
+            $gewaehlt,
+            static fn (mixed $schluessel): bool => \is_string($schluessel) && \in_array($schluessel, $bekannt, true)
+        ));
+
+        foreach ($bekannt as $schluessel) {
+            if (\in_array($schluessel, $gewaehlt, true) && !\in_array($schluessel, $sortiert, true)) {
+                $sortiert[] = $schluessel;
+            }
+        }
+
+        return array_unique($sortiert);
+    }
+
+    /**
      * Ermittelt die Daten einer einzelnen Liste.
      *
-     * @param string  $schluessel  Schlüssel der Liste
-     * @param Turnier $turnier     Das eingelesene Turnier
-     * @param bool    $mitSpielern Ob Aufstellungen und Einzelpartien mitgehen
-     * @param bool    $kreuzKurz   Ob die Mannschaftskreuztabelle gekürzt wird
+     * @param string  $schluessel Schlüssel der Liste
+     * @param Turnier $turnier    Das eingelesene Turnier, gegebenenfalls
+     *                            bereits auf den gewählten Stand zurückversetzt
+     * @param Auswahl $auswahl    Die Einstellungen des Inhaltselements
      *
      * @return array<string,mixed> Die Daten für das Template, oder ein leeres
      *                             Array, wenn die Liste nichts zu zeigen hat
      */
-    private function daten(string $schluessel, Turnier $turnier, bool $mitSpielern, bool $kreuzKurz): array
+    private function daten(string $schluessel, Turnier $turnier, Auswahl $auswahl): array
     {
         return match ($schluessel) {
             'turnierdaten' => $this->turnierdaten($turnier),
@@ -92,11 +126,11 @@ class ListenBauer
             'kreuztabelle' => $this->kreuztabelle($turnier),
             'fortschritt' => $this->fortschritt($turnier, true),
             'fortschrittohne' => $this->fortschritt($turnier, false),
-            'paarungen', 'ergebnisse' => $this->runden($turnier, 'ergebnisse' === $schluessel),
-            'mannschaften' => $this->mannschaften($turnier, $mitSpielern),
+            'paarungen', 'ergebnisse' => $this->runden($turnier, 'ergebnisse' === $schluessel, $auswahl),
+            'mannschaften' => $this->mannschaften($turnier, $auswahl->mitSpielern),
             'mannschaftsrangliste' => $this->schluessellos('mannschaften', Mannschaftswertung::tabelle($turnier)),
-            'mannschaftspaarungen' => $this->mannschaftspaarungen($turnier, $mitSpielern),
-            'mannschaftskreuztabelle' => $this->mannschaftskreuztabelle($turnier, $kreuzKurz),
+            'mannschaftspaarungen' => $this->mannschaftspaarungen($turnier, $auswahl),
+            'mannschaftskreuztabelle' => $this->mannschaftskreuztabelle($turnier, $auswahl->kreuzKurz),
             default => [],
         };
     }
@@ -478,9 +512,13 @@ class ListenBauer
      *
      * @return array<string,mixed> Unter `runden` die Partien je Runde
      */
-    private function runden(Turnier $turnier, bool $mitErgebnissen): array
+    private function runden(Turnier $turnier, bool $mitErgebnissen, Auswahl $auswahl): array
     {
-        $runden = $turnier->getRunden();
+        $runden = array_filter(
+            $turnier->getRunden(),
+            static fn (int $runde): bool => $auswahl->zeigtRunde($runde),
+            ARRAY_FILTER_USE_KEY
+        );
 
         if ([] === $runden) {
             return [];
@@ -512,9 +550,26 @@ class ListenBauer
             // Mannschaften, darunter die Bretter. Eine Runde einer
             // Betriebsmeisterschaft hat sonst hundert Zeilen ohne jede
             // Gliederung.
-            'kaempfe' => $turnier->istMannschaftsturnier() ? Mannschaftswertung::kaempfe($turnier) : [],
+            'kaempfe' => $turnier->istMannschaftsturnier() ? $this->kaempfe($turnier, $auswahl) : [],
             'hoechstwert' => (float) $turnier->getPartienProRunde(),
         ];
+    }
+
+    /**
+     * Holt die Wettkämpfe und lässt die abgewählten Runden weg.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier
+     * @param Auswahl $auswahl Die Einstellungen des Inhaltselements
+     *
+     * @return array<int,array<int,array<string,mixed>>> Wettkämpfe je Runde
+     */
+    private function kaempfe(Turnier $turnier, Auswahl $auswahl): array
+    {
+        return array_filter(
+            Mannschaftswertung::kaempfe($turnier),
+            static fn (int $runde): bool => $auswahl->zeigtRunde($runde),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**
@@ -591,15 +646,19 @@ class ListenBauer
      *
      * @return array<string,mixed> Unter `runden` die Wettkämpfe je Runde
      */
-    private function mannschaftspaarungen(Turnier $turnier, bool $mitSpielern): array
+    private function mannschaftspaarungen(Turnier $turnier, Auswahl $auswahl): array
     {
-        $kaempfe = Mannschaftswertung::kaempfe($turnier);
+        $kaempfe = $this->kaempfe($turnier, $auswahl);
 
         if ([] === $kaempfe) {
             return [];
         }
 
-        return ['runden' => $kaempfe, 'mitSpielern' => $mitSpielern, 'hoechstwert' => (float) $turnier->getPartienProRunde()];
+        return [
+            'runden' => $kaempfe,
+            'mitSpielern' => $auswahl->mitSpielern,
+            'hoechstwert' => (float) $turnier->getPartienProRunde(),
+        ];
     }
 
     /**

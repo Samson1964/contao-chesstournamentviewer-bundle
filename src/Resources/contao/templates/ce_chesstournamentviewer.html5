@@ -15,6 +15,13 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
   <div class="ctv" id="<?= $this->kennung ?>"<?= $this->mitReitern ? ' data-ctv-reiter' : '' ?>>
 
+    <?php /* Der Zwischenstand steht unabhaengig von den Hinweisen ueber der
+             Ausgabe: Eine Tabelle nach Runde 4 saehe sonst aus wie die
+             Endtabelle. */ ?>
+    <?php if ($this->stand): ?>
+      <p class="ctv-stand"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['standTitel'] ?? 'Stand nach Runde %d', $this->stand)) ?></p>
+    <?php endif; ?>
+
     <?php if ($this->hinweise): ?>
       <div class="ctv-hinweise">
         <?php foreach ($this->hinweise as $hinweis): ?>

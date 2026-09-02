@@ -127,3 +127,11 @@ $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan'
 
 $GLOBALS['TL_LANG']['ctv']['ohneMannschaft'] = 'Ohne Mannschaft';
 $GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'Die Dateiendung %s fehlt unter „Einstellungen → Erlaubte Dateitypen". Turnierdateien lassen sich deshalb nicht in die Dateiverwaltung hochladen.';
+
+// Rundenschnitt: Beschriftungen der Auswahl und Hinweise in der Ausgabe
+$GLOBALS['TL_LANG']['ctv']['standGanz'] = 'Ganzes Turnier (Endstand)';
+$GLOBALS['TL_LANG']['ctv']['standRunde'] = 'Stand nach Runde %d';
+$GLOBALS['TL_LANG']['ctv']['rundeNummer'] = 'Runde %d';
+$GLOBALS['TL_LANG']['ctv']['standTitel'] = 'Stand nach Runde %d';
+$GLOBALS['TL_LANG']['ctv']['hinweisSchnitt'] = 'Gezeigt wird der Stand nach Runde %d. Punkte und Platzierungen sind aus den Partien nachgerechnet, nicht der Turnierdatei entnommen.';
+$GLOBALS['TL_LANG']['ctv']['hinweisOhneFeinwertung'] = 'Ohne Angabe bleibt die Feinwertung %s: Ihre Rechenweise ließ sich am Endstand des Turniers nicht bestätigen.';

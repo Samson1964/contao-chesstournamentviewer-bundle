@@ -20,3 +20,7 @@ $GLOBALS['TL_LANG']['tl_content']['ctv_mannschaft_legend'] = 'Mannschaftsturnier
 
 $GLOBALS['TL_LANG']['tl_content']['ctvHinweise'] = ['Hinweise zu den Zahlen anzeigen', 'Zeigt über den Tabellen, wenn die gespeicherten Zahlen der Turnierdatei mit den eingetragenen Ergebnissen nicht zusammengehen — etwa weil die Rangliste älter ist als die letzte Runde.'];
 $GLOBALS['TL_LANG']['tl_content']['ctvKreuzKurz'] = ['Kreuztabelle der Mannschaften kürzen', 'Zeigt in jeder Zelle nur die eigenen Brettpunkte („3½") statt beider Seiten („3½:½"). Die Gegenzahl steht gespiegelt in der Zelle des Gegners.'];
+$GLOBALS['TL_LANG']['tl_content']['ctvStand'] = ['Stand nach Runde', 'Versetzt das ganze Element auf den Stand nach dieser Runde zurück — Tabelle, Kreuztabelle und Fortschrittstabelle zeigen dann, wie es damals aussah. Die Zahlen werden dafür aus den Partien nachgerechnet; eine Feinwertung erscheint nur, wenn sich ihre Rechenweise am Endstand der Datei bestätigen ließ.'];
+$GLOBALS['TL_LANG']['tl_content']['ctvRunden'] = ['Angezeigte Runden', 'Beschränkt Paarungs-, Ergebnis- und Wettkampfliste auf einzelne Runden. Ohne Auswahl erscheinen alle. Auf Tabelle und Kreuztabelle wirkt das Feld nicht — dafür ist „Stand nach Runde" da.'];
+
+$GLOBALS['TL_LANG']['tl_content']['ctv_runden_legend'] = 'Zeitpunkt und Runden';

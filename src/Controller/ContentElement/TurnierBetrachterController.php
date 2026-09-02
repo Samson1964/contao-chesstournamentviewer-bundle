@@ -16,7 +16,9 @@ use Contao\CoreBundle\Security\Authentication\Token\TokenChecker;
 use Contao\StringUtil;
 use Contao\Template;
 use Psr\Log\LoggerInterface;
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Auswahl;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
+use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Rundenschnitt;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -92,12 +94,21 @@ class TurnierBetrachterController extends AbstractContentElementController
             return $template->getResponse();
         }
 
-        $listen = $this->listenBauer->baue(
-            $turnier,
+        $auswahl = new Auswahl(
             StringUtil::deserialize($model->ctvListen, true),
             (bool) $model->ctvMannschaftSpieler,
-            (bool) $model->ctvKreuzKurz
+            (bool) $model->ctvKreuzKurz,
+            (int) $model->ctvStand,
+            array_map('intval', StringUtil::deserialize($model->ctvRunden, true)),
         );
+
+        // Der Rundenschnitt versetzt das Turnier zurück; von da an gelten
+        // dessen Zahlen, auch für Kopfdaten und Hinweise.
+        if ($auswahl->stand > 0) {
+            $turnier = Rundenschnitt::bis($turnier, $auswahl->stand);
+        }
+
+        $listen = $this->listenBauer->baue($turnier, $auswahl);
 
         if ([] === $listen) {
             return new Response();
@@ -118,6 +129,11 @@ class TurnierBetrachterController extends AbstractContentElementController
         // Liste bliebe eine Lasche übrig, die nichts umschalten kann.
         $template->mitReitern = \count($listen) > 1;
         $template->kennung = 'ctv-'.$model->id;
+
+        // Der Zwischenstand steht unabhängig von den Hinweisen über der
+        // Ausgabe: Eine Tabelle nach Runde 4 sähe sonst aus wie die
+        // Endtabelle, und niemand könnte den Unterschied erkennen.
+        $template->stand = (int) $turnier->kopf('standNachRunde', 0);
 
         return $template->getResponse();
     }

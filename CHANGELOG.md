@@ -1,5 +1,50 @@
 # Änderungen
 
+## Version 1.5.0 (2026-09-02)
+
+Diese Fassung bringt zwei neue Datenbankfelder mit. Nach dem Aktualisieren
+ist ein **Datenbank-Abgleich** nötig (Contao Manager → System-Wartung, oder
+`vendor/bin/contao-console contao:migrate`). Bestehende Inhaltselemente
+bleiben unverändert: „Ganzes Turnier" und „alle Runden" sind die Vorgaben.
+
+* Add: Feld **„Stand nach Runde"**. Es versetzt das ganze Inhaltselement auf
+  den Stand nach einer Runde zurück — Rangliste, Kreuztabelle,
+  Fortschrittstabelle und Mannschaftstabelle zeigen dann, wie es damals
+  aussah. Über der Ausgabe steht, welcher Zeitpunkt gemeint ist.
+* Add: Feld **„Angezeigte Runden"**. Es beschränkt Paarungs-, Ergebnis- und
+  Wettkampfliste auf einzelne Runden; die Kästchen entstehen aus der Datei,
+  ein Fünfrundenturnier bietet fünf an. Auf die Tabellen wirkt es nicht —
+  dafür ist der Stand zuständig.
+* Add: Die Feinwertungen eines Zwischenstands werden nachgerechnet, aber nur
+  nach einer **am Endstand überprüften Regel.** Die Rechenweise steht nicht in
+  der Datei; der Betrachter probiert deshalb vierzig Regelfassungen am
+  gespeicherten Endstand durch und wendet nur die an, die dort jeden Wert
+  trifft. Findet sich keine, bleibt die Spalte leer und ein Hinweis nennt den
+  Grund. Im Prüfbestand ließen sich 226 von 294 Turnieren mit Buchholzwertung
+  und 65 von 96 mit Sonneborn-Berger zuordnen.
+* Change: **Die Eingabemaske zeigt nur noch, was auch wirkt.** Bisher richtete
+  sie sich allein nach der Turnierart. Jetzt fallen zusätzlich alle
+  Einstellungen weg, deren Liste gar nicht gewählt ist — „Kreuztabelle
+  kürzen" ohne Kreuztabelle, „Spieler mit ausgeben" ohne Mannschaftsliste,
+  die Rundenauswahl ohne Rundenliste —, ebenso die Rundenfelder bei einem
+  einrundigen Turnier und das Hinweiskästchen bei einer Datei ohne Hinweise.
+  Anders als die Anpassung an die Datei greift diese sofort: Das Auswahlfeld
+  schickt die Maske ab.
+* Change: Die Listenauswahl ist ein sortierbares Kästchenfeld
+  (`checkboxWizard`). **Die Reiter stehen jetzt in der Reihenfolge, die der
+  Redakteur zieht**, statt in der festen des Bundles.
+* Add: Der Aufruf des Listenbauers nimmt die Einstellungen als ein Objekt
+  `Auswahl` entgegen statt als wachsende Reihe von Wahrheitswerten. Wer den
+  Listenbauer selbst aufruft, muss seinen Aufruf anpassen.
+* Add: Die Kreuztabelle wird formatunabhängig aus Rangliste und Paarungen
+  gebaut — gebraucht für den Zwischenstand, zugleich Rückfallebene für
+  Formate ohne eigene Kreuztabelle. Gegen die Kreuztabelle des SWT-Lesers
+  geprüft: 5.668.593 Felder, keine Abweichung.
+* Add: Gegenprobe des Rundenschnitts über den Bestand — 2.373 Schnitte in 791
+  Dateien, ohne Verstoß gegen die Bedingungen, dass keine Paarung jenseits der
+  Schnittrunde übrigbleibt, die Punkte der Summe der Partien entsprechen und
+  die Rangliste absteigend sortiert ist.
+
 ## Version 1.4.0 (2026-08-31)
 
 * Fix: In den Wettkämpfen standen die Bretter nach **Farbe** ausgerichtet,

@@ -15,12 +15,15 @@ declare(strict_types=1);
  * Contao 4.13, unter Contao 5 wurde es entfernt. `protected` mit der
  * Unterpalette `groups` gibt es in beiden Fassungen.
  *
- * Die Feldgruppe „Mannschaftsturniere" entfernt ein Rückruf wieder, sobald
- * die gewählte Datei ein Einzelturnier ist.
+ * Die Palette ist die vollständige; ein Rückruf streicht daraus, was zur
+ * gewählten Datei und zu den gewählten Listen nicht passt — die Feldgruppe
+ * „Mannschaftsturniere" bei einem Einzelturnier, die Rundenauswahl bei einem
+ * einrundigen Turnier, jede Einstellung, deren Liste nicht gewählt ist.
  */
 $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'] =
     '{type_legend},type,headline;'
     .'{ctv_legend},ctvDatei,ctvFormat,ctvListen,ctvHinweise;'
+    .'{ctv_runden_legend},ctvStand,ctvRunden;'
     .'{ctv_mannschaft_legend},ctvMannschaftSpieler,ctvKreuzKurz;'
     .'{template_legend:hide},customTpl;'
     .'{protected_legend:hide},protected;'
@@ -62,13 +65,53 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvFormat'] = [
     'sql' => "varchar(32) NOT NULL default 'auto'",
 ];
 
+/*
+ * Die Listenauswahl ist ein `checkboxWizard` und kein einfaches
+ * Kästchenfeld: Der Wizard lässt sich sortieren und speichert die
+ * Reihenfolge, und genau in dieser Reihenfolge erscheinen später die Reiter.
+ * Den Widget gibt es in Contao 4.13 wie in Contao 5.
+ *
+ * `submitOnChange` schickt die Maske beim Anhaken ab, damit die
+ * dazugehörigen Einstellungen sofort erscheinen und die überflüssigen
+ * verschwinden. Bei Kästchen wirkt das — anders als bei der Dateiauswahl, wo
+ * der Dateiwähler den Wert per Skript setzt und dabei kein Ereignis auslöst.
+ */
 $GLOBALS['TL_DCA']['tl_content']['fields']['ctvListen'] = [
     'exclude' => true,
-    'inputType' => 'checkbox',
+    'inputType' => 'checkboxWizard',
     'reference' => &$GLOBALS['TL_LANG']['ctv']['listen'],
     'eval' => [
         'multiple' => true,
         'mandatory' => true,
+        'submitOnChange' => true,
+        'tl_class' => 'clr',
+    ],
+    'sql' => 'blob NULL',
+];
+
+/*
+ * Die Auswahl beider Rundenfelder entsteht aus der Turnierdatei; die
+ * Beschriftungen schreibt derselbe Rückruf in die Sprachdatei, auf die hier
+ * verwiesen wird. Deshalb steht in beiden Feldern keine feste Liste.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvStand'] = [
+    'exclude' => true,
+    'inputType' => 'select',
+    'reference' => &$GLOBALS['TL_LANG']['ctv']['stand'],
+    'eval' => [
+        'includeBlankOption' => false,
+        'submitOnChange' => true,
+        'tl_class' => 'w50 clr',
+    ],
+    'sql' => "smallint(5) unsigned NOT NULL default '0'",
+];
+
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvRunden'] = [
+    'exclude' => true,
+    'inputType' => 'checkbox',
+    'reference' => &$GLOBALS['TL_LANG']['ctv']['runden'],
+    'eval' => [
+        'multiple' => true,
         'tl_class' => 'clr',
     ],
     'sql' => 'blob NULL',

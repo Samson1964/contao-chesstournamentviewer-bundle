@@ -41,7 +41,7 @@ services:
             - name: contao.callback
               table: tl_content
               target: config.onload
-              method: passeAnTurnierart
+              method: passeMaskeAn
             - name: contao.callback
               table: tl_content
               target: fields.ctvFormat.options
@@ -50,6 +50,14 @@ services:
               table: tl_content
               target: fields.ctvListen.options
               method: listenOptionen
+            - name: contao.callback
+              table: tl_content
+              target: fields.ctvStand.options
+              method: standOptionen
+            - name: contao.callback
+              table: tl_content
+              target: fields.ctvRunden.options
+              method: rundenOptionen
             - name: contao.callback
               table: tl_content
               target: fields.ctvDatei.load

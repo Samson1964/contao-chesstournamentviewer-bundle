@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Tests\Liste;
 
 use PHPUnit\Framework\TestCase;
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Auswahl;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Listen;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
 use Schachbulle\ContaoChesstournamentviewerBundle\Tests\Turnier\TurnierBauer;
@@ -66,22 +67,22 @@ class ListenTest extends TestCase
     }
 
     /**
-     * Prüft, dass der Listenbauer die Reihenfolge des Verzeichnisses hält.
+     * Prüft, dass der Listenbauer die Reihenfolge der Auswahl übernimmt.
      *
-     * Die Auswahl im Backend ist ein Kästchensatz und kommt in beliebiger
-     * Reihenfolge zurück; die Ausgabe soll trotzdem immer gleich sortiert
-     * sein.
+     * Das Auswahlfeld im Backend lässt sich sortieren und speichert die
+     * Reihenfolge; die Reiter sollen genauso stehen. Vor Fassung 1.5.0 galt
+     * die feste Reihenfolge des Verzeichnisses.
      *
      * @return void
      */
-    public function testReihenfolgeFolgtDemVerzeichnis(): void
+    public function testReihenfolgeFolgtDerAuswahl(): void
     {
         $listen = (new ListenBauer())->baue(
             TurnierBauer::einzelturnier(),
-            ['ergebnisse', 'teilnehmer', 'rangliste']
+            new Auswahl(['ergebnisse', 'teilnehmer', 'rangliste'])
         );
 
-        $this->assertSame(['teilnehmer', 'rangliste', 'ergebnisse'], array_column($listen, 'schluessel'));
+        $this->assertSame(['ergebnisse', 'teilnehmer', 'rangliste'], array_column($listen, 'schluessel'));
     }
 
     /**
@@ -93,7 +94,7 @@ class ListenTest extends TestCase
     {
         $listen = (new ListenBauer())->baue(
             TurnierBauer::einzelturnier(),
-            ['mannschaftsrangliste', 'kreuztabelle', 'rangliste']
+            new Auswahl(['mannschaftsrangliste', 'kreuztabelle', 'rangliste', 'gibtesnicht'])
         );
 
         // Die Kreuztabelle fällt weg, weil das Prüfturnier keine mitbringt.
@@ -109,8 +110,7 @@ class ListenTest extends TestCase
     {
         $listen = (new ListenBauer())->baue(
             TurnierBauer::mannschaftsturnier(),
-            Listen::schluessel(),
-            true
+            new Auswahl(Listen::schluessel(), true)
         );
 
         $schluessel = array_column($listen, 'schluessel');
@@ -131,11 +131,35 @@ class ListenTest extends TestCase
         $bauer = new ListenBauer();
         $turnier = TurnierBauer::mannschaftsturnier();
 
-        $ohne = $this->finde($bauer->baue($turnier, ['mannschaften'], false), 'mannschaften');
-        $mit = $this->finde($bauer->baue($turnier, ['mannschaften'], true), 'mannschaften');
+        $ohne = $this->finde($bauer->baue($turnier, new Auswahl(['mannschaften'], false)), 'mannschaften');
+        $mit = $this->finde($bauer->baue($turnier, new Auswahl(['mannschaften'], true)), 'mannschaften');
 
         $this->assertSame([], $ohne['daten']['mannschaften'][0]['spieler']);
         $this->assertCount(2, $mit['daten']['mannschaften'][0]['spieler']);
+    }
+
+    /**
+     * Prüft, dass die Rundenauswahl nur die Rundenlisten beschneidet.
+     *
+     * Die Ergebnisliste soll genau die gewählten Runden zeigen; Tabelle und
+     * Teilnehmerliste bleiben unberührt, denn für den Zeitpunkt ist das Feld
+     * „Stand nach Runde" zuständig.
+     *
+     * @return void
+     */
+    public function testRundenauswahlWirktNurAufRundenlisten(): void
+    {
+        $turnier = TurnierBauer::einzelturnier();
+        $listen = (new ListenBauer())->baue(
+            $turnier,
+            new Auswahl(['ergebnisse', 'rangliste'], false, false, 0, [2])
+        );
+
+        $ergebnisse = $this->finde($listen, 'ergebnisse');
+        $rangliste = $this->finde($listen, 'rangliste');
+
+        $this->assertSame([2], array_keys($ergebnisse['daten']['runden']));
+        $this->assertCount(\count($turnier->getRangliste()), $rangliste['daten']['spieler']);
     }
 
     /**

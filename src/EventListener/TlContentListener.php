@@ -32,6 +32,19 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
 class TlContentListener
 {
     /**
+     * Listen, deren Ausgabe von der Rundenauswahl abhängt.
+     *
+     * Nur wenn eine von ihnen gewählt ist, hat das Feld „Angezeigte Runden"
+     * eine Wirkung — die übrigen Listen zeigen ohnehin das ganze Turnier.
+     */
+    private const RUNDENLISTEN = ['paarungen', 'ergebnisse', 'mannschaftspaarungen'];
+
+    /**
+     * Listen, in denen die Spieler einer Mannschaft vorkommen können.
+     */
+    private const SPIELERLISTEN = ['mannschaften', 'mannschaftspaarungen'];
+
+    /**
      * Erzeugt den Rückruf.
      *
      * @param FormatVerzeichnis $formate   Kennt alle registrierten Turnierformate
@@ -75,36 +88,73 @@ class TlContentListener
     }
 
     /**
-     * Blendet die Felder aus, die zur Turnierart nicht passen.
+     * Streicht aus der Eingabemaske, was zur Datei und zur Auswahl nicht passt.
      *
-     * Ist die gewählte Datei ein Einzelturnier, verschwindet die Feldgruppe
-     * für Mannschaftsturniere; ist es ein Mannschaftsturnier, verschwindet
-     * sie nicht. Solange keine Datei gewählt ist — beim Anlegen des Elements
-     * — bleibt alles stehen, denn dann ist über die Turnierart nichts
-     * bekannt.
+     * Die Maske richtet sich nach zwei Dingen: nach dem Inhalt der gewählten
+     * Turnierdatei — Einzel- oder Mannschaftsturnier, wie viele Runden — und
+     * nach den angehakten Listen. Eine Einstellung, die keine gewählte Liste
+     * beeinflusst, ist keine Hilfe, sondern eine Frage, die der Redakteur
+     * beantworten soll, ohne dass die Antwort irgendwo ankommt.
      *
-     * Die Maske richtet sich damit nach dem Inhalt der Datei und nicht nach
-     * einer Einstellung, die noch einmal gepflegt werden müsste. Der Preis:
-     * Sie passt sich erst nach dem Speichern an, weil die Datei vorher nicht
-     * im Datensatz steht.
+     * Solange keine Datei gewählt ist, bleibt alles stehen, was von ihr
+     * abhängt: Dann ist über das Turnier nichts bekannt, und zu wenig
+     * anzubieten wäre schlimmer als zu viel. Was von den Listen abhängt, wird
+     * dagegen auch ohne Datei gestrichen — dafür braucht es die Datei nicht.
+     *
+     * Die Anpassung an die Datei greift erst nach dem Speichern, weil die
+     * Datei vorher nicht im Datensatz steht; die Anpassung an die Listen
+     * dagegen sofort, weil das Auswahlfeld die Maske abschickt.
      *
      * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
      *
      * @return void
      */
-    public function passeAnTurnierart(DataContainer $dc = null): void
+    public function passeMaskeAn(DataContainer $dc = null): void
     {
-        $turnier = $this->turnier($dc);
+        $datensatz = $this->datensatz($dc);
 
-        if (null === $turnier || $turnier->istMannschaftsturnier()) {
+        if (null === $datensatz) {
+            return;
+        }
+
+        $turnier = $this->turnier($dc);
+        $gewaehlt = StringUtil::deserialize($datensatz->ctvListen, true);
+        $weg = [];
+
+        if (null !== $turnier && !$turnier->istMannschaftsturnier()) {
+            $weg[] = 'ctvMannschaftSpieler';
+            $weg[] = 'ctvKreuzKurz';
+        } else {
+            if ([] === array_intersect(self::SPIELERLISTEN, $gewaehlt)) {
+                $weg[] = 'ctvMannschaftSpieler';
+            }
+
+            if (!\in_array('mannschaftskreuztabelle', $gewaehlt, true)) {
+                $weg[] = 'ctvKreuzKurz';
+            }
+        }
+
+        // Ein Turnier mit einer einzigen Runde kennt keinen Zwischenstand.
+        if (null !== $turnier && $turnier->getLetzteRunde() < 2) {
+            $weg[] = 'ctvStand';
+            $weg[] = 'ctvRunden';
+        } elseif ([] === array_intersect(self::RUNDENLISTEN, $gewaehlt)) {
+            $weg[] = 'ctvRunden';
+        }
+
+        // Die Hinweise erklären Abweichungen der Zahlen. Gibt es in dieser
+        // Datei keine und ist auch kein Zwischenstand eingestellt, der welche
+        // erzeugen würde, ist das Kästchen wirkungslos.
+        if (null !== $turnier && [] === $turnier->getHinweise() && !(int) $datensatz->ctvStand) {
+            $weg[] = 'ctvHinweise';
+        }
+
+        if ([] === $weg) {
             return;
         }
 
         $palette = &$GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'];
-
-        // Die ganze Feldgruppe fällt weg, nicht nur ihre Felder: Eine leere
-        // Überschrift „Mannschaftsturniere" wäre irreführender als gar keine.
-        $palette = preg_replace('/\{ctv_mannschaft_legend[^}]*\}[^;]*;/', '', (string) $palette);
+        $palette = self::ohneFelder((string) $palette, $weg);
     }
 
     /**
@@ -131,6 +181,68 @@ class TlContentListener
             Listen::schluessel(),
             static fn (string $schluessel): bool => Listen::passt($schluessel, $turnier)
         ));
+    }
+
+    /**
+     * Liefert die Auswahl für „Stand nach Runde".
+     *
+     * Angeboten werden die Runden, für die in der Datei Paarungen stehen —
+     * nicht die im Kopf angekündigte Rundenzahl: Ein laufendes Turnier hat
+     * weniger, ein doppelrundiges mehr. An erster Stelle steht die Null für
+     * das ganze Turnier; sie ist der Regelfall und nimmt die gespeicherten
+     * Werte der Datei, statt sie nachzurechnen.
+     *
+     * Ist keine Datei gewählt, bleibt nur diese Null übrig. Eine Rundenzahl
+     * zu raten hieße, Auswahlmöglichkeiten anzubieten, die es nicht gibt.
+     *
+     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
+     *
+     * @return int[] Die wählbaren Rundennummern, beginnend mit 0
+     */
+    public function standOptionen(DataContainer $dc = null): array
+    {
+        $letzte = $this->rundenzahl($dc);
+        $beschriftungen = [0 => $GLOBALS['TL_LANG']['ctv']['standGanz'] ?? 'Ganzes Turnier'];
+
+        for ($runde = 1; $runde <= $letzte; ++$runde) {
+            $beschriftungen[$runde] = sprintf(
+                $GLOBALS['TL_LANG']['ctv']['standRunde'] ?? 'Stand nach Runde %d',
+                $runde
+            );
+        }
+
+        $GLOBALS['TL_LANG']['ctv']['stand'] = $beschriftungen;
+
+        return array_keys($beschriftungen);
+    }
+
+    /**
+     * Liefert die Auswahl für „Angezeigte Runden".
+     *
+     * Die Kästchen entstehen aus der Datei: Ein Turnier über fünf Runden
+     * bietet fünf an, keine starre Neunerreihe. Ohne Datei bleibt die Auswahl
+     * leer — und ein leeres Kästchenfeld bedeutet in der Ausgabe „alle
+     * Runden", also genau das, was ohne Einstellung gelten soll.
+     *
+     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
+     *
+     * @return int[] Die wählbaren Rundennummern ab 1
+     */
+    public function rundenOptionen(DataContainer $dc = null): array
+    {
+        $letzte = $this->rundenzahl($dc);
+        $beschriftungen = [];
+
+        for ($runde = 1; $runde <= $letzte; ++$runde) {
+            $beschriftungen[$runde] = sprintf(
+                $GLOBALS['TL_LANG']['ctv']['rundeNummer'] ?? 'Runde %d',
+                $runde
+            );
+        }
+
+        $GLOBALS['TL_LANG']['ctv']['runden'] = $beschriftungen;
+
+        return array_keys($beschriftungen);
     }
 
     /**
@@ -185,6 +297,65 @@ class TlContentListener
     }
 
     /**
+     * Entfernt Felder aus einer Palette und räumt leere Feldgruppen ab.
+     *
+     * Eine Feldgruppe, aus der alles gestrichen wurde, verschwindet mit ihrer
+     * Überschrift: Eine leere Überschrift „Mannschaftsturniere" wäre
+     * irreführender als gar keine.
+     *
+     * @param string   $palette Die Palettenzeichenkette
+     * @param string[] $felder  Die zu entfernenden Feldnamen
+     *
+     * @return string Die gekürzte Palettenzeichenkette
+     */
+    private static function ohneFelder(string $palette, array $felder): string
+    {
+        $gruppen = [];
+
+        foreach (explode(';', $palette) as $gruppe) {
+            if ('' === trim($gruppe)) {
+                continue;
+            }
+
+            $teile = explode(',', $gruppe);
+            $kopf = '';
+
+            // Die Überschrift steht in geschweiften Klammern am Anfang der
+            // Gruppe. Es gibt auch Gruppen ohne Überschrift.
+            if (str_starts_with(trim($teile[0]), '{')) {
+                $kopf = array_shift($teile);
+            }
+
+            $teile = array_values(array_filter(
+                $teile,
+                static fn (string $feld): bool => !\in_array(trim($feld), $felder, true)
+            ));
+
+            if ([] === $teile) {
+                continue;
+            }
+
+            $gruppen[] = ('' === $kopf ? '' : $kopf.',').implode(',', $teile);
+        }
+
+        return implode(';', $gruppen);
+    }
+
+    /**
+     * Ermittelt die Zahl der Runden, für die Paarungen vorliegen.
+     *
+     * @param DataContainer|null $dc Der Data Container
+     *
+     * @return int Die letzte Runde, 0 wenn keine Datei lesbar ist
+     */
+    private function rundenzahl(DataContainer $dc = null): int
+    {
+        $turnier = $this->turnier($dc);
+
+        return null === $turnier ? 0 : $turnier->getLetzteRunde();
+    }
+
+    /**
      * Liest das Turnier des gerade bearbeiteten Inhaltselements.
      *
      * Gibt null zurück, sobald irgendetwas fehlt oder nicht passt: kein
@@ -198,6 +369,25 @@ class TlContentListener
      */
     private function turnier(DataContainer $dc = null): ?Turnier
     {
+        $datensatz = $this->datensatz($dc);
+
+        if (null === $datensatz) {
+            return null;
+        }
+
+        return $this->lader->ladeStill($datensatz->ctvDatei, (string) ($datensatz->ctvFormat ?: 'auto'));
+    }
+
+    /**
+     * Holt den Datensatz des gerade bearbeiteten Inhaltselements.
+     *
+     * @param DataContainer|null $dc Der Data Container
+     *
+     * @return ContentModel|null Der Datensatz, oder null wenn es keiner des
+     *                           Turnier-Betrachters ist
+     */
+    private function datensatz(DataContainer $dc = null): ?ContentModel
+    {
         if (null === $dc || !$dc->id) {
             return null;
         }
@@ -209,6 +399,6 @@ class TlContentListener
             return null;
         }
 
-        return $this->lader->ladeStill($datensatz->ctvDatei, (string) ($datensatz->ctvFormat ?: 'auto'));
+        return $datensatz;
     }
 }
