@@ -121,8 +121,8 @@ class ListenBauer
     {
         return match ($schluessel) {
             'turnierdaten' => $this->turnierdaten($turnier),
-            'teilnehmer' => $this->teilnehmer($turnier),
-            'rangliste' => $this->rangliste($turnier),
+            'teilnehmer' => $this->teilnehmer($turnier, $auswahl),
+            'rangliste' => $this->rangliste($turnier, $auswahl),
             'kreuztabelle' => $this->kreuztabelle($turnier),
             'fortschritt' => $this->fortschritt($turnier, true),
             'fortschrittohne' => $this->fortschritt($turnier, false),
@@ -149,7 +149,7 @@ class ListenBauer
      * @return array<string,mixed> Unter `teilnehmer` die flache Liste, bei
      *                             Mannschaftsturnieren zusätzlich `gruppen`
      */
-    private function teilnehmer(Turnier $turnier): array
+    private function teilnehmer(Turnier $turnier, Auswahl $auswahl): array
     {
         $teilnehmer = $turnier->getTeilnehmer();
 
@@ -157,9 +157,16 @@ class ListenBauer
             return [];
         }
 
+        $gruppiert = $turnier->istMannschaftsturnier();
+
         return [
             'teilnehmer' => $teilnehmer,
-            'gruppen' => $turnier->istMannschaftsturnier() ? $this->nachMannschaften($turnier, $teilnehmer, true) : [],
+            'gruppen' => $gruppiert ? $this->nachMannschaften($turnier, $teilnehmer, true) : [],
+            'spalten' => Spalten::fuerAusgabe('teilnehmer', $auswahl->spaltenFuer('teilnehmer'), $turnier),
+            // Eine gegliederte Tabelle lässt sich nicht sortieren: Die
+            // Kopfzeilen der Mannschaften würden zwischen die Spieler
+            // rutschen und die Gliederung zerreißen.
+            'sortierbar' => !$gruppiert,
         ];
     }
 
@@ -356,7 +363,7 @@ class ListenBauer
      *                             `feinwertung1`/`feinwertung2` die
      *                             Spaltenbeschriftungen oder null
      */
-    private function rangliste(Turnier $turnier): array
+    private function rangliste(Turnier $turnier, Auswahl $auswahl): array
     {
         $rangliste = $turnier->getRangliste();
 
@@ -376,12 +383,16 @@ class ListenBauer
 
         [$feinwertung1, $feinwertung2] = $this->feinwertungsspalten($turnier, $rangliste);
 
+        $gruppiert = $turnier->istMannschaftsturnier();
+
         return [
             'spieler' => $rangliste,
-            'gruppen' => $turnier->istMannschaftsturnier() ? $this->nachMannschaften($turnier, $rangliste, false) : [],
+            'gruppen' => $gruppiert ? $this->nachMannschaften($turnier, $rangliste, false) : [],
             'feinwertung1' => $feinwertung1,
             'feinwertung2' => $feinwertung2,
-            'mannschaftsspalte' => $turnier->istMannschaftsturnier(),
+            'mannschaftsspalte' => $gruppiert,
+            'spalten' => Spalten::fuerAusgabe('rangliste', $auswahl->spaltenFuer('rangliste'), $turnier),
+            'sortierbar' => !$gruppiert,
         ];
     }
 

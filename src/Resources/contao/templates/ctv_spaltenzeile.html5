@@ -1,0 +1,28 @@
+<?php
+
+/*
+ * Eine Zeile einer Tabelle mit wählbaren Spalten.
+ *
+ * Teilnehmerliste und Rangliste teilen sie sich: Beide zeigen Teilnehmer, nur
+ * mit anderen Spalten. Wo Anzeige und Sortierung auseinandergehen — „3½" oder
+ * eine Bilanz wie „5/2/1" —, geht der Sortierwert als `data-wert` mit.
+ *
+ * Die Klasse `ctv-schmal` gehört nur an den Spaltenkopf: Sie hält die Spalte
+ * schmal, und an jeder Zelle wiederholt bewirkte sie nichts weiter.
+ */
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+$zeile = $this->zeile;
+
+?>
+<tr>
+  <?php foreach ($this->spalten as $spalte): ?>
+    <?php
+      $klasse = trim(str_replace('ctv-schmal', '', $spalte['klasse']));
+      $wert = Ausgabe::sortierwert($zeile, $spalte['schluessel']);
+      $attribute = ('' === $klasse ? '' : ' class="'.$klasse.'"').('' === $wert ? '' : ' data-wert="'.$wert.'"');
+    ?>
+    <td<?= $attribute ?>><?= Ausgabe::zelle($zeile, $spalte['schluessel']) ?></td>
+  <?php endforeach; ?>
+</tr>

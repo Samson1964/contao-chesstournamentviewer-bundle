@@ -13,7 +13,7 @@ declare(strict_types=1);
  * übrigen Schach-Bundles, damit alle Elemente im Backend beieinanderstehen.
  */
 $GLOBALS['TL_LANG']['CTE']['schach'] = 'Schach-Elemente';
-$GLOBALS['TL_LANG']['CTE']['chesstournamentviewer'] = ['Turnier-Betrachter', 'Gibt eine Turnierdatei einer Schachturnierverwaltung als Tabellen aus.'];
+$GLOBALS['TL_LANG']['CTE']['chesstournamentviewer'] = ['Schachturnier-Betrachter', 'Gibt eine Turnierdatei einer Schachturnierverwaltung als Tabellen aus.'];
 
 // Bezeichnungen der Listen, zugleich Beschriftung der Reiter im Frontend
 $GLOBALS['TL_LANG']['ctv']['listen']['turnierdaten'] = 'Turnierdaten';
@@ -127,7 +127,10 @@ $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Berliner Wertung'] = 'Berliner';
 $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan';
 
 $GLOBALS['TL_LANG']['ctv']['ohneMannschaft'] = 'Ohne Mannschaft';
-$GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'Die Dateiendung %s fehlt unter „Einstellungen → Erlaubte Dateitypen". Turnierdateien lassen sich deshalb nicht in die Dateiverwaltung hochladen.';
+// Die Endungen stehen ohne Leerzeichen hintereinander, so wie sie in
+// „Erlaubte Dateitypen" einzutragen sind — der Redakteur kann sie von hier
+// aus einfach übernehmen.
+$GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'Unter „Einstellungen → Erlaubte Dateitypen" fehlt: %s. Turnierdateien lassen sich deshalb nicht in die Dateiverwaltung hochladen.';
 
 // Rundenschnitt: Beschriftungen der Auswahl und Hinweise in der Ausgabe
 $GLOBALS['TL_LANG']['ctv']['standGanz'] = 'Ganzes Turnier (Endstand)';
@@ -136,3 +139,8 @@ $GLOBALS['TL_LANG']['ctv']['rundeNummer'] = 'Runde %d';
 $GLOBALS['TL_LANG']['ctv']['standTitel'] = 'Stand nach Runde %d';
 $GLOBALS['TL_LANG']['ctv']['hinweisSchnitt'] = 'Gezeigt wird der Stand nach Runde %d. Punkte und Platzierungen sind aus den Partien nachgerechnet, nicht der Turnierdatei entnommen.';
 $GLOBALS['TL_LANG']['ctv']['hinweisOhneFeinwertung'] = 'Ohne Angabe bleibt die Feinwertung %s: Ihre Rechenweise ließ sich am Endstand des Turniers nicht bestätigen.';
+
+// Spaltenköpfe, die erst mit der wählbaren Spaltenauswahl hinzukamen
+$GLOBALS['TL_LANG']['ctv']['spalte']['geburtsjahr'] = 'Geburtsjahr';
+$GLOBALS['TL_LANG']['ctv']['spalte']['fideId'] = 'FIDE-Kennung';
+$GLOBALS['TL_LANG']['ctv']['spalte']['gruppe'] = 'Gruppe';

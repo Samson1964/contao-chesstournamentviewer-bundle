@@ -1,5 +1,44 @@
 # Änderungen
 
+## Version 1.7.0 (2026-09-03)
+
+Diese Fassung bringt zwei neue Datenbankfelder mit. Nach dem Aktualisieren
+ist ein **Datenbank-Abgleich** nötig.
+
+* Add: **Wählbare Spalten für Teilnehmerliste und Rangliste.** Angeboten wird,
+  was die gewählte Datei hergibt — ein Turnier ohne Elo-Zahlen bietet keine
+  Elo-Spalte an, ein Einzelturnier keine Brettspalte, eine Datei ohne
+  Feinwertung keine Feinwertungsspalte. Das Auswahlfeld lässt sich ziehen; die
+  Reihenfolge ist die der Ausgabe. Ohne Auswahl erscheinen die bisherigen
+  Spalten, bestehende Inhaltselemente ändern sich also nicht.
+* Add: Neue Spalten, die es bisher nicht gab: Titel, Geburtsjahr,
+  FIDE-Kennung, Gruppe, Land, Verein und die Zahl der Partien. Das Geburtsjahr
+  kommt aus beiden Formaten — Swiss-Manager führt es als Zahl, der SWT-Leser
+  als Datumstext.
+* Add: **Sortierung im Frontend.** In Teilnehmerliste und Rangliste ordnet ein
+  Klick auf den Spaltenkopf die Tabelle; ein zweiter dreht die Richtung um.
+  Punktestände wie „3½" und Bilanzen wie „5/2/1" werden nach ihrem Zahlenwert
+  geordnet, nicht als Text, und leere Felder stehen in beiden Richtungen am
+  Ende. Die Köpfe sind mit der Tastatur erreichbar und melden über `aria-sort`,
+  wonach geordnet ist. Ohne JavaScript steht die Tabelle in der Reihenfolge der
+  Turnierdatei.
+* Change: Nach Mannschaften gegliederte Tabellen sind nicht sortierbar — die
+  Kopfzeilen der Mannschaften rutschten sonst zwischen die Spieler.
+* Change: **Bei einer einzigen Liste steht keine Überschrift mehr über der
+  Ausgabe.** Wer nur die Teilnehmerliste einbindet, hat die Überschrift des
+  Inhaltselements dafür. Ab zwei Listen erscheint sie weiterhin — und wird
+  ausgeblendet, sobald die Reiter stehen. Ohne JavaScript bleibt sie sichtbar,
+  was bisher fehlte: Dort standen die Listen ohne jede Beschriftung
+  untereinander.
+* Change: Das Inhaltselement heißt **„Schachturnier-Betrachter"**.
+* Change: Die Warnung zu den erlaubten Dateitypen nennt die Endungen ohne
+  Leerzeichen — genau so, wie sie in „Einstellungen → Erlaubte Dateitypen"
+  einzutragen sind.
+* Change: Das Template `ctv_ranglistenzeile` entfällt; Teilnehmerliste und
+  Rangliste bauen ihre Zeilen jetzt aus `ctv_spaltenzeile` und ihre
+  Spaltenköpfe aus `ctv_spaltenkopf`. Wer `ctv_ranglistenzeile`
+  überschrieben hatte, muss das übertragen.
+
 ## Version 1.6.0 (2026-09-03)
 
 * Add: **Zweites Turnierformat: Swiss-Manager.** Gelesen werden die Endungen

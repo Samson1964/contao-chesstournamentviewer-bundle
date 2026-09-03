@@ -1,0 +1,30 @@
+<?php
+
+/*
+ * Ein Spaltenkopf einer Tabelle mit wählbaren Spalten.
+ *
+ * Ist die Tabelle sortierbar, macht das Skript den Kopf anklickbar und setzt
+ * `aria-sort`. Ohne JavaScript bleibt ein gewöhnlicher Spaltenkopf stehen,
+ * der nichts verspricht, was er nicht halten kann.
+ */
+
+$spalte = $this->spalte;
+
+$attribute = ' scope="col"';
+
+if ('' !== $spalte['klasse']) {
+    $attribute .= ' class="'.$spalte['klasse'].'"';
+}
+
+$attribute .= ' data-ctv-spalte="'.$spalte['schluessel'].'"';
+
+if ($spalte['zahl']) {
+    $attribute .= ' data-ctv-zahl="1"';
+}
+
+if ('' !== $spalte['titel']) {
+    $attribute .= ' title="'.$spalte['titel'].'"';
+}
+
+?>
+<th<?= $attribute ?>><?= $spalte['name'] ?></th>

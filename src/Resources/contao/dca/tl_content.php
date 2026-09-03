@@ -24,6 +24,7 @@ $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'] =
     '{type_legend},type,headline;'
     .'{ctv_legend},ctvDatei,ctvFormat,ctvListen,ctvHinweise;'
     .'{ctv_runden_legend},ctvStand,ctvRunden;'
+    .'{ctv_spalten_legend},ctvSpaltenTeilnehmer,ctvSpaltenRangliste;'
     .'{ctv_mannschaft_legend},ctvMannschaftSpieler,ctvKreuzKurz;'
     .'{template_legend:hide},customTpl;'
     .'{protected_legend:hide},protected;'
@@ -110,6 +111,35 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvRunden'] = [
     'exclude' => true,
     'inputType' => 'checkbox',
     'reference' => &$GLOBALS['TL_LANG']['ctv']['runden'],
+    'eval' => [
+        'multiple' => true,
+        'tl_class' => 'clr',
+    ],
+    'sql' => 'blob NULL',
+];
+
+/*
+ * Die Spaltenauswahl von Teilnehmerliste und Rangliste. Beide sind
+ * sortierbare Kästchenfelder: Die gespeicherte Reihenfolge ist die der
+ * Spalten in der Ausgabe. Angeboten wird nur, was die gewählte Datei
+ * hergibt — eine Elo-Spalte in einem Turnier ohne Elo-Zahlen wäre ein
+ * Kästchen ohne Wirkung.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvSpaltenTeilnehmer'] = [
+    'exclude' => true,
+    'inputType' => 'checkboxWizard',
+    'reference' => &$GLOBALS['TL_LANG']['ctv']['spaltenwahl'],
+    'eval' => [
+        'multiple' => true,
+        'tl_class' => 'clr',
+    ],
+    'sql' => 'blob NULL',
+];
+
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvSpaltenRangliste'] = [
+    'exclude' => true,
+    'inputType' => 'checkboxWizard',
+    'reference' => &$GLOBALS['TL_LANG']['ctv']['spaltenwahl'],
     'eval' => [
         'multiple' => true,
         'tl_class' => 'clr',

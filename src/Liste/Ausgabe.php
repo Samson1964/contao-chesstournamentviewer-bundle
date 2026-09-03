@@ -254,4 +254,112 @@ final class Ausgabe
 
         return self::esc(\is_string($wert) ? $wert : $standard);
     }
+
+    /**
+     * Gibt den Inhalt einer Tabellenzelle für eine wählbare Spalte aus.
+     *
+     * Alle Spalten von Teilnehmerliste und Rangliste laufen hier zusammen,
+     * damit die Templates nicht für jede Spalte eine eigene Zeile brauchen —
+     * sonst müsste jede neue Spalte an mehreren Stellen nachgetragen werden.
+     * Das Ergebnis ist bereits maskiert und kann unmittelbar ausgegeben
+     * werden.
+     *
+     * @param array<string,mixed> $zeile  Ein Teilnehmersatz
+     * @param string              $spalte Schlüssel der Spalte
+     *
+     * @return string Der Zelleninhalt, maskiert; leer, wenn nichts vorliegt
+     */
+    public static function zelle(array $zeile, string $spalte): string
+    {
+        return match ($spalte) {
+            'nr' => self::zahl($zeile['tnr'] ?? 0),
+            'platz' => self::zahl($zeile['platz'] ?? 0),
+            'brett' => self::zahl($zeile['brett'] ?? 0),
+            'name' => self::esc(self::name($zeile)),
+            'titel' => self::esc($zeile['titel'] ?? ''),
+            'elo' => self::zahl($zeile['elo'] ?? 0),
+            'dwz' => self::zahl($zeile['dwz'] ?? 0),
+            'twz' => self::zahl($zeile['twz'] ?? 0),
+            'verein' => self::esc($zeile['mannschaft'] ?? ''),
+            'land' => self::esc($zeile['land'] ?? ''),
+            'gruppe' => self::esc($zeile['gruppe'] ?? ''),
+            'geburtsjahr' => self::geburtsjahr($zeile),
+            'fideId' => self::zahl($zeile['fideId'] ?? 0),
+            'bilanz' => self::bilanz($zeile),
+            'partien' => self::zahl($zeile['partien'] ?? 0),
+            'punkte' => self::punkte($zeile['punkte'] ?? 0),
+            'feinwertung1' => self::punkte($zeile['feinwertung1'] ?? 0),
+            'feinwertung2' => self::punkte($zeile['feinwertung2'] ?? 0),
+            default => '',
+        };
+    }
+
+    /**
+     * Liefert den ungeformten Wert einer Spalte.
+     *
+     * Gebraucht wird er, um zu entscheiden, ob eine Spalte überhaupt etwas zu
+     * zeigen hat. Die geformte Zelle taugt dafür nicht: Eine Feinwertung von
+     * null erscheint dort als „0" und sähe belegt aus.
+     *
+     * @param array<string,mixed> $zeile  Ein Teilnehmersatz
+     * @param string              $spalte Schlüssel der Spalte
+     *
+     * @return mixed Der Wert aus dem Satz; bei zusammengesetzten Spalten der
+     *               Wert, an dem sich die Belegung entscheidet
+     */
+    public static function rohwert(array $zeile, string $spalte): mixed
+    {
+        return match ($spalte) {
+            'nr' => $zeile['tnr'] ?? null,
+            'verein' => $zeile['mannschaft'] ?? null,
+            'geburtsjahr' => self::geburtsjahr($zeile),
+            'name' => self::name($zeile),
+            'bilanz' => ($zeile['siege'] ?? 0) + ($zeile['remis'] ?? 0) + ($zeile['niederlagen'] ?? 0),
+            default => $zeile[$spalte] ?? null,
+        };
+    }
+
+    /**
+     * Liefert den Wert, nach dem eine Zelle zu sortieren ist.
+     *
+     * Gebraucht wird er dort, wo die Anzeige nicht sortierbar ist: „3½" und
+     * eine Bilanz wie „5/2/1" ordnet der Browser als Text falsch. Die Zahl
+     * geht als `data-wert` mit ins Markup, das Skript sortiert danach.
+     *
+     * @param array<string,mixed> $zeile  Ein Teilnehmersatz
+     * @param string              $spalte Schlüssel der Spalte
+     *
+     * @return string Der Sortierwert, oder eine leere Zeichenkette wenn die
+     *                Anzeige selbst schon richtig sortiert
+     */
+    public static function sortierwert(array $zeile, string $spalte): string
+    {
+        return match ($spalte) {
+            'punkte', 'feinwertung1', 'feinwertung2' => (string) (float) ($zeile[$spalte] ?? 0),
+            'bilanz' => (string) (int) ($zeile['siege'] ?? 0),
+            default => '',
+        };
+    }
+
+    /**
+     * Ermittelt das Geburtsjahr eines Teilnehmers.
+     *
+     * Die Formate liefern es verschieden: Swiss-Manager als Zahl, der
+     * SWT-Leser als Datumstext. Gesucht wird deshalb die erste vierstellige
+     * Jahreszahl; steht dort nichts Brauchbares, bleibt die Zelle leer.
+     *
+     * @param array<string,mixed> $zeile Ein Teilnehmersatz
+     *
+     * @return string Das Jahr, oder eine leere Zeichenkette
+     */
+    public static function geburtsjahr(array $zeile): string
+    {
+        $jahr = (int) ($zeile['geburtsjahr'] ?? 0);
+
+        if ($jahr < 1000 && preg_match('/(1[89]\d\d|20\d\d)/', (string) ($zeile['geburtsdatum'] ?? ''), $treffer)) {
+            $jahr = (int) $treffer[1];
+        }
+
+        return $jahr >= 1000 ? (string) $jahr : '';
+    }
 }

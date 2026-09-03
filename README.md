@@ -32,6 +32,8 @@ Im Artikel ein Inhaltselement der Gruppe **Schach-Elemente** vom Typ
 | **Turnierdatei** | Die Datei aus der Dateiverwaltung. Angeboten werden nur Dateien mit einer Endung, die ein registriertes Format kennt. |
 | **Format der Turnierdatei** | „Automatisch erkennen" ist der Regelfall; die Formate erkennen ihre Dateien am Inhalt, nicht an der Endung. Ein Format von Hand zu wählen hilft nur, wenn eine Datei nicht erkannt wird, obwohl sie dazugehört. |
 | **Auszugebende Listen** | Mehrfachauswahl. Ab zwei Listen erscheinen Reiter. Die Auswahl lässt sich **ziehen**; in dieser Reihenfolge stehen später die Reiter. |
+| **Spalten der Teilnehmerliste** | Welche Spalten sie zeigt und in welcher Reihenfolge. Siehe [Spalten](#spalten-und-sortierung). |
+| **Spalten der Rangliste** | Dasselbe für die Rangliste. |
 | **Stand nach Runde** | Versetzt das ganze Element auf den Stand nach dieser Runde zurück. Siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden). |
 | **Angezeigte Runden** | Beschränkt Paarungs-, Ergebnis- und Wettkampfliste auf einzelne Runden. Ohne Auswahl erscheinen alle. |
 | **Hinweise zu den Zahlen anzeigen** | Zeigt über den Tabellen, wenn die gespeicherten Zahlen der Datei mit den eingetragenen Ergebnissen nicht zusammengehen. |
@@ -71,6 +73,32 @@ erkennbaren Grund leer.
 | Mannschaftstabelle | Wettkämpfe, Bilanz, Mannschafts- und Brettpunkte |
 | Wettkämpfe | Die Begegnungen je Runde mit Wertungsschnitt, auf Wunsch mit Einzelpartien; die Bretter stehen nach Mannschaft ausgerichtet, die Farbe ist am Grund der Felder abzulesen |
 | Kreuztabelle der Mannschaften | Die Wettkampfergebnisse als Kreuztabelle |
+
+### Spalten und Sortierung
+
+Für **Teilnehmerliste** und **Rangliste** lässt sich einstellen, welche
+Spalten erscheinen und in welcher Reihenfolge. Angeboten wird nur, was die
+gewählte Datei hergibt: Ein Turnier ohne Elo-Zahlen bietet keine Elo-Spalte
+an, ein Einzelturnier keine Brettspalte, eine Datei ohne Feinwertung keine
+Feinwertungsspalte.
+
+Zur Wahl stehen — je nach Datei — Startnummer, Platz, Brett, Name, Titel, Elo,
+DWZ, Turnierwertungszahl, Verein, Land, Gruppe, Geburtsjahr, FIDE-Kennung,
+Bilanz, Partien, Punkte und die beiden Feinwertungen. **Das Auswahlfeld lässt
+sich ziehen; die Reihenfolge ist die der Ausgabe.** Ohne Auswahl erscheinen
+die Vorgabespalten.
+
+Dieselbe Auswahl taugt für mehrere Turnierdateien: Was eine Datei nicht
+hergibt, wird übergangen. Bleibt nichts übrig, greift die Vorgabe.
+
+**Im Frontend ordnet ein Klick auf den Spaltenkopf die Tabelle**, ein zweiter
+dreht die Richtung um. Punktestände wie „3½" und Bilanzen wie „5/2/1" werden
+nach ihrem Zahlenwert geordnet, nicht als Text; leere Felder stehen in beiden
+Richtungen am Ende. Ohne JavaScript steht die Tabelle in der Reihenfolge der
+Turnierdatei.
+
+Nach Mannschaften gegliederte Tabellen lassen sich nicht sortieren — die
+Kopfzeilen der Mannschaften rutschten sonst zwischen die Spieler.
 
 ### Zeitpunkt und Runden
 
@@ -149,7 +177,8 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 | `ctv_ergebnisse` | Ergebnisse |
 | `ctv_partiezeile` | Eine Partiezeile der Paarungs- und Ergebnisliste, nach Farbe ausgerichtet |
 | `ctv_wettkampfzeile` | Eine Brettzeile im Wettkampf, nach Mannschaft ausgerichtet |
-| `ctv_ranglistenzeile` | Eine Ranglistenzeile — durchgehend wie in den Mannschaftsgruppen |
+| `ctv_spaltenkopf` | Ein Spaltenkopf von Teilnehmerliste und Rangliste |
+| `ctv_spaltenzeile` | Eine Zeile von Teilnehmerliste und Rangliste, mit den gewählten Spalten |
 | `ctv_mannschaften` | Mannschaften |
 | `ctv_mannschaftsrangliste` | Mannschaftstabelle |
 | `ctv_mannschaftspaarungen` | Wettkämpfe |
@@ -158,7 +187,13 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 Für die Formatierung steht in den Templates die Klasse
 `Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe` bereit:
 `punkte()` schreibt halbe Punkte als ½, `esc()` maskiert Werte aus der
-Turnierdatei, `spalte()` holt eine Spaltenbeschriftung aus der Sprachdatei.
+Turnierdatei, `spalte()` holt eine Spaltenbeschriftung aus der Sprachdatei,
+`zelle()` gibt den Inhalt einer wählbaren Spalte aus.
+
+Welche Spalten es gibt und welche eine Datei füllen kann, steht in
+`Schachbulle\ContaoChesstournamentviewerBundle\Liste\Spalten`. Eine neue
+Spalte braucht dort einen Eintrag, einen Zweig in `Ausgabe::zelle()` und eine
+Beschriftung in den Sprachdateien.
 
 Farben und Abstände kommen aus `betrachter.css`. Alle Farben stehen als
 CSS-Eigenschaften am Element `.ctv` und lassen sich im eigenen Theme

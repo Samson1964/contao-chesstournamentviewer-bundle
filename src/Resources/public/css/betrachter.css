@@ -171,6 +171,49 @@
     margin: 0 0 .5rem;
 }
 
+/* Sobald die Reiter stehen, tragen sie die Beschriftung; die Ueberschrift
+ * ueber der Liste waere dann doppelt. Ohne JavaScript bleibt sie stehen. */
+.ctv--bereit .ctv-liste__titel {
+    display: none;
+}
+
+/* --- Sortierbare Spaltenkoepfe ------------------------------------------
+ *
+ * Die Klasse setzt das Skript. Ohne JavaScript sieht der Kopf deshalb aus wie
+ * jeder andere und verspricht nichts, was er nicht halten kann. Der Pfeil
+ * steht in einem Pseudoelement, damit er die Spaltenbreite nicht springen
+ * laesst — der Platz ist immer reserviert.
+ */
+
+.ctv-sortierbar {
+    position: relative;
+    padding-right: 1.2em !important;
+    cursor: pointer;
+    user-select: none;
+}
+
+.ctv-sortierbar::after {
+    position: absolute;
+    right: .4em;
+    opacity: .35;
+    content: '\2195';
+}
+
+.ctv-sortierbar[aria-sort='ascending']::after {
+    opacity: 1;
+    content: '\2191';
+}
+
+.ctv-sortierbar[aria-sort='descending']::after {
+    opacity: 1;
+    content: '\2193';
+}
+
+.ctv-sortierbar:hover,
+.ctv-sortierbar:focus-visible {
+    color: var(--ctv-akzent) !important;
+}
+
 /* --- Tabellen ----------------------------------------------------------- */
 
 .ctv-rollbar {

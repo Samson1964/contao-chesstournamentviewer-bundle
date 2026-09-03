@@ -15,7 +15,7 @@ $GLOBALS['TL_LANG']['tl_content']['ctvListen'] = ['Auszugebende Listen', 'Bei me
 $GLOBALS['TL_LANG']['tl_content']['ctvMannschaftSpieler'] = ['Spieler mit ausgeben', 'Zeigt in der Mannschaftsliste die Aufstellungen und in den Wettkämpfen die Einzelpartien. Bei großen Turnieren wird die Ausgabe dadurch sehr lang.'];
 
 // Überschriften der Feldgruppen
-$GLOBALS['TL_LANG']['tl_content']['ctv_legend'] = 'Turnier-Betrachter';
+$GLOBALS['TL_LANG']['tl_content']['ctv_legend'] = 'Schachturnier-Betrachter';
 $GLOBALS['TL_LANG']['tl_content']['ctv_mannschaft_legend'] = 'Mannschaftsturniere';
 
 $GLOBALS['TL_LANG']['tl_content']['ctvHinweise'] = ['Hinweise zu den Zahlen anzeigen', 'Zeigt über den Tabellen, wenn die gespeicherten Zahlen der Turnierdatei mit den eingetragenen Ergebnissen nicht zusammengehen — etwa weil die Rangliste älter ist als die letzte Runde.'];
@@ -24,3 +24,7 @@ $GLOBALS['TL_LANG']['tl_content']['ctvStand'] = ['Stand nach Runde', 'Versetzt d
 $GLOBALS['TL_LANG']['tl_content']['ctvRunden'] = ['Angezeigte Runden', 'Beschränkt Paarungs-, Ergebnis- und Wettkampfliste auf einzelne Runden. Ohne Auswahl erscheinen alle. Auf Tabelle und Kreuztabelle wirkt das Feld nicht — dafür ist „Stand nach Runde" da.'];
 
 $GLOBALS['TL_LANG']['tl_content']['ctv_runden_legend'] = 'Zeitpunkt und Runden';
+$GLOBALS['TL_LANG']['tl_content']['ctvSpaltenTeilnehmer'] = ['Spalten der Teilnehmerliste', 'Angeboten wird, was die gewählte Datei hergibt. Die Reihenfolge lässt sich ziehen und ist die der Ausgabe. Ohne Auswahl erscheinen die Vorgabespalten.'];
+$GLOBALS['TL_LANG']['tl_content']['ctvSpaltenRangliste'] = ['Spalten der Rangliste', 'Angeboten wird, was die gewählte Datei hergibt. Die Reihenfolge lässt sich ziehen und ist die der Ausgabe. Ohne Auswahl erscheinen die Vorgabespalten.'];
+
+$GLOBALS['TL_LANG']['tl_content']['ctv_spalten_legend'] = 'Spalten der Tabellen';

@@ -34,6 +34,9 @@ final class Auswahl
      * @param int[]    $runden      Rundennummern, auf die Paarungs-, Ergebnis-
      *                              und Wettkampfliste beschränkt werden; leer
      *                              für alle Runden
+     * @param array<string,string[]> $spalten Gewählte Spalten je Liste, in der
+     *                              Reihenfolge der Ausgabe; eine Liste ohne
+     *                              Eintrag bekommt ihre Vorgabespalten
      */
     public function __construct(
         public readonly array $listen = [],
@@ -41,7 +44,22 @@ final class Auswahl
         public readonly bool $kreuzKurz = false,
         public readonly int $stand = 0,
         public readonly array $runden = [],
+        public readonly array $spalten = [],
     ) {
+    }
+
+    /**
+     * Gibt die gewählten Spalten einer Liste zurück.
+     *
+     * @param string $liste Schlüssel der Liste
+     *
+     * @return string[] Die Spaltenschlüssel, oder ein leeres Array
+     */
+    public function spaltenFuer(string $liste): array
+    {
+        $spalten = $this->spalten[$liste] ?? [];
+
+        return \is_array($spalten) ? $spalten : [];
     }
 
     /**

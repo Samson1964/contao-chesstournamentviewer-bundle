@@ -100,6 +100,10 @@ class TurnierBetrachterController extends AbstractContentElementController
             (bool) $model->ctvKreuzKurz,
             (int) $model->ctvStand,
             array_map('intval', StringUtil::deserialize($model->ctvRunden, true)),
+            [
+                'teilnehmer' => StringUtil::deserialize($model->ctvSpaltenTeilnehmer, true),
+                'rangliste' => StringUtil::deserialize($model->ctvSpaltenRangliste, true),
+            ],
         );
 
         // Der Rundenschnitt versetzt das Turnier zurück; von da an gelten

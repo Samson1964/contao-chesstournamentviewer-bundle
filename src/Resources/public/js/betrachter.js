@@ -86,6 +86,136 @@
     }
 
     /**
+     * Ermittelt den Wert, nach dem eine Zelle einzuordnen ist.
+     *
+     * Steht am Feld ein `data-wert`, gilt der: Ein Punktestand wie „3½" und
+     * eine Bilanz wie „5/2/1" sind als Text nicht zu ordnen. Sonst zählt der
+     * sichtbare Inhalt — als Zahl, wenn die Spalte eine Zahlenspalte ist.
+     *
+     * Leere Zellen ergeben null. Sie stehen später immer am Ende, in beiden
+     * Richtungen: Wer nach Wertungszahl ordnet, will die Spieler ohne Zahl
+     * nicht vorn haben, gleichgültig ob auf- oder absteigend.
+     *
+     * @param {HTMLTableCellElement} feld  Die Zelle
+     * @param {boolean}              zahl  Ob die Spalte Zahlen führt
+     *
+     * @return {number|string|null} Der Sortierwert, oder null wenn leer
+     */
+    function wertVon(feld, zahl) {
+        if (!feld) {
+            return null;
+        }
+
+        var roh = feld.getAttribute('data-wert');
+
+        if (null !== roh) {
+            return parseFloat(roh) || 0;
+        }
+
+        var text = (feld.textContent || '').trim();
+
+        if ('' === text) {
+            return null;
+        }
+
+        return zahl ? (parseFloat(text.replace(',', '.')) || 0) : text.toLowerCase();
+    }
+
+    /**
+     * Ordnet die Zeilen einer Tabelle nach einer Spalte.
+     *
+     * Sortiert wird stabil und nur innerhalb des Tabellenkörpers; Kopf- und
+     * Fußzeilen bleiben, wo sie sind. Ein zweiter Klick auf dieselbe Spalte
+     * dreht die Richtung um.
+     *
+     * @param {HTMLTableElement} tabelle Die Tabelle
+     * @param {number}           spalte  Nummer der Spalte, ab 0
+     */
+    function sortiere(tabelle, spalte) {
+        var koepfe = tabelle.querySelectorAll('thead th');
+        var kopf = koepfe[spalte];
+        var koerper = tabelle.tBodies[0];
+
+        if (!kopf || !koerper) {
+            return;
+        }
+
+        var absteigend = 'ascending' === kopf.getAttribute('aria-sort');
+        var zahl = '1' === kopf.getAttribute('data-ctv-zahl');
+        var zeilen = Array.prototype.slice.call(koerper.rows);
+
+        zeilen.sort(function (a, b) {
+            var links = wertVon(a.cells[spalte], zahl);
+            var rechts = wertVon(b.cells[spalte], zahl);
+
+            // Leere Zellen ans Ende, unabhaengig von der Richtung.
+            if (null === links || null === rechts) {
+                if (links === rechts) {
+                    return 0;
+                }
+
+                return null === links ? 1 : -1;
+            }
+
+            if (links === rechts) {
+                return 0;
+            }
+
+            var kleiner = 'string' === typeof links
+                ? links.localeCompare(rechts) < 0
+                : links < rechts;
+
+            return (kleiner ? -1 : 1) * (absteigend ? -1 : 1);
+        });
+
+        for (var i = 0; i < zeilen.length; i++) {
+            koerper.appendChild(zeilen[i]);
+        }
+
+        for (var k = 0; k < koepfe.length; k++) {
+            koepfe[k].removeAttribute('aria-sort');
+        }
+
+        kopf.setAttribute('aria-sort', absteigend ? 'descending' : 'ascending');
+    }
+
+    /**
+     * Macht die Spaltenköpfe einer Tabelle anklickbar.
+     *
+     * Der Kopf wird dabei zur Schaltfläche im Sinne der Bedienung: Er ist mit
+     * der Tastatur erreichbar und meldet über `aria-sort`, wonach gerade
+     * geordnet ist. Ohne JavaScript passiert nichts von alledem — die Tabelle
+     * steht dann in der Reihenfolge der Turnierdatei, und das ist die
+     * richtige Rückfallebene.
+     *
+     * @param {HTMLTableElement} tabelle Die Tabelle
+     */
+    function ruesteTabelleAus(tabelle) {
+        var koepfe = tabelle.querySelectorAll('thead th');
+
+        var klick = function (nummer) {
+            return function () {
+                sortiere(tabelle, nummer);
+            };
+        };
+
+        for (var i = 0; i < koepfe.length; i++) {
+            koepfe[i].classList.add('ctv-sortierbar');
+            koepfe[i].setAttribute('tabindex', '0');
+            koepfe[i].setAttribute('role', 'columnheader');
+            koepfe[i].addEventListener('click', klick(i));
+            koepfe[i].addEventListener('keydown', (function (nummer) {
+                return function (ereignis) {
+                    if ('Enter' === ereignis.key || ' ' === ereignis.key) {
+                        ereignis.preventDefault();
+                        sortiere(tabelle, nummer);
+                    }
+                };
+            })(i));
+        }
+    }
+
+    /**
      * Sucht alle Betrachter der Seite und rüstet sie aus.
      */
     function start() {
@@ -93,6 +223,12 @@
 
         for (var i = 0; i < behaelter.length; i++) {
             ruesteAus(behaelter[i]);
+        }
+
+        var tabellen = document.querySelectorAll('.ctv table[data-ctv-sortierbar]');
+
+        for (var t = 0; t < tabellen.length; t++) {
+            ruesteTabelleAus(tabellen[t]);
         }
     }
 

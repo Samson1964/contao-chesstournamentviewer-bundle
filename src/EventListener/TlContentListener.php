@@ -18,6 +18,7 @@ use Contao\Message;
 use Contao\StringUtil;
 use Schachbulle\ContaoChesstournamentviewerBundle\Format\FormatVerzeichnis;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Listen;
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Spalten;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
 
@@ -142,6 +143,16 @@ class TlContentListener
             $weg[] = 'ctvRunden';
         }
 
+        // Die Spaltenauswahl gehört zu ihrer Liste. Ohne die Liste stellte
+        // der Redakteur Spalten einer Tabelle ein, die gar nicht erscheint.
+        if (!\in_array('teilnehmer', $gewaehlt, true)) {
+            $weg[] = 'ctvSpaltenTeilnehmer';
+        }
+
+        if (!\in_array('rangliste', $gewaehlt, true)) {
+            $weg[] = 'ctvSpaltenRangliste';
+        }
+
         // Die Hinweise erklären Abweichungen der Zahlen. Gibt es in dieser
         // Datei keine und ist auch kein Zwischenstand eingestellt, der welche
         // erzeugen würde, ist das Kästchen wirkungslos.
@@ -246,6 +257,69 @@ class TlContentListener
     }
 
     /**
+     * Liefert die wählbaren Spalten der Teilnehmerliste.
+     *
+     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
+     *
+     * @return string[] Die Spaltenschlüssel
+     */
+    public function spaltenTeilnehmerOptionen(DataContainer $dc = null): array
+    {
+        return $this->spaltenOptionen('teilnehmer', $dc);
+    }
+
+    /**
+     * Liefert die wählbaren Spalten der Rangliste.
+     *
+     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
+     *
+     * @return string[] Die Spaltenschlüssel
+     */
+    public function spaltenRanglisteOptionen(DataContainer $dc = null): array
+    {
+        return $this->spaltenOptionen('rangliste', $dc);
+    }
+
+    /**
+     * Ermittelt die wählbaren Spalten einer Liste und ihre Beschriftungen.
+     *
+     * Angeboten wird nur, was die gewählte Datei hergibt: Eine Elo-Spalte in
+     * einem Turnier ohne Elo-Zahlen wäre ein Kästchen, das nichts bewirkt.
+     * Ohne Datei bleibt die Auswahl leer — und eine leere Auswahl bedeutet in
+     * der Ausgabe „Vorgabespalten", also genau das, was ohne Einstellung
+     * gelten soll.
+     *
+     * Die Beschriftungen landen in einer Sprachdatei, auf die beide Felder
+     * verweisen. Sie sind für beide Listen dieselben; welches Feld sie zuerst
+     * schreibt, ist deshalb gleichgültig.
+     *
+     * @param string             $liste Schlüssel der Liste
+     * @param DataContainer|null $dc    Der Data Container
+     *
+     * @return string[] Die Spaltenschlüssel in natürlicher Reihenfolge
+     */
+    private function spaltenOptionen(string $liste, DataContainer $dc = null): array
+    {
+        $turnier = $this->turnier($dc);
+
+        if (null === $turnier) {
+            return [];
+        }
+
+        $spalten = Spalten::verfuegbar($liste, $turnier);
+        $beschriftungen = $GLOBALS['TL_LANG']['ctv']['spaltenwahl'] ?? [];
+
+        foreach ($spalten as $spalte) {
+            $satz = Spalten::beschreibung($spalte, $turnier);
+            $beschriftungen[$spalte] = '' !== $satz['titel'] ? $satz['titel'] : $satz['name'];
+        }
+
+        $GLOBALS['TL_LANG']['ctv']['spaltenwahl'] = $beschriftungen;
+
+        return $spalten;
+    }
+
+    /**
      * Warnt, wenn die Turnierformate gar nicht hochgeladen werden dürfen.
      *
      * Die Dateiauswahl zeigt nur, was in der Dateiverwaltung liegt — und dort
@@ -271,10 +345,12 @@ class TlContentListener
         $fehlend = array_values(array_diff($this->formate->dateiendungen(), $erlaubt));
 
         if ([] !== $fehlend) {
+            // Ohne Leerzeichen: Genau so steht die Liste in „Erlaubte
+            // Dateitypen", und so lässt sie sich von hier aus übernehmen.
             Message::addError(sprintf(
                 $GLOBALS['TL_LANG']['ctv']['uploadWarnung']
-                    ?? 'Die Dateiendung %s fehlt unter „Einstellungen → Erlaubte Dateitypen". Turnierdateien lassen sich deshalb nicht in die Dateiverwaltung hochladen.',
-                implode(', ', $fehlend)
+                    ?? 'Unter „Einstellungen → Erlaubte Dateitypen" fehlt: %s. Turnierdateien lassen sich deshalb nicht in die Dateiverwaltung hochladen.',
+                implode(',', $fehlend)
             ));
         }
 

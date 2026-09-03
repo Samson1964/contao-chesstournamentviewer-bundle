@@ -13,7 +13,7 @@ $GLOBALS['TL_LANG']['tl_content']['ctvFormat'] = ['File format', 'With "Detect a
 $GLOBALS['TL_LANG']['tl_content']['ctvListen'] = ['Lists to display', 'With more than one list the lists are shown as tabs. Team lists are silently skipped for individual tournaments.'];
 $GLOBALS['TL_LANG']['tl_content']['ctvMannschaftSpieler'] = ['Include players', 'Shows the line-ups in the team list and the individual games in the team matches. This makes the output very long for large tournaments.'];
 
-$GLOBALS['TL_LANG']['tl_content']['ctv_legend'] = 'Tournament viewer';
+$GLOBALS['TL_LANG']['tl_content']['ctv_legend'] = 'Chess tournament viewer';
 $GLOBALS['TL_LANG']['tl_content']['ctv_mannschaft_legend'] = 'Team tournaments';
 
 $GLOBALS['TL_LANG']['tl_content']['ctvHinweise'] = ['Show notes on the figures', 'Displays a note above the tables when the stored figures of the tournament file do not match the entered results — for instance because the standings are older than the last round.'];
@@ -22,3 +22,7 @@ $GLOBALS['TL_LANG']['tl_content']['ctvStand'] = ['Standings after round', 'Rolls
 $GLOBALS['TL_LANG']['tl_content']['ctvRunden'] = ['Rounds to display', 'Restricts the pairing, result and team match lists to individual rounds. Without a selection all rounds are shown. The field does not affect the table or cross table — that is what "Standings after round" is for.'];
 
 $GLOBALS['TL_LANG']['tl_content']['ctv_runden_legend'] = 'Point in time and rounds';
+$GLOBALS['TL_LANG']['tl_content']['ctvSpaltenTeilnehmer'] = ['Columns of the player list', 'Only columns the chosen file can fill are offered. The order can be dragged and is the order of the output. Without a selection the default columns are shown.'];
+$GLOBALS['TL_LANG']['tl_content']['ctvSpaltenRangliste'] = ['Columns of the standings', 'Only columns the chosen file can fill are offered. The order can be dragged and is the order of the output. Without a selection the default columns are shown.'];
+
+$GLOBALS['TL_LANG']['tl_content']['ctv_spalten_legend'] = 'Table columns';

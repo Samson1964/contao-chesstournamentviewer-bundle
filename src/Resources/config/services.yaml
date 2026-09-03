@@ -62,6 +62,14 @@ services:
               method: rundenOptionen
             - name: contao.callback
               table: tl_content
+              target: fields.ctvSpaltenTeilnehmer.options
+              method: spaltenTeilnehmerOptionen
+            - name: contao.callback
+              table: tl_content
+              target: fields.ctvSpaltenRangliste.options
+              method: spaltenRanglisteOptionen
+            - name: contao.callback
+              table: tl_content
               target: fields.ctvDatei.load
               method: pruefeUploadTypen
 

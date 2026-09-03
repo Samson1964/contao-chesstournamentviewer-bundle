@@ -48,7 +48,12 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
                id="<?= $this->kennung ?>-<?= $liste['schluessel'] ?>"
                <?php if ($this->mitReitern): ?>role="tabpanel" aria-labelledby="<?= $this->kennung ?>-reiter-<?= $liste['schluessel'] ?>"<?php endif; ?>>
 
-        <?php if (!$this->mitReitern): ?>
+        <?php /* Bei einer einzigen Liste steht hier keine Ueberschrift: Wer
+                 nur die Teilnehmerliste einbindet, hat die Ueberschrift des
+                 Inhaltselements dafuer. Ab zwei Listen wird sie ausgegeben
+                 und vom Stilblatt verborgen, sobald die Reiter stehen — ohne
+                 JavaScript braucht jede Liste ihre Beschriftung. */ ?>
+        <?php if ($this->mitReitern): ?>
           <h3 class="ctv-liste__titel"><?= Ausgabe::esc($liste['name']) ?></h3>
         <?php endif; ?>
 

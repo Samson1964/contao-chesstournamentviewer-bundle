@@ -3,26 +3,16 @@
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
 $gruppiert = (bool) $this->gruppen;
-
-// Platz, Name, TWZ, Bilanz, Punkte und die belegten Feinwertungen
-$spalten = 5 + ($this->feinwertung1 ? 1 : 0) + ($this->feinwertung2 ? 1 : 0);
+$spalten = $this->spalten;
 
 ?>
 <div class="ctv-rollbar">
-  <table class="ctv-tabelle ctv-tabelle--rangliste">
+  <table class="ctv-tabelle ctv-tabelle--rangliste"<?= $this->sortierbar ? ' data-ctv-sortierbar' : '' ?>>
     <thead>
       <tr>
-        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('platz') ?>"><?= Ausgabe::spalte('platzKurz') ?></th>
-        <th scope="col"><?= Ausgabe::spalte('name') ?></th>
-        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('twz') ?></th>
-        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('bilanz') ?></th>
-        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('punkte') ?>"><?= Ausgabe::spalte('punkteKurz') ?></th>
-        <?php if ($this->feinwertung1): ?>
-          <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::esc($this->feinwertung1['titel']) ?>"><?= Ausgabe::esc($this->feinwertung1['name']) ?></th>
-        <?php endif; ?>
-        <?php if ($this->feinwertung2): ?>
-          <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::esc($this->feinwertung2['titel']) ?>"><?= Ausgabe::esc($this->feinwertung2['name']) ?></th>
-        <?php endif; ?>
+        <?php foreach ($spalten as $spalte): ?>
+          <?php $this->insert('ctv_spaltenkopf', ['spalte' => $spalte, 'sortierbar' => $this->sortierbar]); ?>
+        <?php endforeach; ?>
       </tr>
     </thead>
 
@@ -31,7 +21,7 @@ $spalten = 5 + ($this->feinwertung1 ? 1 : 0) + ($this->feinwertung2 ? 1 : 0);
       <?php foreach ($this->gruppen as $gruppe): ?>
         <tbody class="ctv-gruppe">
           <tr class="ctv-gruppe__kopf">
-            <th scope="colgroup" colspan="<?= $spalten ?>">
+            <th scope="colgroup" colspan="<?= count($spalten) ?>">
               <?php if ($gruppe['nummer'] > 0): ?>
                 <span class="ctv-gruppe__nummer"><?= (int) $gruppe['startnummer'] ?></span>
                 <?= Ausgabe::esc($gruppe['name']) ?>
@@ -41,7 +31,7 @@ $spalten = 5 + ($this->feinwertung1 ? 1 : 0) + ($this->feinwertung2 ? 1 : 0);
             </th>
           </tr>
           <?php foreach ($gruppe['spieler'] as $spieler): ?>
-            <?php $this->insert('ctv_ranglistenzeile', ['spieler' => $spieler, 'feinwertung1' => $this->feinwertung1, 'feinwertung2' => $this->feinwertung2]); ?>
+            <?php $this->insert('ctv_spaltenzeile', ['zeile' => $spieler, 'spalten' => $spalten]); ?>
           <?php endforeach; ?>
         </tbody>
       <?php endforeach; ?>
@@ -50,7 +40,7 @@ $spalten = 5 + ($this->feinwertung1 ? 1 : 0) + ($this->feinwertung2 ? 1 : 0);
 
       <tbody>
         <?php foreach ($this->spieler as $spieler): ?>
-          <?php $this->insert('ctv_ranglistenzeile', ['spieler' => $spieler, 'feinwertung1' => $this->feinwertung1, 'feinwertung2' => $this->feinwertung2]); ?>
+          <?php $this->insert('ctv_spaltenzeile', ['zeile' => $spieler, 'spalten' => $spalten]); ?>
         <?php endforeach; ?>
       </tbody>
 
