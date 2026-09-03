@@ -32,6 +32,7 @@ $GLOBALS['TL_LANG']['ctv']['listen']['mannschaftskreuztabelle'] = 'Kreuztabelle 
 // Auswahl im Feld „Format der Turnierdatei"
 $GLOBALS['TL_LANG']['ctv']['formate']['auto'] = 'Automatisch erkennen';
 $GLOBALS['TL_LANG']['ctv']['formate']['swt'] = 'SWT (Swiss-Chess)';
+$GLOBALS['TL_LANG']['ctv']['formate']['swissmanager'] = 'Swiss-Manager';
 
 // Beschriftungen in der Liste der Turnierdaten
 $GLOBALS['TL_LANG']['ctv']['turnierdaten']['name'] = 'Turnier';

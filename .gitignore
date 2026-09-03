@@ -9,3 +9,22 @@
 # Private Arbeitsnotiz
 TODO.md
 CLAUDE.md
+
+# Turnierdateien zum Pruefen. Sie enthalten Namen, Geburtsjahre und
+# Mitgliedsnummern lebender Personen, darunter Kinder — das gehoert nicht in
+# ein oeffentliches Repository. Die Testfaelle bauen sich ihre Pruefdateien
+# selbst zusammen.
+*.SWT
+*.swt
+*.TUN
+*.TUNX
+*.TUNx
+*.TUR
+*.TURX
+*.TURx
+*.TUM
+*.TUMX
+*.TUMx
+*.TUT
+*.TUTX
+*.TUTx

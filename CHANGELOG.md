@@ -1,5 +1,31 @@
 # Änderungen
 
+## Version 1.6.0 (2026-09-03)
+
+* Add: **Zweites Turnierformat: Swiss-Manager.** Gelesen werden die Endungen
+  `tun`, `tur`, `tum` und `tut`, jeweils auch in der Unicode-Fassung mit
+  angehängtem `x`. Das Format war nicht dokumentiert und wurde an sieben
+  Turnierdateien erarbeitet; der Aufbau steht in `SWISS-MANAGER.md`.
+* Add: Erkannt werden Teilnehmer mit Titel, Verein, Föderation, Gruppe, beiden
+  Wertungszahlen, FIDE-Kennung und Geburtsjahr, die Partien aller Runden samt
+  kampflosen und spielfreien Sätzen, die Mannschaften mit Mannschaftsführer
+  und Aufstellung sowie die Wettkämpfe.
+* Change: Bei Swiss-Manager entstehen **Punkte und Platzierungen aus den
+  Partien** — die Datei speichert sie nicht. Feinwertungen bleiben leer, weil
+  in der Datei nicht steht, welche das Turnier führt; punktgleiche Teilnehmer
+  teilen sich deshalb den Platz. Ein Hinweis über der Tabelle nennt den Grund.
+* Add: Ab 250 Teilnehmern entfällt die Kreuztabelle. Bei den 1031 Teilnehmern
+  einer Schacholympiade hätte sie über eine Million Felder und wäre weder
+  aufzubauen noch zu lesen.
+* Add: Geprüft gegen chess-results.com — Punktzahlen der Endtabellen von vier
+  Turnieren (Schweizer System, Rundenturnier, Turnier mit spielfreier Runde),
+  die Mannschaftspunkte einer Frauen-Mannschaftsmeisterschaft und die
+  Teilnehmerzahlen aller sieben Dateien. Acht Dateien laufen durch die volle
+  Kette, mit und ohne Rundenschnitt.
+* Add: `.gitignore` hält Turnierdateien aus dem Repository heraus. Sie
+  enthalten Namen, Geburtsjahre und Mitgliedsnummern lebender Personen; die
+  Testfälle bauen sich ihre Prüfdatei deshalb selbst zusammen.
+
 ## Version 1.5.0 (2026-09-02)
 
 Diese Fassung bringt zwei neue Datenbankfelder mit. Nach dem Aktualisieren

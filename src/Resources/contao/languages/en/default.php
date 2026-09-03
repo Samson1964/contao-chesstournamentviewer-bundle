@@ -26,6 +26,7 @@ $GLOBALS['TL_LANG']['ctv']['listen']['mannschaftskreuztabelle'] = 'Team cross ta
 
 $GLOBALS['TL_LANG']['ctv']['formate']['auto'] = 'Detect automatically';
 $GLOBALS['TL_LANG']['ctv']['formate']['swt'] = 'SWT (Swiss-Chess)';
+$GLOBALS['TL_LANG']['ctv']['formate']['swissmanager'] = 'Swiss-Manager';
 
 $GLOBALS['TL_LANG']['ctv']['turnierdaten']['name'] = 'Tournament';
 $GLOBALS['TL_LANG']['ctv']['turnierdaten']['untertitel'] = 'Subtitle';

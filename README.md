@@ -225,6 +225,26 @@ zeigt. Nach welcher Regel Swiss-Chess seine TWZ-Spalte bildet, ließ sich an
 den vorliegenden Ausgaben nicht bestimmen; die Einzelheiten stehen im
 Klassenkommentar von `Mannschaftswertung::wertungsschnitt()`.
 
+## Unterstützte Turnierformate
+
+| Format | Endungen | Umfang |
+| --- | --- | --- |
+| **SWT** (Swiss-Chess) | `swt` | Vollständig: Teilnehmer, Ergebnisse, Rangliste, Feinwertungen, Mannschaftswertung |
+| **Swiss-Manager** | `tun`, `tunx`, `tur`, `turx`, `tum`, `tumx`, `tut`, `tutx` | Teilnehmer, Ergebnisse, Mannschaften und Wettkämpfe. **Ohne Feinwertungen** — siehe unten |
+
+Bei **Swiss-Manager** stehen Punkte, Platzierungen und Feinwertungen nicht in
+der Datei; das Programm rechnet sie bei jeder Anzeige neu. Der Betrachter tut
+dasselbe, und zwar für die Punkte vollständig. Bei den Feinwertungen geht das
+nicht: In der Datei steht nicht, welche das Turnier führt. Punktgleiche
+Teilnehmer teilen sich deshalb den Platz, und die Feinwertungsspalten
+entfallen. Ein Hinweis über der Tabelle sagt das.
+
+Ab 250 Teilnehmern entfällt außerdem die Kreuztabelle — bei den 1031
+Teilnehmern einer Schacholympiade hätte sie über eine Million Felder.
+
+Der Aufbau des Swiss-Manager-Formats ist in [SWISS-MANAGER.md](SWISS-MANAGER.md)
+beschrieben.
+
 ## Weitere Turnierformate
 
 Ein neues Format braucht eine Klasse, die
