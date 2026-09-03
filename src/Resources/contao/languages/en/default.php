@@ -9,7 +9,9 @@ declare(strict_types=1);
  */
 
 $GLOBALS['TL_LANG']['CTE']['schach'] = 'Chess elements';
-$GLOBALS['TL_LANG']['CTE']['chesstournamentviewer'] = ['Chess tournament viewer', 'Displays a file of a chess tournament management program as tables.'];
+$GLOBALS['TL_LANG']['CTE']['chesstournamentviewer'] = ['Chess tournament viewer – output', 'Displays one list from a tournament file: players, standings, cross table, results and more.'];
+$GLOBALS['TL_LANG']['CTE']['chesstournamentviewerStart'] = ['Chess tournament viewer – wrapper start', 'Opens a wrapper. The tournament outputs that follow until the wrapper end appear as tabs.'];
+$GLOBALS['TL_LANG']['CTE']['chesstournamentviewerStop'] = ['Chess tournament viewer – wrapper end', 'Closes the wrapper.'];
 
 $GLOBALS['TL_LANG']['ctv']['listen']['turnierdaten'] = 'Tournament data';
 $GLOBALS['TL_LANG']['ctv']['listen']['teilnehmer'] = 'Players';
@@ -115,7 +117,7 @@ $GLOBALS['TL_LANG']['ctv']['feinwertungKurz']['Schmuljan-Wertung'] = 'Schmuljan'
 $GLOBALS['TL_LANG']['ctv']['ohneMannschaft'] = 'Without team';
 $GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'Missing under "Settings → Allowed file types": %s. Tournament files therefore cannot be uploaded to the file manager.';
 
-$GLOBALS['TL_LANG']['ctv']['standGanz'] = 'Whole tournament (final standings)';
+$GLOBALS['TL_LANG']['ctv']['standGanz'] = 'Current standings (last round)';
 $GLOBALS['TL_LANG']['ctv']['standRunde'] = 'Standings after round %d';
 $GLOBALS['TL_LANG']['ctv']['rundeNummer'] = 'Round %d';
 $GLOBALS['TL_LANG']['ctv']['standTitel'] = 'Standings after round %d';

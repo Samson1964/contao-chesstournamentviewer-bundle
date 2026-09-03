@@ -25,26 +25,21 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
 /**
  * Rückrufe für den Data Container der Inhaltselemente.
  *
- * Die Klasse hält alles, was die Eingabemaske über die registrierten
- * Turnierformate und über die gewählte Turnierdatei wissen muss. Sie steht
- * hier und nicht in der DCA-Datei, damit Format-Verzeichnis und Dateileser
- * über die Dienstverdrahtung hereinkommen.
+ * Die Klasse baut die Eingabemaske in drei Schritten auf, damit der Redakteur
+ * nie vor Einstellungen steht, die noch nichts bewirken können:
+ *
+ * 1. **Ohne Datei** steht nur die Dateiauswahl da. Alles Weitere hängt am
+ *    Inhalt der Datei und wäre zu diesem Zeitpunkt geraten.
+ * 2. **Nach dem Speichern** kommt die Auswahl der Ausgabe hinzu — angeboten
+ *    wird, was diese Datei hergibt.
+ * 3. **Nach Wahl der Ausgabe** erscheinen deren Einstellungen, und zwar
+ *    sofort: Das Auswahlfeld schickt die Maske ab.
+ *
+ * Der Umweg über das Speichern ist nicht zu vermeiden: Die Dateiauswahl setzt
+ * ihren Wert per Skript, und eine Zuweisung löst kein `change`-Ereignis aus.
  */
 class TlContentListener
 {
-    /**
-     * Listen, deren Ausgabe von der Rundenauswahl abhängt.
-     *
-     * Nur wenn eine von ihnen gewählt ist, hat das Feld „Angezeigte Runden"
-     * eine Wirkung — die übrigen Listen zeigen ohnehin das ganze Turnier.
-     */
-    private const RUNDENLISTEN = ['paarungen', 'ergebnisse', 'mannschaftspaarungen'];
-
-    /**
-     * Listen, in denen die Spieler einer Mannschaft vorkommen können.
-     */
-    private const SPIELERLISTEN = ['mannschaften', 'mannschaftspaarungen'];
-
     /**
      * Erzeugt den Rückruf.
      *
@@ -89,22 +84,11 @@ class TlContentListener
     }
 
     /**
-     * Streicht aus der Eingabemaske, was zur Datei und zur Auswahl nicht passt.
+     * Baut die Eingabemaske entsprechend dem Stand der Einstellungen auf.
      *
-     * Die Maske richtet sich nach zwei Dingen: nach dem Inhalt der gewählten
-     * Turnierdatei — Einzel- oder Mannschaftsturnier, wie viele Runden — und
-     * nach den angehakten Listen. Eine Einstellung, die keine gewählte Liste
-     * beeinflusst, ist keine Hilfe, sondern eine Frage, die der Redakteur
-     * beantworten soll, ohne dass die Antwort irgendwo ankommt.
-     *
-     * Solange keine Datei gewählt ist, bleibt alles stehen, was von ihr
-     * abhängt: Dann ist über das Turnier nichts bekannt, und zu wenig
-     * anzubieten wäre schlimmer als zu viel. Was von den Listen abhängt, wird
-     * dagegen auch ohne Datei gestrichen — dafür braucht es die Datei nicht.
-     *
-     * Die Anpassung an die Datei greift erst nach dem Speichern, weil die
-     * Datei vorher nicht im Datensatz steht; die Anpassung an die Listen
-     * dagegen sofort, weil das Auswahlfeld die Maske abschickt.
+     * Gestrichen wird alles, was zum jetzigen Zeitpunkt nichts bewirken kann:
+     * ohne Datei alles außer der Dateiauswahl, ohne gewählte Ausgabe deren
+     * Einstellungen, und bei jeder Ausgabe die Einstellungen der anderen.
      *
      * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
      *
@@ -119,73 +103,74 @@ class TlContentListener
         }
 
         $turnier = $this->turnier($dc);
-        $gewaehlt = StringUtil::deserialize($datensatz->ctvListen, true);
+
+        // Schritt 1: Ohne lesbare Datei bleibt nur die Dateiauswahl. Alles
+        // Weitere hinge am Inhalt der Datei.
+        if (null === $turnier) {
+            $this->kuerze(['ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
+
+            return;
+        }
+
+        $liste = self::liste($datensatz->ctvListe, $datensatz->ctvListen);
         $weg = [];
 
-        if (null !== $turnier && !$turnier->istMannschaftsturnier()) {
-            $weg[] = 'ctvMannschaftSpieler';
-            $weg[] = 'ctvKreuzKurz';
-        } else {
-            if ([] === array_intersect(self::SPIELERLISTEN, $gewaehlt)) {
-                $weg[] = 'ctvMannschaftSpieler';
-            }
+        // Schritt 2: Datei da, aber noch keine Ausgabe gewählt.
+        if ('' === $liste) {
+            $this->kuerze(['ctvSpalten', 'ctvStand', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
 
-            if (!\in_array('mannschaftskreuztabelle', $gewaehlt, true)) {
-                $weg[] = 'ctvKreuzKurz';
-            }
+            return;
         }
 
-        // Ein Turnier mit einer einzigen Runde kennt keinen Zwischenstand.
-        if (null !== $turnier && $turnier->getLetzteRunde() < 2) {
+        // Schritt 3: Die Einstellungen genau dieser Ausgabe.
+        if (!Spalten::einstellbar($liste)) {
+            $weg[] = 'ctvSpalten';
+        }
+
+        if (!\in_array($liste, Listen::MIT_STAND, true) || $turnier->getLetzteRunde() < 2) {
             $weg[] = 'ctvStand';
-            $weg[] = 'ctvRunden';
-        } elseif ([] === array_intersect(self::RUNDENLISTEN, $gewaehlt)) {
+        }
+
+        if (!\in_array($liste, Listen::MIT_RUNDEN, true) || $turnier->getLetzteRunde() < 2) {
             $weg[] = 'ctvRunden';
         }
 
-        // Die Spaltenauswahl gehört zu ihrer Liste. Ohne die Liste stellte
-        // der Redakteur Spalten einer Tabelle ein, die gar nicht erscheint.
-        if (!\in_array('teilnehmer', $gewaehlt, true)) {
-            $weg[] = 'ctvSpaltenTeilnehmer';
+        if (!\in_array($liste, Listen::MIT_SPIELERN, true)) {
+            $weg[] = 'ctvMannschaftSpieler';
         }
 
-        if (!\in_array('rangliste', $gewaehlt, true)) {
-            $weg[] = 'ctvSpaltenRangliste';
+        if ('mannschaftskreuztabelle' !== $liste) {
+            $weg[] = 'ctvKreuzKurz';
         }
 
         // Die Hinweise erklären Abweichungen der Zahlen. Gibt es in dieser
         // Datei keine und ist auch kein Zwischenstand eingestellt, der welche
         // erzeugen würde, ist das Kästchen wirkungslos.
-        if (null !== $turnier && [] === $turnier->getHinweise() && !(int) $datensatz->ctvStand) {
+        if ([] === $turnier->getHinweise() && !(int) $datensatz->ctvStand) {
             $weg[] = 'ctvHinweise';
         }
 
-        if ([] === $weg) {
-            return;
-        }
-
-        $palette = &$GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'];
-        $palette = self::ohneFelder((string) $palette, $weg);
+        $this->kuerze($weg);
     }
 
     /**
-     * Liefert die Auswahl der Listen, passend zur gewählten Turnierdatei.
+     * Liefert die Ausgaben, die diese Turnierdatei hergibt.
      *
      * Bei einem Einzelturnier erscheinen die Mannschaftslisten gar nicht
-     * erst. Ausgegeben würden sie ohnehin nicht — der Listenbauer übergeht
-     * sie —, aber ein Kästchen anzubieten, das nichts bewirkt, ist eine
+     * erst, und Listen ohne Inhalt — eine Kreuztabelle vor der ersten Runde —
+     * ebenso wenig. Ein Eintrag, der eine leere Ausgabe erzeugt, wäre eine
      * schlechte Auskunft.
      *
      * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
      *
-     * @return string[] Die Schlüssel der anwendbaren Listen
+     * @return string[] Die Schlüssel der möglichen Ausgaben
      */
     public function listenOptionen(DataContainer $dc = null): array
     {
         $turnier = $this->turnier($dc);
 
         if (null === $turnier) {
-            return Listen::schluessel();
+            return [];
         }
 
         return array_values(array_filter(
@@ -195,16 +180,71 @@ class TlContentListener
     }
 
     /**
+     * Liefert die wählbaren Spalten der gewählten Ausgabe.
+     *
+     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
+     *
+     * @return string[] Die Spaltenschlüssel in natürlicher Reihenfolge
+     */
+    public function spaltenOptionen(DataContainer $dc = null): array
+    {
+        $turnier = $this->turnier($dc);
+        $datensatz = $this->datensatz($dc);
+
+        if (null === $turnier || null === $datensatz) {
+            return [];
+        }
+
+        $spalten = Spalten::verfuegbar(self::liste($datensatz->ctvListe, $datensatz->ctvListen), $turnier);
+        $beschriftungen = [];
+
+        foreach ($spalten as $spalte) {
+            $satz = Spalten::beschreibung($spalte, $turnier);
+            $beschriftungen[$spalte] = '' !== $satz['titel'] ? $satz['titel'] : $satz['name'];
+        }
+
+        $GLOBALS['TL_LANG']['ctv']['spaltenwahl'] = $beschriftungen;
+
+        return $spalten;
+    }
+
+    /**
+     * Hakt die gebräuchlichen Spalten vor, solange nichts gewählt ist.
+     *
+     * Der Rückruf ändert nur die Anzeige: Gespeichert wird erst, was der
+     * Redakteur beim nächsten Speichern stehen lässt. Ein leeres Feld
+     * bedeutet in der Ausgabe ohnehin „Vorgabespalten"; vorangehakt zu zeigen,
+     * was dann erscheint, ist die ehrlichere Maske.
+     *
+     * @param mixed              $wert Der gespeicherte Wert
+     * @param DataContainer|null $dc   Der Data Container
+     *
+     * @return mixed Der Wert, oder die Vorauswahl wenn nichts gespeichert ist
+     */
+    public function spaltenVorauswahl(mixed $wert, DataContainer $dc = null): mixed
+    {
+        if ([] !== StringUtil::deserialize($wert, true)) {
+            return $wert;
+        }
+
+        $turnier = $this->turnier($dc);
+        $datensatz = $this->datensatz($dc);
+
+        if (null === $turnier || null === $datensatz) {
+            return $wert;
+        }
+
+        return serialize(Spalten::vorauswahl(self::liste($datensatz->ctvListe, $datensatz->ctvListen), $turnier));
+    }
+
+    /**
      * Liefert die Auswahl für „Stand nach Runde".
      *
      * Angeboten werden die Runden, für die in der Datei Paarungen stehen —
      * nicht die im Kopf angekündigte Rundenzahl: Ein laufendes Turnier hat
      * weniger, ein doppelrundiges mehr. An erster Stelle steht die Null für
-     * das ganze Turnier; sie ist der Regelfall und nimmt die gespeicherten
-     * Werte der Datei, statt sie nachzurechnen.
-     *
-     * Ist keine Datei gewählt, bleibt nur diese Null übrig. Eine Rundenzahl
-     * zu raten hieße, Auswahlmöglichkeiten anzubieten, die es nicht gibt.
+     * den aktuellen Stand; sie nimmt die gespeicherten Werte der Datei, statt
+     * sie nachzurechnen, und meint damit stets die zuletzt gespielte Runde.
      *
      * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
      *
@@ -213,7 +253,7 @@ class TlContentListener
     public function standOptionen(DataContainer $dc = null): array
     {
         $letzte = $this->rundenzahl($dc);
-        $beschriftungen = [0 => $GLOBALS['TL_LANG']['ctv']['standGanz'] ?? 'Ganzes Turnier'];
+        $beschriftungen = [0 => $GLOBALS['TL_LANG']['ctv']['standGanz'] ?? 'Aktueller Stand (letzte Runde)'];
 
         for ($runde = 1; $runde <= $letzte; ++$runde) {
             $beschriftungen[$runde] = sprintf(
@@ -257,69 +297,6 @@ class TlContentListener
     }
 
     /**
-     * Liefert die wählbaren Spalten der Teilnehmerliste.
-     *
-     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
-     *
-     * @return string[] Die Spaltenschlüssel
-     */
-    public function spaltenTeilnehmerOptionen(DataContainer $dc = null): array
-    {
-        return $this->spaltenOptionen('teilnehmer', $dc);
-    }
-
-    /**
-     * Liefert die wählbaren Spalten der Rangliste.
-     *
-     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
-     *
-     * @return string[] Die Spaltenschlüssel
-     */
-    public function spaltenRanglisteOptionen(DataContainer $dc = null): array
-    {
-        return $this->spaltenOptionen('rangliste', $dc);
-    }
-
-    /**
-     * Ermittelt die wählbaren Spalten einer Liste und ihre Beschriftungen.
-     *
-     * Angeboten wird nur, was die gewählte Datei hergibt: Eine Elo-Spalte in
-     * einem Turnier ohne Elo-Zahlen wäre ein Kästchen, das nichts bewirkt.
-     * Ohne Datei bleibt die Auswahl leer — und eine leere Auswahl bedeutet in
-     * der Ausgabe „Vorgabespalten", also genau das, was ohne Einstellung
-     * gelten soll.
-     *
-     * Die Beschriftungen landen in einer Sprachdatei, auf die beide Felder
-     * verweisen. Sie sind für beide Listen dieselben; welches Feld sie zuerst
-     * schreibt, ist deshalb gleichgültig.
-     *
-     * @param string             $liste Schlüssel der Liste
-     * @param DataContainer|null $dc    Der Data Container
-     *
-     * @return string[] Die Spaltenschlüssel in natürlicher Reihenfolge
-     */
-    private function spaltenOptionen(string $liste, DataContainer $dc = null): array
-    {
-        $turnier = $this->turnier($dc);
-
-        if (null === $turnier) {
-            return [];
-        }
-
-        $spalten = Spalten::verfuegbar($liste, $turnier);
-        $beschriftungen = $GLOBALS['TL_LANG']['ctv']['spaltenwahl'] ?? [];
-
-        foreach ($spalten as $spalte) {
-            $satz = Spalten::beschreibung($spalte, $turnier);
-            $beschriftungen[$spalte] = '' !== $satz['titel'] ? $satz['titel'] : $satz['name'];
-        }
-
-        $GLOBALS['TL_LANG']['ctv']['spaltenwahl'] = $beschriftungen;
-
-        return $spalten;
-    }
-
-    /**
      * Warnt, wenn die Turnierformate gar nicht hochgeladen werden dürfen.
      *
      * Die Dateiauswahl zeigt nur, was in der Dateiverwaltung liegt — und dort
@@ -328,10 +305,6 @@ class TlContentListener
      * keinen Anhaltspunkt, woran es liegt: Der Upload scheitert an ganz
      * anderer Stelle, mit einer Meldung, die das Inhaltselement nicht
      * erwähnt. Deshalb der Hinweis hier, wo er gebraucht wird.
-     *
-     * Der Rückruf hängt am Feld und nicht an der Tabelle; so läuft er nur,
-     * wenn dieses Inhaltselement tatsächlich bearbeitet wird, und nicht bei
-     * jedem beliebigen Inhaltselement.
      *
      * @param mixed              $wert Der gespeicherte Feldwert; wird unverändert
      *                                 zurückgegeben
@@ -370,6 +343,58 @@ class TlContentListener
     public function formatOptionen(): array
     {
         return array_merge(['auto'], array_keys($this->formate->auswahl()));
+    }
+
+    /**
+     * Ermittelt die Ausgabe eines Inhaltselements.
+     *
+     * Bis Fassung 1.7.0 führte ein Element mehrere Listen. Ein solches
+     * Element behält seine erste — mehr lässt sich nicht retten, ohne zu
+     * raten, und der Rest ist mit dem Umschlag nachzubauen.
+     *
+     * Die Werte werden einzeln übergeben und nicht der Datensatz: So lässt
+     * sich der Rückfall auf die alte Mehrfachauswahl prüfen, ohne dass ein
+     * Contao-Datensatz gebraucht wird.
+     *
+     * @param mixed $einzeln  Der Wert des Feldes `ctvListe`
+     * @param mixed $mehrfach Der Wert des alten Feldes `ctvListen`
+     *
+     * @return string Der Schlüssel der Liste, oder eine leere Zeichenkette
+     */
+    public static function liste(mixed $einzeln, mixed $mehrfach): string
+    {
+        $liste = trim((string) $einzeln);
+
+        if ('' !== $liste) {
+            return $liste;
+        }
+
+        $alt = StringUtil::deserialize($mehrfach, true);
+
+        foreach ($alt as $eintrag) {
+            if (\is_string($eintrag) && '' !== $eintrag) {
+                return $eintrag;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Streicht Felder aus der Palette der Turnierausgabe.
+     *
+     * @param string[] $felder Die zu entfernenden Feldnamen
+     *
+     * @return void
+     */
+    private function kuerze(array $felder): void
+    {
+        if ([] === $felder) {
+            return;
+        }
+
+        $palette = &$GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'];
+        $palette = self::ohneFelder((string) $palette, $felder);
     }
 
     /**
@@ -436,8 +461,7 @@ class TlContentListener
      *
      * Gibt null zurück, sobald irgendetwas fehlt oder nicht passt: kein
      * Datensatz, ein anderes Inhaltselement, keine Datei, eine unlesbare
-     * Datei. Die Eingabemaske soll sich dann nicht einschränken — im Zweifel
-     * lieber zu viele Felder als zu wenige.
+     * Datei.
      *
      * @param DataContainer|null $dc Der Data Container
      *
@@ -459,8 +483,8 @@ class TlContentListener
      *
      * @param DataContainer|null $dc Der Data Container
      *
-     * @return ContentModel|null Der Datensatz, oder null wenn es keiner des
-     *                           Turnier-Betrachters ist
+     * @return ContentModel|null Der Datensatz, oder null wenn es keine
+     *                           Turnierausgabe ist
      */
     private function datensatz(DataContainer $dc = null): ?ContentModel
     {

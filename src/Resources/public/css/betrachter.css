@@ -177,6 +177,22 @@
     display: none;
 }
 
+/* --- Umschlag ------------------------------------------------------------
+ *
+ * Der Umschlag ist ein eigenes Inhaltselement und umschliesst mehrere
+ * Turnierausgaben. Die eingeschlossenen Ausgaben bringen ihren eigenen
+ * `.ctv`-Behaelter mit; dessen Abstand nach oben faellt weg, sobald die
+ * Reiter stehen, damit die Tabelle unmittelbar unter der Leiste beginnt.
+ */
+
+.ctv--umschlag > .ctv {
+    margin-block: 0;
+}
+
+.ctv-umschlag__titel {
+    margin: 0 0 .5rem;
+}
+
 /* --- Sortierbare Spaltenkoepfe ------------------------------------------
  *
  * Die Klasse setzt das Skript. Ohne JavaScript sieht der Kopf deshalb aus wie

@@ -1,0 +1,21 @@
+<?php
+
+/*
+ * Oeffnet den Umschlag um mehrere Turnierausgaben.
+ *
+ * Die Reiterleiste bleibt leer: Sie wird vom Skript gefuellt, sobald es die
+ * Ausgaben im fertigen HTML gefunden hat. Ohne JavaScript bleibt sie leer und
+ * unsichtbar, und die Ausgaben stehen untereinander.
+ *
+ * Das oeffnende `div` wird hier bewusst nicht geschlossen — das erledigt
+ * „Umschlag Ende". So halten es auch Akkordeon und Slider von Contao.
+ */
+
+?>
+<div class="ctv ctv--umschlag" id="<?= $this->kennung ?>" data-ctv-reiter>
+
+  <?php if ($this->headline): ?>
+    <<?= $this->hl ?> class="ctv-umschlag__titel"><?= $this->headline ?></<?= $this->hl ?>>
+  <?php endif; ?>
+
+  <div class="ctv-reiter" role="tablist"></div>

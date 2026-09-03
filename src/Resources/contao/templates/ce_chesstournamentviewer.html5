@@ -11,56 +11,36 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
   <p class="ctv-fehler"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['fehler'] ?? '%s', $this->fehler)) ?></p>
 
-<?php else: ?>
+<?php elseif ($this->liste): ?>
 
-  <div class="ctv" id="<?= $this->kennung ?>"<?= $this->mitReitern ? ' data-ctv-reiter' : '' ?>>
+  <div class="ctv" id="<?= $this->kennung ?>">
 
-    <?php /* Der Zwischenstand steht unabhaengig von den Hinweisen ueber der
-             Ausgabe: Eine Tabelle nach Runde 4 saehe sonst aus wie die
-             Endtabelle. */ ?>
-    <?php if ($this->stand): ?>
-      <p class="ctv-stand"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['standTitel'] ?? 'Stand nach Runde %d', $this->stand)) ?></p>
-    <?php endif; ?>
+    <?php /* Alles gehoert in den Abschnitt hinein: Steht das Element in einem
+             Umschlag, blendet die Stilvorlage den ganzen Abschnitt aus, wenn
+             sein Reiter nicht gewaehlt ist. Stuende der Hinweis darueber,
+             haenge er ueber jeder Ausgabe.
 
-    <?php if ($this->hinweise): ?>
-      <div class="ctv-hinweise">
-        <?php foreach ($this->hinweise as $hinweis): ?>
-          <p class="ctv-hinweis"><?= Ausgabe::esc($hinweis) ?></p>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
+             Der Name im `data-ctv-name` ist das, was der Umschlag auf die
+             Reiterlasche schreibt. */ ?>
+    <section class="ctv-liste ctv-liste--<?= $this->liste['schluessel'] ?>"
+             id="<?= $this->kennung ?>-<?= $this->liste['schluessel'] ?>"
+             data-ctv-name="<?= Ausgabe::esc($this->reitername) ?>">
 
-    <?php if ($this->mitReitern): ?>
-      <div class="ctv-reiter" role="tablist">
-        <?php foreach ($this->listen as $i => $liste): ?>
-          <button type="button"
-                  class="ctv-reiter__knopf<?= 0 === $i ? ' ctv-reiter__knopf--aktiv' : '' ?>"
-                  role="tab"
-                  id="<?= $this->kennung ?>-reiter-<?= $liste['schluessel'] ?>"
-                  aria-controls="<?= $this->kennung ?>-<?= $liste['schluessel'] ?>"
-                  aria-selected="<?= 0 === $i ? 'true' : 'false' ?>"><?= Ausgabe::esc($liste['name']) ?></button>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
+      <?php if ($this->stand): ?>
+        <p class="ctv-stand"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['standTitel'] ?? 'Stand nach Runde %d', $this->stand)) ?></p>
+      <?php endif; ?>
 
-    <?php foreach ($this->listen as $i => $liste): ?>
-      <section class="ctv-liste ctv-liste--<?= $liste['schluessel'] ?><?= 0 === $i ? ' ctv-liste--aktiv' : '' ?>"
-               id="<?= $this->kennung ?>-<?= $liste['schluessel'] ?>"
-               <?php if ($this->mitReitern): ?>role="tabpanel" aria-labelledby="<?= $this->kennung ?>-reiter-<?= $liste['schluessel'] ?>"<?php endif; ?>>
+      <?php if ($this->hinweise): ?>
+        <div class="ctv-hinweise">
+          <?php foreach ($this->hinweise as $hinweis): ?>
+            <p class="ctv-hinweis"><?= Ausgabe::esc($hinweis) ?></p>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
 
-        <?php /* Bei einer einzigen Liste steht hier keine Ueberschrift: Wer
-                 nur die Teilnehmerliste einbindet, hat die Ueberschrift des
-                 Inhaltselements dafuer. Ab zwei Listen wird sie ausgegeben
-                 und vom Stilblatt verborgen, sobald die Reiter stehen — ohne
-                 JavaScript braucht jede Liste ihre Beschriftung. */ ?>
-        <?php if ($this->mitReitern): ?>
-          <h3 class="ctv-liste__titel"><?= Ausgabe::esc($liste['name']) ?></h3>
-        <?php endif; ?>
+      <?php $this->insert($this->liste['template'], array_merge($this->liste['daten'], ['turnier' => $this->turnier])); ?>
 
-        <?php $this->insert($liste['template'], array_merge($liste['daten'], ['turnier' => $this->turnier])); ?>
-
-      </section>
-    <?php endforeach; ?>
+    </section>
 
   </div>
 

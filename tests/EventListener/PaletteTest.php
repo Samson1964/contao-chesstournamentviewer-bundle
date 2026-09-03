@@ -27,7 +27,8 @@ class PaletteTest extends TestCase
      * Die vollständige Palette des Inhaltselements.
      */
     private const PALETTE = '{type_legend},type,headline;'
-        .'{ctv_legend},ctvDatei,ctvFormat,ctvListen,ctvHinweise;'
+        .'{ctv_legend},ctvDatei,ctvFormat,ctvListe;'
+        .'{ctv_spalten_legend},ctvSpalten;'
         .'{ctv_runden_legend},ctvStand,ctvRunden;'
         .'{ctv_mannschaft_legend},ctvMannschaftSpieler,ctvKreuzKurz;'
         .'{template_legend:hide},customTpl;'
@@ -40,10 +41,11 @@ class PaletteTest extends TestCase
      */
     public function testFeldWirdEntfernt(): void
     {
-        $palette = $this->ohneFelder(['ctvHinweise']);
+        $palette = $this->ohneFelder(['ctvSpalten']);
 
-        $this->assertStringNotContainsString('ctvHinweise', $palette);
-        $this->assertStringContainsString('{ctv_legend},ctvDatei,ctvFormat,ctvListen;', $palette);
+        $this->assertStringNotContainsString('ctvSpalten', $palette);
+        $this->assertStringNotContainsString('ctv_spalten_legend', $palette);
+        $this->assertStringContainsString('{ctv_legend},ctvDatei,ctvFormat,ctvListe;', $palette);
         $this->assertStringContainsString('{ctv_runden_legend},ctvStand,ctvRunden;', $palette);
     }
 
@@ -74,7 +76,7 @@ class PaletteTest extends TestCase
 
         $this->assertStringNotContainsString('ctv_runden_legend', $palette);
         $this->assertStringNotContainsString('ctv_mannschaft_legend', $palette);
-        $this->assertStringContainsString('{ctv_legend},ctvDatei,ctvFormat,ctvListen,ctvHinweise;', $palette);
+        $this->assertStringContainsString('{ctv_legend},ctvDatei,ctvFormat,ctvListe;', $palette);
     }
 
     /**

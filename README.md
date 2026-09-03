@@ -24,38 +24,68 @@ composer require schachbulle/contao-chesstournamentviewer-bundle
 
 ## Benutzung
 
-Im Artikel ein Inhaltselement der Gruppe **Schach-Elemente** vom Typ
-**Turnier-Betrachter** anlegen. Dort stehen diese Einstellungen:
+Es gibt drei Inhaltselemente in der Gruppe **Schach-Elemente**:
 
-| Feld | Bedeutung |
+| Element | Zweck |
 | --- | --- |
-| **Turnierdatei** | Die Datei aus der Dateiverwaltung. Angeboten werden nur Dateien mit einer Endung, die ein registriertes Format kennt. |
-| **Format der Turnierdatei** | „Automatisch erkennen" ist der Regelfall; die Formate erkennen ihre Dateien am Inhalt, nicht an der Endung. Ein Format von Hand zu wählen hilft nur, wenn eine Datei nicht erkannt wird, obwohl sie dazugehört. |
-| **Auszugebende Listen** | Mehrfachauswahl. Ab zwei Listen erscheinen Reiter. Die Auswahl lässt sich **ziehen**; in dieser Reihenfolge stehen später die Reiter. |
-| **Spalten der Teilnehmerliste** | Welche Spalten sie zeigt und in welcher Reihenfolge. Siehe [Spalten](#spalten-und-sortierung). |
-| **Spalten der Rangliste** | Dasselbe für die Rangliste. |
-| **Stand nach Runde** | Versetzt das ganze Element auf den Stand nach dieser Runde zurück. Siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden). |
-| **Angezeigte Runden** | Beschränkt Paarungs-, Ergebnis- und Wettkampfliste auf einzelne Runden. Ohne Auswahl erscheinen alle. |
-| **Hinweise zu den Zahlen anzeigen** | Zeigt über den Tabellen, wenn die gespeicherten Zahlen der Datei mit den eingetragenen Ergebnissen nicht zusammengehen. |
-| **Spieler mit ausgeben** | Nur bei Mannschaftsturnieren: Aufstellungen in der Mannschaftsliste und Einzelpartien in den Wettkämpfen. |
-| **Kreuztabelle der Mannschaften kürzen** | Nur bei Mannschaftsturnieren: In jeder Zelle stehen nur die eigenen Brettpunkte statt beider Seiten. |
+| **Schachturnier-Betrachter – Turnierausgabe** | Gibt **eine** Liste aus einer Turnierdatei aus |
+| **Schachturnier-Betrachter – Umschlag Anfang** | Öffnet einen Umschlag; die folgenden Ausgaben erscheinen als Reiter |
+| **Schachturnier-Betrachter – Umschlag Ende** | Schließt den Umschlag |
 
-**Die Maske zeigt nur, was auch wirkt.** Sie richtet sich nach zwei Dingen:
+**Ein Element gibt genau eine Liste aus.** Wer Teilnehmer, Rangliste und
+Kreuztabelle nebeneinander zeigen will, legt drei Turnierausgaben an und
+klammert sie mit den beiden Umschlag-Elementen ein — so, wie Contao es mit
+Akkordeon und Slider hält. Im Backend rückt Contao die eingeschlossenen
+Elemente ein, sodass zu sehen ist, was zusammengehört.
 
-* **nach der Datei** — bei einem Einzelturnier verschwinden die Feldgruppe
-  „Mannschaftsturniere" und die Mannschaftslisten aus der Auswahl; ein
-  einrundiges Turnier bekommt keine Rundenfelder; eine Datei ohne Hinweise
-  bekommt kein Kästchen dafür. Das greift nach dem Speichern, denn vorher
-  steht die Datei nicht im Datensatz.
-* **nach den angehakten Listen** — „Kreuztabelle kürzen" erscheint nur mit
-  der Kreuztabelle der Mannschaften, „Spieler mit ausgeben" nur mit einer
-  Liste, in der Spieler vorkommen, „Angezeigte Runden" nur mit einer
-  Rundenliste. Das greift **sofort**: Das Auswahlfeld schickt die Maske ab.
+### Eine Turnierausgabe anlegen
+
+Die Maske baut sich in drei Schritten auf. Das ist Absicht: Was ausgegeben
+werden kann, steht in der Turnierdatei, und die kennt das Element erst, wenn
+sie gewählt und gespeichert ist.
+
+1. **Turnierdatei wählen.** Mehr steht nicht in der Maske — alles Weitere
+   hinge am Inhalt der Datei und wäre zu diesem Zeitpunkt geraten. Angeboten
+   werden nur Dateien mit einer Endung, die ein registriertes Format kennt.
+2. **Speichern.** Jetzt kommt **Auszugebende Liste** hinzu, ein Auswahlfeld
+   mit dem, was diese Datei hergibt: Bei einem Einzelturnier fehlen die
+   Mannschaftslisten, vor der ersten Runde die Kreuztabelle.
+3. **Liste wählen.** Deren Einstellungen erscheinen sofort — das Auswahlfeld
+   schickt die Maske ab. Welche das sind, hängt von der Liste ab:
+
+| Liste | Einstellungen |
+| --- | --- |
+| Teilnehmer, Rangliste | **Spalten** — siehe [Spalten und Sortierung](#spalten-und-sortierung) |
+| Rangliste, Kreuztabelle, Fortschritt, Mannschaftstabelle, Kreuztabelle der Mannschaften | **Stand nach Runde** — siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden) |
+| Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden** |
+| Mannschaften, Wettkämpfe | **Spieler mit ausgeben** |
+| Kreuztabelle der Mannschaften | **Kreuztabelle kürzen** |
+| alle | **Hinweise zu den Zahlen anzeigen**, sofern die Datei welche erzeugt |
+
+Das Feld **Format der Turnierdatei** steht ab Schritt 2 bereit. „Automatisch
+erkennen" ist der Regelfall; die Formate erkennen ihre Dateien am Inhalt,
+nicht an der Endung. Ein Format von Hand zu wählen hilft nur, wenn eine Datei
+nicht erkannt wird, obwohl sie dazugehört.
 
 Steht die Dateiendung der Turnierformate nicht unter **Einstellungen →
 Erlaubte Dateitypen**, warnt das Inhaltselement: Ohne den Eintrag lässt sich
 gar keine Turnierdatei hochladen, und die Dateiauswahl bliebe ohne
 erkennbaren Grund leer.
+
+### Mehrere Ausgaben als Reiter
+
+Zwischen **Umschlag Anfang** und **Umschlag Ende** gehören beliebig viele
+Turnierausgaben. Sie müssen nicht dieselbe Turnierdatei verwenden — ein
+Umschlag kann ebenso gut Vorrunde und Endrunde nebeneinanderstellen.
+
+Die Beschriftung einer Reiterlasche ist die **Überschrift** der
+Turnierausgabe, und wenn dort nichts steht, der Name der Liste. Ein eigenes
+Feld dafür gibt es nicht.
+
+**Die Reiterleiste baut das Skript**, nicht der Server: Das öffnende Element
+weiß beim Ausliefern nicht, was nach ihm kommt. Ohne JavaScript stehen die
+Ausgaben deshalb untereinander, jede vollständig lesbar — dieselbe
+Rückfallebene wie bisher.
 
 ### Die Listen
 
@@ -102,31 +132,24 @@ Kopfzeilen der Mannschaften rutschten sonst zwischen die Spieler.
 
 ### Zeitpunkt und Runden
 
-Zwei Felder steuern, **wann** und **was** gezeigt wird. Sie tun
+Je nach Liste steht eines von zwei Feldern in der Maske. Sie tun
 Verschiedenes:
 
-**Stand nach Runde** ist ein Schnitt durch das ganze Turnier. Alles, was
-danach gespielt wurde, ist weg — nicht ausgeblendet, sondern entfernt.
-Rangliste, Kreuztabelle und Fortschrittstabelle zeigen den damaligen Stand,
-die Mannschaftstabelle ebenso. Über der Ausgabe steht dann „Stand nach Runde
-4", damit niemand einen Zwischenstand für die Endtabelle hält.
+**Stand nach Runde** — bei Rangliste, Kreuztabelle, Fortschrittstabelle und
+den Mannschaftstabellen. Es ist ein Schnitt durch das ganze Turnier: Alles,
+was danach gespielt wurde, ist weg — nicht ausgeblendet, sondern entfernt.
+Über der Ausgabe steht dann „Stand nach Runde 4", damit niemand einen
+Zwischenstand für die Endtabelle hält.
 
-**Angezeigte Runden** wirkt innerhalb dieses Schnitts und nur auf die
-Rundenlisten: Paarungen, Ergebnisse und Wettkämpfe. Auf die Tabellen wirkt es
-nicht.
+„Aktueller Stand (letzte Runde)" ist die Vorgabe. Sie nimmt die gespeicherten
+Zahlen der Turnierdatei — die des jeweils letzten Standes — und rechnet
+nichts nach. Genau das will man im Regelfall: Lädt jemand eine neue Fassung
+der Datei hoch, wächst die Ausgabe von selbst mit.
 
-Beide zusammen ergeben die üblichen Fälle:
-
-| Gewünscht | Stand nach Runde | Angezeigte Runden |
-| --- | --- | --- |
-| Alles, wie es am Ende war | Ganzes Turnier | (leer) |
-| Nur die Ergebnisse der Runden 4 und 5, dazu die Endtabelle | Ganzes Turnier | 4, 5 |
-| Der Zwischenstand nach Runde 4 mit den Ergebnissen dieser Runde | 4 | 4 |
-| Der Zwischenstand nach Runde 4, alle bisherigen Ergebnisse | 4 | (leer) |
-
-Die Rundennummern kommen aus der Datei: Ein Turnier über fünf Runden bietet
-fünf Kästchen an. „Ergebnisse der Runde 5 mit der Tabelle nach Runde 4" gibt
-es nicht — Runde 5 ist dann noch nicht gespielt.
+**Angezeigte Runden** — bei Paarungen, Ergebnissen und Wettkämpfen.
+Beschränkt die Ausgabe auf einzelne Runden; ohne Auswahl erscheinen alle. Die
+Rundennummern kommen aus der Datei: Ein Turnier über fünf Runden bietet fünf
+Kästchen an.
 
 #### Woher die Zahlen eines Zwischenstands kommen
 
@@ -153,11 +176,11 @@ Summe, nicht die Runde, in der sie vergeben wurden.
 
 ### Reiternavigation
 
-Ab zwei Listen entsteht eine Reiterleiste; mit Pfeiltasten lässt sich zwischen
-den Reitern wechseln. **Ohne JavaScript stehen alle Listen untereinander** und
-bleiben vollständig lesbar — der Server liefert sie alle sichtbar aus, und
-erst das Skript blendet aus, was hinter den Reitern liegt. Bei einer einzigen
-Liste entfällt die Leiste.
+Ab zwei Turnierausgaben in einem Umschlag entsteht eine Reiterleiste; mit
+Pfeiltasten lässt sich zwischen den Reitern wechseln. **Ohne JavaScript stehen
+alle Ausgaben untereinander** und bleiben vollständig lesbar — der Server
+liefert sie alle sichtbar aus, und erst das Skript blendet aus, was hinter den
+Reitern liegt. Bei einer einzigen Ausgabe entfällt die Leiste.
 
 ## Anpassen der Ausgabe
 
@@ -166,7 +189,11 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 
 | Template | Liste |
 | --- | --- |
-| `ce_chesstournamentviewer` | Rahmen mit Reiterleiste und Hinweisen |
+| `ce_chesstournamentviewer` | Rahmen einer Turnierausgabe, mit Hinweisen |
+| `ce_chesstournamentviewerStart` | Öffnender Umschlag mit der Reiterleiste |
+| `ce_chesstournamentviewerStop` | Schließender Umschlag |
+| `ctv_spaltenkopf` | Ein Spaltenkopf von Teilnehmerliste und Rangliste |
+| `ctv_spaltenzeile` | Eine Zeile von Teilnehmerliste und Rangliste, mit den gewählten Spalten |
 | `ctv_turnierdaten` | Turnierdaten |
 | `ctv_teilnehmer` | Teilnehmer |
 | `ctv_rangliste` | Rangliste |

@@ -9,31 +9,44 @@ declare(strict_types=1);
  */
 
 /*
- * Palette des Inhaltselements „Turnier-Betrachter".
+ * Paletten der drei Inhaltselemente.
  *
- * Die Palette enthält bewusst kein Feld `guests`: Es gibt dieses Feld nur in
- * Contao 4.13, unter Contao 5 wurde es entfernt. `protected` mit der
- * Unterpalette `groups` gibt es in beiden Fassungen.
+ * **Ein Element gibt genau eine Liste aus.** Wer mehrere Listen als Reiter
+ * zeigen will, legt sie einzeln an und klammert sie mit „Umschlag Anfang" und
+ * „Umschlag Ende" ein — so, wie Contao es mit Akkordeon und Slider hält.
  *
- * Die Palette ist die vollständige; ein Rückruf streicht daraus, was zur
- * gewählten Datei und zu den gewählten Listen nicht passt — die Feldgruppe
- * „Mannschaftsturniere" bei einem Einzelturnier, die Rundenauswahl bei einem
- * einrundigen Turnier, jede Einstellung, deren Liste nicht gewählt ist.
+ * Die Palette der Turnierausgabe ist die vollständige; ein Rückruf streicht
+ * daraus alles, was noch nicht an der Reihe ist. Der Redakteur sieht dadurch
+ * nacheinander: erst die Dateiauswahl, nach dem Speichern die Auswahl der
+ * Ausgabe, und nach deren Wahl die Einstellungen genau dieser Ausgabe.
  */
 $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'] =
     '{type_legend},type,headline;'
-    .'{ctv_legend},ctvDatei,ctvFormat,ctvListen,ctvHinweise;'
+    .'{ctv_legend},ctvDatei,ctvFormat,ctvListe;'
+    .'{ctv_spalten_legend},ctvSpalten;'
     .'{ctv_runden_legend},ctvStand,ctvRunden;'
-    .'{ctv_spalten_legend},ctvSpaltenTeilnehmer,ctvSpaltenRangliste;'
     .'{ctv_mannschaft_legend},ctvMannschaftSpieler,ctvKreuzKurz;'
+    .'{ctv_hinweis_legend},ctvHinweise;'
     .'{template_legend:hide},customTpl;'
     .'{protected_legend:hide},protected;'
     .'{expert_legend:hide},cssID;'
     .'{invisible_legend:hide},invisible,start,stop';
 
+$GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewerStart'] =
+    '{type_legend},type,headline;'
+    .'{template_legend:hide},customTpl;'
+    .'{protected_legend:hide},protected;'
+    .'{expert_legend:hide},cssID;'
+    .'{invisible_legend:hide},invisible,start,stop';
+
+$GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewerStop'] =
+    '{type_legend},type;'
+    .'{template_legend:hide},customTpl;'
+    .'{invisible_legend:hide},invisible,start,stop';
+
 /*
- * Die Dateiendungen der Dateiauswahl, die Formatauswahl, die Listenauswahl
- * und die Anpassung an die Turnierart tragen Rückrufe nach: Alle vier hängen
+ * Die Dateiendungen der Dateiauswahl, die Formatauswahl, die Auswahl der
+ * Ausgabe, die Spalten und die Runden tragen Rückrufe nach: Sie alle hängen
  * an Angaben, die erst zur Laufzeit feststehen — an den registrierten
  * Formaten und am Inhalt der gewählten Datei. Die Rückrufe hängen als
  * Dienst-Tag `contao.callback` an TlContentListener und stehen deshalb nicht
@@ -67,24 +80,34 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvFormat'] = [
 ];
 
 /*
- * Die Listenauswahl ist ein `checkboxWizard` und kein einfaches
- * Kästchenfeld: Der Wizard lässt sich sortieren und speichert die
- * Reihenfolge, und genau in dieser Reihenfolge erscheinen später die Reiter.
- * Den Widget gibt es in Contao 4.13 wie in Contao 5.
- *
- * `submitOnChange` schickt die Maske beim Anhaken ab, damit die
- * dazugehörigen Einstellungen sofort erscheinen und die überflüssigen
- * verschwinden. Bei Kästchen wirkt das — anders als bei der Dateiauswahl, wo
- * der Dateiwähler den Wert per Skript setzt und dabei kein Ereignis auslöst.
+ * Die auszugebende Liste. Ein Auswahlfeld und keine Mehrfachauswahl: Ein
+ * Element gibt eine Liste aus. `submitOnChange` schickt die Maske ab, damit
+ * die Einstellungen dieser Liste sofort erscheinen.
  */
-$GLOBALS['TL_DCA']['tl_content']['fields']['ctvListen'] = [
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvListe'] = [
     'exclude' => true,
-    'inputType' => 'checkboxWizard',
+    'inputType' => 'select',
     'reference' => &$GLOBALS['TL_LANG']['ctv']['listen'],
     'eval' => [
-        'multiple' => true,
         'mandatory' => true,
+        'includeBlankOption' => true,
         'submitOnChange' => true,
+        'tl_class' => 'w50',
+    ],
+    'sql' => "varchar(32) NOT NULL default ''",
+];
+
+/*
+ * Die Spalten der gewählten Liste. Sortierbar: Die gespeicherte Reihenfolge
+ * ist die der Ausgabe. Angeboten wird nur, was die gewählte Datei hergibt;
+ * vorangehakt sind die gebräuchlichen.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvSpalten'] = [
+    'exclude' => true,
+    'inputType' => 'checkboxWizard',
+    'reference' => &$GLOBALS['TL_LANG']['ctv']['spaltenwahl'],
+    'eval' => [
+        'multiple' => true,
         'tl_class' => 'clr',
     ],
     'sql' => 'blob NULL',
@@ -93,7 +116,7 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvListen'] = [
 /*
  * Die Auswahl beider Rundenfelder entsteht aus der Turnierdatei; die
  * Beschriftungen schreibt derselbe Rückruf in die Sprachdatei, auf die hier
- * verwiesen wird. Deshalb steht in beiden Feldern keine feste Liste.
+ * verwiesen wird.
  */
 $GLOBALS['TL_DCA']['tl_content']['fields']['ctvStand'] = [
     'exclude' => true,
@@ -111,35 +134,6 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvRunden'] = [
     'exclude' => true,
     'inputType' => 'checkbox',
     'reference' => &$GLOBALS['TL_LANG']['ctv']['runden'],
-    'eval' => [
-        'multiple' => true,
-        'tl_class' => 'clr',
-    ],
-    'sql' => 'blob NULL',
-];
-
-/*
- * Die Spaltenauswahl von Teilnehmerliste und Rangliste. Beide sind
- * sortierbare Kästchenfelder: Die gespeicherte Reihenfolge ist die der
- * Spalten in der Ausgabe. Angeboten wird nur, was die gewählte Datei
- * hergibt — eine Elo-Spalte in einem Turnier ohne Elo-Zahlen wäre ein
- * Kästchen ohne Wirkung.
- */
-$GLOBALS['TL_DCA']['tl_content']['fields']['ctvSpaltenTeilnehmer'] = [
-    'exclude' => true,
-    'inputType' => 'checkboxWizard',
-    'reference' => &$GLOBALS['TL_LANG']['ctv']['spaltenwahl'],
-    'eval' => [
-        'multiple' => true,
-        'tl_class' => 'clr',
-    ],
-    'sql' => 'blob NULL',
-];
-
-$GLOBALS['TL_DCA']['tl_content']['fields']['ctvSpaltenRangliste'] = [
-    'exclude' => true,
-    'inputType' => 'checkboxWizard',
-    'reference' => &$GLOBALS['TL_LANG']['ctv']['spaltenwahl'],
     'eval' => [
         'multiple' => true,
         'tl_class' => 'clr',
@@ -172,4 +166,13 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvKreuzKurz'] = [
         'tl_class' => 'clr',
     ],
     'sql' => "char(1) NOT NULL default ''",
+];
+
+/*
+ * Bis Fassung 1.7.0 führte ein Element mehrere Listen und baute die Reiter
+ * selbst. Das Feld bleibt in der Datenbank, damit ein bestehendes Element
+ * seine erste Liste behält; in der Maske erscheint es nicht mehr.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvListen'] = [
+    'sql' => 'blob NULL',
 ];

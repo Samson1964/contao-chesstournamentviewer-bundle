@@ -82,13 +82,16 @@ final class Spalten
     /**
      * Die Spalten, die ohne eigene Auswahl erscheinen.
      *
-     * Es sind die, die das Bundle bis Fassung 1.6.0 fest ausgegeben hat —
-     * bestehende Inhaltselemente sehen dadurch unverändert aus.
+     * Sie sind zugleich die, die im Backend vorangehakt sind. Die
+     * Teilnehmerliste führt bewusst nur die Turnierwertungszahl und nicht
+     * zusätzlich Elo und DWZ: Alle drei nebeneinander machen die Tabelle auf
+     * schmalen Bildschirmen unlesbar, und welche Zahl im Turnier den
+     * Ausschlag gibt, steht ohnehin in der TWZ.
      *
      * @var array<string,string[]>
      */
-    private const VORGABE = [
-        'teilnehmer' => ['nr', 'name', 'elo', 'dwz', 'twz', 'verein'],
+    public const VORGABE = [
+        'teilnehmer' => ['nr', 'name', 'twz', 'verein'],
         'rangliste' => ['platz', 'name', 'twz', 'bilanz', 'punkte', 'feinwertung1', 'feinwertung2'],
     ];
 
@@ -102,6 +105,24 @@ final class Spalten
     public static function einstellbar(string $liste): bool
     {
         return \in_array($liste, self::LISTEN, true);
+    }
+
+    /**
+     * Nennt die Spalten, die im Backend vorangehakt sein sollen.
+     *
+     * Es sind die Vorgabespalten, beschränkt auf das, was die Datei hergibt.
+     *
+     * @param string  $liste   Schlüssel der Liste
+     * @param Turnier $turnier Das eingelesene Turnier
+     *
+     * @return string[] Die Spaltenschlüssel
+     */
+    public static function vorauswahl(string $liste, Turnier $turnier): array
+    {
+        return array_values(array_intersect(
+            self::VORGABE[$liste] ?? [],
+            self::verfuegbar($liste, $turnier)
+        ));
     }
 
     /**

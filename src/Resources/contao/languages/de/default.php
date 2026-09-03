@@ -13,7 +13,9 @@ declare(strict_types=1);
  * übrigen Schach-Bundles, damit alle Elemente im Backend beieinanderstehen.
  */
 $GLOBALS['TL_LANG']['CTE']['schach'] = 'Schach-Elemente';
-$GLOBALS['TL_LANG']['CTE']['chesstournamentviewer'] = ['Schachturnier-Betrachter', 'Gibt eine Turnierdatei einer Schachturnierverwaltung als Tabellen aus.'];
+$GLOBALS['TL_LANG']['CTE']['chesstournamentviewer'] = ['Schachturnier-Betrachter – Turnierausgabe', 'Gibt eine Liste aus einer Turnierdatei aus: Teilnehmer, Rangliste, Kreuztabelle, Ergebnisse und mehr.'];
+$GLOBALS['TL_LANG']['CTE']['chesstournamentviewerStart'] = ['Schachturnier-Betrachter – Umschlag Anfang', 'Öffnet einen Umschlag. Die Turnierausgaben, die bis zum Umschlag-Ende folgen, erscheinen als Reiter.'];
+$GLOBALS['TL_LANG']['CTE']['chesstournamentviewerStop'] = ['Schachturnier-Betrachter – Umschlag Ende', 'Schließt den Umschlag.'];
 
 // Bezeichnungen der Listen, zugleich Beschriftung der Reiter im Frontend
 $GLOBALS['TL_LANG']['ctv']['listen']['turnierdaten'] = 'Turnierdaten';
@@ -133,7 +135,7 @@ $GLOBALS['TL_LANG']['ctv']['ohneMannschaft'] = 'Ohne Mannschaft';
 $GLOBALS['TL_LANG']['ctv']['uploadWarnung'] = 'Unter „Einstellungen → Erlaubte Dateitypen" fehlt: %s. Turnierdateien lassen sich deshalb nicht in die Dateiverwaltung hochladen.';
 
 // Rundenschnitt: Beschriftungen der Auswahl und Hinweise in der Ausgabe
-$GLOBALS['TL_LANG']['ctv']['standGanz'] = 'Ganzes Turnier (Endstand)';
+$GLOBALS['TL_LANG']['ctv']['standGanz'] = 'Aktueller Stand (letzte Runde)';
 $GLOBALS['TL_LANG']['ctv']['standRunde'] = 'Stand nach Runde %d';
 $GLOBALS['TL_LANG']['ctv']['rundeNummer'] = 'Runde %d';
 $GLOBALS['TL_LANG']['ctv']['standTitel'] = 'Stand nach Runde %d';

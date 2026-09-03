@@ -16,6 +16,7 @@ use Contao\CoreBundle\Security\Authentication\Token\TokenChecker;
 use Contao\StringUtil;
 use Contao\Template;
 use Psr\Log\LoggerInterface;
+use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Auswahl;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Rundenschnitt;
@@ -75,7 +76,7 @@ class TurnierBetrachterController extends AbstractContentElementController
     {
         $template->fehler = null;
         $template->turnier = null;
-        $template->listen = [];
+        $template->liste = null;
         $template->hinweise = [];
 
         try {
@@ -94,16 +95,14 @@ class TurnierBetrachterController extends AbstractContentElementController
             return $template->getResponse();
         }
 
+        $schluessel = TlContentListener::liste($model->ctvListe, $model->ctvListen);
         $auswahl = new Auswahl(
-            StringUtil::deserialize($model->ctvListen, true),
+            '' === $schluessel ? [] : [$schluessel],
             (bool) $model->ctvMannschaftSpieler,
             (bool) $model->ctvKreuzKurz,
             (int) $model->ctvStand,
             array_map('intval', StringUtil::deserialize($model->ctvRunden, true)),
-            [
-                'teilnehmer' => StringUtil::deserialize($model->ctvSpaltenTeilnehmer, true),
-                'rangliste' => StringUtil::deserialize($model->ctvSpaltenRangliste, true),
-            ],
+            [$schluessel => StringUtil::deserialize($model->ctvSpalten, true)],
         );
 
         // Der Rundenschnitt versetzt das Turnier zurück; von da an gelten
@@ -122,16 +121,21 @@ class TurnierBetrachterController extends AbstractContentElementController
 
         $template->turnier = $turnier;
         $template->kopf = $turnier->getKopf();
-        $template->listen = $listen;
+
+        // Ein Element gibt genau eine Liste aus. Mehrere Ausgaben als Reiter
+        // entstehen durch den Umschlag, nicht durch das Element selbst.
+        $template->liste = $listen[0];
+
+        // Die Beschriftung des Reiters: die Überschrift des Elements, wenn
+        // eine gesetzt ist, sonst der Name der Liste. So kann der Redakteur
+        // die Lasche benennen, ohne dafür ein eigenes Feld zu brauchen.
+        $ueberschrift = StringUtil::deserialize($model->headline, true);
+        $template->reitername = trim((string) ($ueberschrift['value'] ?? '')) ?: $listen[0]['name'];
 
         // Die Hinweise erklären, warum Zahlen auseinandergehen können. Auf
         // einer Vereinsseite ist das oft mehr, als der Besucher wissen will;
         // deshalb erscheinen sie nur auf Wunsch.
         $template->hinweise = $model->ctvHinweise ? $turnier->getHinweise() : [];
-
-        // Die Reiternavigation lohnt erst ab zwei Listen. Bei einer einzigen
-        // Liste bliebe eine Lasche übrig, die nichts umschalten kann.
-        $template->mitReitern = \count($listen) > 1;
         $template->kennung = 'ctv-'.$model->id;
 
         // Der Zwischenstand steht unabhängig von den Hinweisen über der

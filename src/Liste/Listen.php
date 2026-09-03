@@ -57,6 +57,32 @@ final class Listen
     ];
 
     /**
+     * Listen, die einen Zeitpunkt kennen.
+     *
+     * Sie zeigen einen Stand — Tabelle, Kreuztabelle, Verlauf — und lassen
+     * sich deshalb auf eine Runde zurückversetzen. Eine Paarungsliste zeigt
+     * keinen Stand, sondern eine Runde; für sie ist die Rundenauswahl da.
+     */
+    public const MIT_STAND = [
+        'rangliste',
+        'kreuztabelle',
+        'fortschritt',
+        'fortschrittohne',
+        'mannschaftsrangliste',
+        'mannschaftskreuztabelle',
+    ];
+
+    /**
+     * Listen, die je Runde ausgeben und sich auf Runden beschränken lassen.
+     */
+    public const MIT_RUNDEN = ['paarungen', 'ergebnisse', 'mannschaftspaarungen'];
+
+    /**
+     * Listen, in denen die Spieler einer Mannschaft vorkommen können.
+     */
+    public const MIT_SPIELERN = ['mannschaften', 'mannschaftspaarungen'];
+
+    /**
      * Gibt die Schlüssel aller bekannten Listen zurück.
      *
      * Wird für das Auswahlfeld im Backend gebraucht. Dort werden alle Listen

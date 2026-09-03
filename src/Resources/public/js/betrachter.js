@@ -37,12 +37,53 @@
     }
 
     /**
-     * Rüstet einen Betrachter mit der Reiternavigation aus.
+     * Baut die Reiterlaschen aus den Ausgaben, die im Umschlag stehen.
      *
-     * @param {HTMLElement} behaelter Der Betrachter
+     * Der Umschlag weiß beim Ausliefern nicht, was in ihm steht — er ist ein
+     * eigenes Inhaltselement und wird vor den Ausgaben gerendert. Deshalb
+     * werden die Laschen hier gebaut: aus den Abschnitten, die im fertigen
+     * HTML zwischen Anfang und Ende liegen. Ihre Beschriftung steht am
+     * Abschnitt selbst.
+     *
+     * @param {HTMLElement} behaelter Der Umschlag
+     *
+     * @return {NodeList} Die erzeugten Laschen
+     */
+    function baueReiter(behaelter) {
+        var leiste = behaelter.querySelector('.ctv-reiter');
+        var listen = behaelter.querySelectorAll('.ctv-liste');
+
+        if (!leiste || listen.length < 2) {
+            return behaelter.querySelectorAll('.ctv-reiter__knopf');
+        }
+
+        for (var i = 0; i < listen.length; i++) {
+            // Ohne eigene Kennung liesse sich die Lasche nicht zuordnen.
+            if (!listen[i].id) {
+                listen[i].id = behaelter.id + '-liste-' + i;
+            }
+
+            var knopf = document.createElement('button');
+            knopf.type = 'button';
+            knopf.className = 'ctv-reiter__knopf';
+            knopf.setAttribute('role', 'tab');
+            knopf.setAttribute('aria-controls', listen[i].id);
+            knopf.setAttribute('aria-selected', 'false');
+            knopf.textContent = listen[i].getAttribute('data-ctv-name') || listen[i].id;
+
+            leiste.appendChild(knopf);
+        }
+
+        return behaelter.querySelectorAll('.ctv-reiter__knopf');
+    }
+
+    /**
+     * Rüstet einen Umschlag mit der Reiternavigation aus.
+     *
+     * @param {HTMLElement} behaelter Der Umschlag
      */
     function ruesteAus(behaelter) {
-        var knoepfe = behaelter.querySelectorAll('.ctv-reiter__knopf');
+        var knoepfe = baueReiter(behaelter);
 
         if (knoepfe.length < 2) {
             return;

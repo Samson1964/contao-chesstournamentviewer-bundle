@@ -50,7 +50,7 @@ services:
               method: formatOptionen
             - name: contao.callback
               table: tl_content
-              target: fields.ctvListen.options
+              target: fields.ctvListe.options
               method: listenOptionen
             - name: contao.callback
               table: tl_content
@@ -62,12 +62,12 @@ services:
               method: rundenOptionen
             - name: contao.callback
               table: tl_content
-              target: fields.ctvSpaltenTeilnehmer.options
-              method: spaltenTeilnehmerOptionen
+              target: fields.ctvSpalten.options
+              method: spaltenOptionen
             - name: contao.callback
               table: tl_content
-              target: fields.ctvSpaltenRangliste.options
-              method: spaltenRanglisteOptionen
+              target: fields.ctvSpalten.load
+              method: spaltenVorauswahl
             - name: contao.callback
               table: tl_content
               target: fields.ctvDatei.load
@@ -86,3 +86,20 @@ services:
               category: schach
               type: chesstournamentviewer
               template: ce_chesstournamentviewer
+
+    # Die beiden Hüllen, die mehrere Ausgaben zu Reitern zusammenfassen. Sie
+    # stehen zusätzlich in TL_WRAPPERS, damit Contao die eingeschlossenen
+    # Elemente im Backend einrückt.
+    Schachbulle\ContaoChesstournamentviewerBundle\Controller\ContentElement\UmschlagAnfangController:
+        tags:
+            - name: contao.content_element
+              category: schach
+              type: chesstournamentviewerStart
+              template: ce_chesstournamentviewerStart
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Controller\ContentElement\UmschlagEndeController:
+        tags:
+            - name: contao.content_element
+              category: schach
+              type: chesstournamentviewerStop
+              template: ce_chesstournamentviewerStop

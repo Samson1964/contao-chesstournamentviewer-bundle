@@ -1,5 +1,46 @@
 # Änderungen
 
+## Version 1.8.0 (2026-09-03)
+
+Diese Fassung ändert die Bedienung grundlegend und bringt neue
+Datenbankfelder mit. Nach dem Aktualisieren ist ein **Datenbank-Abgleich**
+nötig.
+
+**Bestehende Inhaltselemente mit mehreren Listen zeigen künftig nur noch ihre
+erste.** Wer Reiter hatte, baut sie mit dem neuen Umschlag nach: ein Element
+je Liste, eingeklammert von „Umschlag Anfang" und „Umschlag Ende".
+
+* Change: **Ein Inhaltselement gibt genau eine Liste aus.** Aus der
+  Mehrfachauswahl „Auszugebende Listen" wird das Auswahlfeld „Auszugebende
+  Liste". Damit trägt jedes Element nur noch die Einstellungen, die zu seiner
+  Liste gehören — statt einer Maske, in der neben den Feldern für die
+  Kreuztabelle auch die für die Wettkämpfe stehen.
+* Add: **Zwei neue Inhaltselemente, „Umschlag Anfang" und „Umschlag Ende".**
+  Sie klammern beliebig viele Turnierausgaben ein, die dann als Reiter
+  erscheinen. Contao rückt die eingeschlossenen Elemente im Backend ein, wie
+  bei Akkordeon und Slider. Die Ausgaben müssen nicht dieselbe Turnierdatei
+  verwenden.
+* Change: Das Inhaltselement heißt **„Schachturnier-Betrachter –
+  Turnierausgabe"**.
+* Change: **Die Maske baut sich in drei Schritten auf.** Ohne Datei steht nur
+  die Dateiauswahl da; nach dem Speichern kommt die Auswahl der Ausgabe hinzu;
+  nach deren Wahl erscheinen sofort deren Einstellungen. Der Redakteur steht
+  damit nie vor Feldern, die noch nichts bewirken können.
+* Change: Statt zweier Spaltenfelder gibt es eins. Es zeigt die Spalten der
+  gewählten Liste, und die gebräuchlichen sind vorangehakt.
+* Change: Die Vorauswahl der Teilnehmerliste ist schlanker: Nr., Name,
+  Turnierwertungszahl und Verein. Elo und DWZ lassen sich dazuhaken; alle drei
+  Wertungszahlen nebeneinander machten die Tabelle auf schmalen Bildschirmen
+  unlesbar.
+* Change: „Stand nach Runde" heißt in der Vorgabe jetzt „Aktueller Stand
+  (letzte Runde)" — dieselbe Wirkung, aber die Bezeichnung sagt, was sie tut:
+  Sie nimmt die gespeicherten Zahlen der Datei und wächst mit, wenn eine neue
+  Fassung hochgeladen wird.
+* Change: Die Reiterleiste baut jetzt das Skript aus den Ausgaben, die es im
+  Umschlag findet. Der Server kann sie nicht bauen: Das öffnende Element weiß
+  beim Ausliefern nicht, was nach ihm kommt. Ohne JavaScript stehen die
+  Ausgaben untereinander, jede vollständig lesbar.
+
 ## Version 1.7.0 (2026-09-03)
 
 Diese Fassung bringt zwei neue Datenbankfelder mit. Nach dem Aktualisieren
