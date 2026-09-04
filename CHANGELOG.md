@@ -1,5 +1,37 @@
 # Änderungen
 
+## Version 1.10.0 (2026-09-03)
+
+* Change: **Die Rangliste beginnt mit anderen Spalten** — Platz, Titel, Name,
+  Turnierwertungszahl, Verein, Punkte und die Feinwertungen. Zur Wahl stehen
+  jetzt außerdem alle Spalten der Teilnehmerliste, also auch Gruppe,
+  Geburtsjahr, FIDE-Kennung und Startnummer. Wer eigene Spalten eingestellt
+  hat, behält sie.
+* Fix: Die Spalte der Turnierwertungszahl hieß bei Swiss-Manager-Dateien mit
+  nationalen Zahlen **„NWZ"**. Das ist die Bezeichnung von Swiss-Chess;
+  chess-results schreibt für dieselbe Zahl „EloN", und in Deutschland heißt
+  sie DWZ. Sie heißt jetzt **„DWZ"**. Bei SWT-Dateien bleibt es bei der
+  Bezeichnung, die das Programm selbst führt.
+* Change: **Punkte und Feinwertungen stehen mit Komma** — „7,5" statt „7½" und
+  „7,0" statt „7". In einer Spalte, in der Zahlen untereinander verglichen
+  werden, liest sich das besser, und so hält es auch chess-results. Eine
+  zweite Nachkommastelle erscheint nur, wenn sie gebraucht wird:
+  Sonneborn-Berger rechnet in Vierteln. Das ½ bleibt dort, wo eine Zahl für
+  sich steht — in Ergebnislisten und Kreuztabellen.
+* Change: **Die Föderation erscheint als Flagge.** Die Turnierdateien führen
+  die dreibuchstabigen Kennungen des Weltschachbundes; sie werden auf die
+  ISO-Kennungen abgebildet und als Flagge gesetzt. Der Code steht als Titel am
+  Feld, und wo es keine Flagge gibt — „FID" für den Weltschachbund —, bleibt
+  er stehen.
+* Add: **Die Feinwertungseinstellung der Swiss-Manager-Dateien ist gefunden**,
+  wenn auch noch nicht vollständig lesbar: Im Abschnitt `95` stehen die Zahl
+  der Wertungen und ihre Schlüssel, sieben davon sind an Legenden von
+  chess-results belegt. Zum Rechnen fehlt noch mindestens ein Merkmal je
+  Eintrag — die Streichung steht woanders, und ein Schlüssel steht für zwei
+  verschiedene Wertungen. Der Befund und der Weg zum nächsten Schritt stehen
+  in `SWISS-MANAGER.md`. Bis dahin bleiben die Feinwertungsspalten bei
+  Swiss-Manager leer, und Punktgleiche teilen sich den Platz.
+
 ## Version 1.9.0 (2026-09-03)
 
 Diese Fassung bringt ein neues Datenbankfeld mit. Nach dem Aktualisieren ist

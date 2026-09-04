@@ -121,7 +121,14 @@ Zur Wahl stehen — je nach Datei — Startnummer, Platz, Brett, Name, Titel, El
 DWZ, Turnierwertungszahl, Verein, Land, Gruppe, Geburtsjahr, FIDE-Kennung,
 Bilanz, Partien, Punkte und die beiden Feinwertungen. **Das Auswahlfeld lässt
 sich ziehen; die Reihenfolge ist die der Ausgabe.** Ohne Auswahl erscheinen
-die Vorgabespalten.
+die Vorgabespalten: bei der Teilnehmerliste Nr., Name, Wertungszahl und
+Verein, bei der Rangliste Platz, Titel, Name, Wertungszahl, Verein, Punkte und
+die Feinwertungen.
+
+Zwei Spalten werden besonders gesetzt: **Die Föderation erscheint als
+Flagge** — der dreibuchstabige Code steht als Titel am Feld —, und **Punkte
+und Feinwertungen stehen mit Komma**, also „7,5" statt „7½". Das ½ bleibt
+dort, wo eine Zahl für sich steht: in Ergebnislisten und Kreuztabellen.
 
 Dieselbe Auswahl taugt für mehrere Turnierdateien: Was eine Datei nicht
 hergibt, wird übergangen. Bleibt nichts übrig, greift die Vorgabe.

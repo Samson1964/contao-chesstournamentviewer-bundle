@@ -134,11 +134,51 @@ Reihenfolge; die Aufstellung steht in den Teilnehmerkarten.
 führt der Satz nicht — Brett- und Mannschaftspunkte ergeben sich aus den
 Einzelpartien.
 
-## Was noch offen ist
+### Feinwertungen (`95`), teilweise entschlüsselt
 
-* **Feinwertungen.** In der Datei steht nicht, welche das Turnier führt.
-  Solange das so ist, bleibt die Spalte leer und Punktgleiche teilen sich den
-  Platz.
+Im Abschnitt `95` steht, **welche** Feinwertungen das Turnier führt — die
+Werte selbst stehen nirgends, Swiss-Manager rechnet sie bei jeder Anzeige neu.
+
+| Versatz ab Abschnittsanfang | Breite | Inhalt |
+| --- | --- | --- |
+| +0 | 16 Bit | Rundenzahl |
+| +27 | 16 Bit | Zahl der Feinwertungen |
+| +29, +31, … | je 16 Bit | die Schlüssel, in der Reihenfolge der Wertung |
+
+Belegt an vier Turnieren, deren Rangkriterien auf chess-results.com stehen:
+
+| Schlüssel | Bedeutung |
+| --- | --- |
+| `0x09` | Fidewertung mit Streichresultaten |
+| `0x0B` | Direkte Begegnung |
+| `0x25` | Buchholz (variabel) |
+| `0x34` | Sonneborn-Berger-Wertung variabel |
+| `0x44` | Zahl der Siege |
+| `0x54` | Buchholzwertung Variabel (2023), Spielpunkte |
+| `0x55` | Sonneborn-Berger-Wertung Variabel (2023), Spielpunkte |
+
+**Zum Rechnen reicht das nicht.** Zwei Beobachtungen stehen dem entgegen:
+
+* Bei der Offenen Deutschen Blindenmeisterschaft (tnr1148367) tragen die
+  Wertungen 2 und 3 beide den Schlüssel `0x54` und unterscheiden sich nur
+  durch „Cut1". **Die Streichung steht also woanders**, an einer Stelle, die
+  noch nicht gefunden ist.
+* Ebendort tragen die Wertungen 4 und 5 beide `0x44`, heißen aber „Zahl der
+  Partien mit Schwarz" und „Zahl der Siege". Ein Schlüssel allein bestimmt die
+  Wertung demnach nicht; es fehlt mindestens ein Merkmal.
+
+Solange diese Merkmale nicht gefunden sind, bleiben die Feinwertungsspalten
+bei Swiss-Manager leer: Eine gerechnete Zahl, die neben der amtlichen Tabelle
+steht und ihr widerspricht, wäre schlechter als keine. Aus demselben Grund
+teilen sich Punktgleiche den Platz.
+
+Wer weitersucht, findet den Weg dorthin so: Die Ordner unter
+`F:\Claude\Swiss-Manager-Turnierdateien auf Chess-Results\` enthalten je eine
+Verknüpfung zur zugehörigen Seite; unter der Rangliste steht dort die Legende
+mit den Rangkriterien im Klartext. Damit lässt sich jede Vermutung über die
+fehlenden Merkmale sofort an achtundsiebzig Turnieren prüfen.
+
+## Was noch offen ist
 * **Mannschaftspunkte.** Die Regel steht nicht in der Datei; angesetzt sind
   zwei für den Sieg und einer für das Unentschieden. Für die
   Frauen-Mannschaftsmeisterschaft 2025 trifft das die Tabelle von

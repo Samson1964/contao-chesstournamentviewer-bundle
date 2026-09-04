@@ -110,7 +110,9 @@ class SpaltenTest extends TestCase
     {
         $spalten = Spalten::fuerAusgabe('rangliste', [], TurnierBauer::einzelturnier());
 
-        $this->assertSame(['platz', 'name', 'twz', 'bilanz', 'punkte'], array_column($spalten, 'schluessel'));
+        // Verein fällt weg — im Prüfturnier hat niemand einen —, ebenso die
+        // Feinwertungen. Was bleibt, ist die Vorgabe in ihrer Reihenfolge.
+        $this->assertSame(['platz', 'titel', 'name', 'twz', 'punkte'], array_column($spalten, 'schluessel'));
     }
 
     /**

@@ -24,6 +24,62 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftswertung;
 final class Ausgabe
 {
     /**
+     * Die Länderkennungen des Weltschachbundes und ihre ISO-Entsprechung.
+     *
+     * Turnierdateien führen die dreibuchstabigen Kennungen der FIDE; für eine
+     * Flagge braucht es die zweibuchstabigen nach ISO 3166. Die FIDE folgt
+     * überwiegend den Kennungen des Olympischen Komitees, die sich von den
+     * ISO-Kennungen an vielen Stellen unterscheiden — „GER" gegen „DE".
+     *
+     * Was hier fehlt, erscheint als Code. Das ist der bessere Ausgang als
+     * eine falsche Flagge: Bei „FID" — Sportler unter der Flagge des
+     * Weltschachbundes — gibt es keine.
+     *
+     * @var array<string,string>
+     */
+    private const LAENDER = [
+        'AFG' => 'AF', 'ALB' => 'AL', 'ALG' => 'DZ', 'AND' => 'AD', 'ANG' => 'AO',
+        'ANT' => 'AG', 'ARG' => 'AR', 'ARM' => 'AM', 'ARU' => 'AW', 'AUS' => 'AU',
+        'AUT' => 'AT', 'AZE' => 'AZ', 'BAH' => 'BS', 'BAN' => 'BD', 'BAR' => 'BB',
+        'BDI' => 'BI', 'BEL' => 'BE', 'BEN' => 'BJ', 'BER' => 'BM', 'BHU' => 'BT',
+        'BIH' => 'BA', 'BLR' => 'BY', 'BLZ' => 'BZ', 'BOL' => 'BO', 'BOT' => 'BW',
+        'BRA' => 'BR', 'BRN' => 'BH', 'BRU' => 'BN', 'BUL' => 'BG', 'BUR' => 'BF',
+        'CAF' => 'CF', 'CAM' => 'KH', 'CAN' => 'CA', 'CAY' => 'KY', 'CGO' => 'CG',
+        'CHA' => 'TD', 'CHI' => 'CL', 'CHN' => 'CN', 'CIV' => 'CI', 'CMR' => 'CM',
+        'COD' => 'CD', 'COL' => 'CO', 'COM' => 'KM', 'CPV' => 'CV', 'CRC' => 'CR',
+        'CRO' => 'HR', 'CUB' => 'CU', 'CYP' => 'CY', 'CZE' => 'CZ', 'DEN' => 'DK',
+        'DJI' => 'DJ', 'DOM' => 'DO', 'ECU' => 'EC', 'EGY' => 'EG', 'ENG' => 'GB',
+        'ERI' => 'ER', 'ESA' => 'SV', 'ESP' => 'ES', 'EST' => 'EE', 'ETH' => 'ET',
+        'FAI' => 'FO', 'FIJ' => 'FJ', 'FIN' => 'FI', 'FRA' => 'FR', 'GAB' => 'GA',
+        'GAM' => 'GM', 'GCI' => 'GG', 'GEO' => 'GE', 'GER' => 'DE', 'GHA' => 'GH',
+        'GRE' => 'GR', 'GRN' => 'GD', 'GUA' => 'GT', 'GUM' => 'GU', 'GUY' => 'GY',
+        'HAI' => 'HT', 'HKG' => 'HK', 'HON' => 'HN', 'HUN' => 'HU', 'INA' => 'ID',
+        'IND' => 'IN', 'IRI' => 'IR', 'IRL' => 'IE', 'IRQ' => 'IQ', 'ISL' => 'IS',
+        'ISR' => 'IL', 'ISV' => 'VI', 'ITA' => 'IT', 'IVB' => 'VG', 'JAM' => 'JM',
+        'JCI' => 'JE', 'JOR' => 'JO', 'JPN' => 'JP', 'KAZ' => 'KZ', 'KEN' => 'KE',
+        'KGZ' => 'KG', 'KOR' => 'KR', 'KOS' => 'XK', 'KSA' => 'SA', 'KUW' => 'KW',
+        'LAO' => 'LA', 'LAT' => 'LV', 'LBA' => 'LY', 'LBN' => 'LB', 'LBR' => 'LR',
+        'LCA' => 'LC', 'LES' => 'LS', 'LIE' => 'LI', 'LTU' => 'LT', 'LUX' => 'LU',
+        'MAC' => 'MO', 'MAD' => 'MG', 'MAR' => 'MA', 'MAS' => 'MY', 'MAW' => 'MW',
+        'MDA' => 'MD', 'MDV' => 'MV', 'MEX' => 'MX', 'MGL' => 'MN', 'MKD' => 'MK',
+        'MLI' => 'ML', 'MLT' => 'MT', 'MNE' => 'ME', 'MNC' => 'MC', 'MOZ' => 'MZ',
+        'MRI' => 'MU', 'MTN' => 'MR', 'MYA' => 'MM', 'NAM' => 'NA', 'NCA' => 'NI',
+        'NED' => 'NL', 'NEP' => 'NP', 'NGR' => 'NG', 'NIG' => 'NE', 'NOR' => 'NO',
+        'NZL' => 'NZ', 'OMA' => 'OM', 'PAK' => 'PK', 'PAN' => 'PA', 'PAR' => 'PY',
+        'PER' => 'PE', 'PHI' => 'PH', 'PLE' => 'PS', 'PNG' => 'PG', 'POL' => 'PL',
+        'POR' => 'PT', 'PUR' => 'PR', 'QAT' => 'QA', 'ROU' => 'RO', 'RSA' => 'ZA',
+        'RUS' => 'RU', 'RWA' => 'RW', 'SCO' => 'GB', 'SEN' => 'SN', 'SEY' => 'SC',
+        'SGP' => 'SG', 'SLE' => 'SL', 'SLO' => 'SI', 'SMR' => 'SM', 'SOL' => 'SB',
+        'SOM' => 'SO', 'SRB' => 'RS', 'SRI' => 'LK', 'SSD' => 'SS', 'STP' => 'ST',
+        'SUD' => 'SD', 'SUI' => 'CH', 'SUR' => 'SR', 'SVK' => 'SK', 'SWE' => 'SE',
+        'SWZ' => 'SZ', 'SYR' => 'SY', 'TAN' => 'TZ', 'THA' => 'TH', 'TJK' => 'TJ',
+        'TKM' => 'TM', 'TLS' => 'TL', 'TOG' => 'TG', 'TPE' => 'TW', 'TTO' => 'TT',
+        'TUN' => 'TN', 'TUR' => 'TR', 'UAE' => 'AE', 'UGA' => 'UG', 'UKR' => 'UA',
+        'URU' => 'UY', 'USA' => 'US', 'UZB' => 'UZ', 'VEN' => 'VE', 'VIE' => 'VN',
+        'VIN' => 'VC', 'WLS' => 'GB', 'YEM' => 'YE', 'ZAM' => 'ZM', 'ZIM' => 'ZW',
+    ];
+
+    /**
      * Schreibt eine Punktzahl in der im Schach üblichen Form.
      *
      * Halbe Punkte erscheinen als ½, ganze ohne Nachkommastelle. Der Wert
@@ -183,6 +239,15 @@ final class Ausgabe
         $einstellung = null;
 
         if (\is_object($turnier) && method_exists($turnier, 'kopf')) {
+            // Nennt das Format die Bezeichnung selbst, gilt sie. Swiss-Manager
+            // tut das: Dort steht die Einstellung nicht in der Datei, wohl
+            // aber, nach welcher Zahl die Startrangliste geordnet ist.
+            $name = trim((string) $turnier->kopf('wertungName', ''));
+
+            if ('' !== $name) {
+                return self::esc($name);
+            }
+
             $einstellung = $turnier->kopf('twzErmittlung');
         }
 
@@ -289,17 +354,80 @@ final class Ausgabe
             'dwz' => self::zahl($zeile['dwz'] ?? 0),
             'twz' => self::zahl($zeile['twz'] ?? 0),
             'verein' => self::esc($zeile['mannschaft'] ?? ''),
-            'land' => self::esc($zeile['land'] ?? ''),
+            'land' => self::flagge($zeile['land'] ?? ''),
             'gruppe' => self::esc($zeile['gruppe'] ?? ''),
             'geburtsjahr' => self::geburtsjahr($zeile),
             'fideId' => self::zahl($zeile['fideId'] ?? 0),
             'bilanz' => self::bilanz($zeile),
             'partien' => self::zahl($zeile['partien'] ?? 0),
-            'punkte' => self::punkte($zeile['punkte'] ?? 0),
-            'feinwertung1' => self::punkte($zeile['feinwertung1'] ?? 0),
-            'feinwertung2' => self::punkte($zeile['feinwertung2'] ?? 0),
+            'punkte' => self::kommazahl($zeile['punkte'] ?? 0),
+            'feinwertung1' => self::kommazahl($zeile['feinwertung1'] ?? 0),
+            'feinwertung2' => self::kommazahl($zeile['feinwertung2'] ?? 0),
             default => '',
         };
+    }
+
+    /**
+     * Schreibt eine Punktzahl mit Komma und einer Nachkommastelle.
+     *
+     * In einer Tabellenspalte, in der die Zahlen untereinander stehen und
+     * verglichen werden, ist „7,5" leichter zu lesen als „7½" — und „7,0"
+     * leichter mit „7,5" zu vergleichen als „7". So schreibt es auch
+     * chess-results. Das ½ bleibt dort, wo eine Zahl für sich steht: in
+     * Ergebnissen und Kreuztabellen.
+     *
+     * Eine Nachkommastelle steht immer, eine zweite nur, wenn sie gebraucht
+     * wird: Sonneborn-Berger rechnet in Vierteln, und aus 196,25 dürfen nicht
+     * 196,3 werden.
+     *
+     * @param float|int|string|null $wert Die Punktzahl
+     *
+     * @return string Die Zahl als Text, oder leer wenn keine vorliegt
+     */
+    public static function kommazahl(mixed $wert): string
+    {
+        if (null === $wert || '' === $wert) {
+            return '';
+        }
+
+        return (string) preg_replace('/(,\d)0$/', '$1', number_format((float) $wert, 2, ',', ''));
+    }
+
+    /**
+     * Gibt eine Föderation als Flagge aus.
+     *
+     * Die Flagge entsteht aus zwei Regionalbuchstaben — dieselbe Schreibweise,
+     * die auch Smartphones benutzen; eine Bilddatei braucht es dafür nicht.
+     * Nötig ist der Umweg über die zweibuchstabigen Landeskennungen, denn
+     * Turnierdateien führen die dreibuchstabigen des Weltschachbundes.
+     *
+     * Der Ländercode bleibt als Titel am Feld: Nicht jedes System stellt
+     * Flaggen dar, und wer eine Flagge nicht zuordnen kann, liest ihn ab.
+     * Fehlt die Zuordnung — „FID" für den Weltschachbund etwa —, steht dort
+     * weiterhin der Code selbst.
+     *
+     * @param mixed $land Die Föderation, dreibuchstabig
+     *
+     * @return string Die Flagge als HTML, oder der unveränderte Code
+     */
+    public static function flagge(mixed $land): string
+    {
+        $code = strtoupper(trim((string) $land));
+
+        if ('' === $code) {
+            return '';
+        }
+
+        $zwei = self::LAENDER[$code] ?? null;
+
+        if (null === $zwei) {
+            return self::esc($code);
+        }
+
+        $flagge = mb_chr(0x1F1E6 + \ord($zwei[0]) - \ord('A'), 'UTF-8')
+            .mb_chr(0x1F1E6 + \ord($zwei[1]) - \ord('A'), 'UTF-8');
+
+        return sprintf('<span class="ctv-flagge" title="%s">%s</span>', self::esc($code), $flagge);
     }
 
     /**
@@ -345,6 +473,9 @@ final class Ausgabe
         return match ($spalte) {
             'punkte', 'feinwertung1', 'feinwertung2' => (string) (float) ($zeile[$spalte] ?? 0),
             'bilanz' => (string) (int) ($zeile['siege'] ?? 0),
+            // In der Zelle steht eine Flagge; nach ihr zu ordnen ergäbe die
+            // Reihenfolge der Unicode-Zeichen. Geordnet wird nach dem Code.
+            'land' => strtoupper(trim((string) ($zeile['land'] ?? ''))),
             default => '',
         };
     }

@@ -536,3 +536,11 @@
     color: var(--ctv-gedaempft) !important;
     font-size: .85em !important;
 }
+
+/* Flaggen der Foederationen. Etwas groesser als der Text, damit sie in einer
+ * Tabellenspalte zu erkennen sind. */
+
+.ctv-flagge {
+    font-size: 1.25em !important;
+    line-height: 1 !important;
+}

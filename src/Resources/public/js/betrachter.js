@@ -150,7 +150,11 @@
         var roh = feld.getAttribute('data-wert');
 
         if (null !== roh) {
-            return parseFloat(roh) || 0;
+            // Der Sortierwert ist meist eine Zahl — bei der Foederation aber
+            // der Laendercode, denn in der Zelle steht eine Flagge.
+            var zahlwert = parseFloat(roh);
+
+            return isNaN(zahlwert) ? roh.toLowerCase() : zahlwert;
         }
 
         var text = (feld.textContent || '').trim();

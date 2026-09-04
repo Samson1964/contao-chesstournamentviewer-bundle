@@ -76,7 +76,7 @@ final class Spalten
      */
     private const ANGEBOT = [
         'teilnehmer' => ['nr', 'brett', 'name', 'titel', 'elo', 'dwz', 'twz', 'verein', 'land', 'gruppe', 'geburtsjahr', 'fideId'],
-        'rangliste' => ['platz', 'name', 'titel', 'twz', 'elo', 'dwz', 'bilanz', 'partien', 'punkte', 'feinwertung1', 'feinwertung2', 'verein', 'land'],
+        'rangliste' => ['platz', 'nr', 'titel', 'name', 'twz', 'elo', 'dwz', 'verein', 'land', 'gruppe', 'geburtsjahr', 'fideId', 'bilanz', 'partien', 'punkte', 'feinwertung1', 'feinwertung2'],
     ];
 
     /**
@@ -92,7 +92,7 @@ final class Spalten
      */
     public const VORGABE = [
         'teilnehmer' => ['nr', 'name', 'twz', 'verein'],
-        'rangliste' => ['platz', 'name', 'twz', 'bilanz', 'punkte', 'feinwertung1', 'feinwertung2'],
+        'rangliste' => ['platz', 'titel', 'name', 'twz', 'verein', 'punkte', 'feinwertung1', 'feinwertung2'],
     ];
 
     /**

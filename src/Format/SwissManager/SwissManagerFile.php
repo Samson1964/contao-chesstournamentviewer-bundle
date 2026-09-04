@@ -515,9 +515,11 @@ class SwissManagerFile
 
         $this->turnier['wertungszahl'] = 'dwz' === $feld ? 'nationale Wertungszahl' : 'Elo';
 
-        // Dieselbe Angabe in der Schreibweise, die das Turniermodell führt:
-        // 0 für die internationale Elo-Zahl, 1 für die nationale. Nur so
-        // steht über der Spalte, welche Zahl der Leser vor sich hat.
+        // Die Beschriftung der Spalte. Sie nennt dieselbe Zahl, die auch in
+        // der Elo- beziehungsweise DWZ-Spalte steht — „NWZ" wäre hier falsch:
+        // Das ist die Bezeichnung von Swiss-Chess, chess-results schreibt für
+        // dieselbe Zahl „EloN", und in Deutschland heißt sie DWZ.
+        $this->turnier['wertungName'] = 'dwz' === $feld ? 'DWZ' : 'Elo';
         $this->turnier['twzErmittlung'] = 'dwz' === $feld ? 1 : 0;
     }
 
