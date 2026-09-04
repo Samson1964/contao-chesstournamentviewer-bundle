@@ -189,11 +189,19 @@ final class Spalten
         // zwei verschiedenen Spalten. Allein sagt der genaue Name mehr.
         $sammelbegriff = [] !== array_intersect(['elo', 'dwz'], $schluessel);
 
+        // Der Titel steht üblicherweise vor dem Namen — „IM Berger,Steve".
+        // Hat er eine eigene Spalte, wäre er zweimal da.
+        $titelspalte = \in_array('titel', $schluessel, true);
+
         foreach ($schluessel as $eine) {
             $satz = self::beschreibung($eine, $turnier);
 
             if ('twz' === $eine && $sammelbegriff) {
                 $satz['name'] = Ausgabe::spalte('twz');
+            }
+
+            if ('name' === $eine && $titelspalte) {
+                $satz['ohneTitel'] = true;
             }
 
             $spalten[] = $satz;
@@ -233,6 +241,7 @@ final class Spalten
                     'titel' => $name.($turnier->kopf('feinwertungSicher', true) ? '' : ' '.Ausgabe::wort('unsicher', '(Bezeichnung unsicher)')),
                     'klasse' => $satz['klasse'],
                     'zahl' => true,
+                    'ohneTitel' => false,
                 ];
             }
         }
@@ -245,6 +254,7 @@ final class Spalten
             'titel' => '' !== $kurz ? $voll : '',
             'klasse' => $satz['klasse'],
             'zahl' => $satz['zahl'],
+            'ohneTitel' => false,
         ];
     }
 

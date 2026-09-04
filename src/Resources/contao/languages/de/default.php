@@ -146,3 +146,5 @@ $GLOBALS['TL_LANG']['ctv']['hinweisOhneFeinwertung'] = 'Ohne Angabe bleibt die F
 $GLOBALS['TL_LANG']['ctv']['spalte']['geburtsjahr'] = 'Geburtsjahr';
 $GLOBALS['TL_LANG']['ctv']['spalte']['fideId'] = 'FIDE-Kennung';
 $GLOBALS['TL_LANG']['ctv']['spalte']['gruppe'] = 'Gruppe';
+
+$GLOBALS['TL_LANG']['ctv']['aktualisiert'] = 'Stand der Turnierdatei: %s';

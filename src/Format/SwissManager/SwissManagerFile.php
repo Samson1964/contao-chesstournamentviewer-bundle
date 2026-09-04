@@ -514,6 +514,11 @@ class SwissManagerFile
         }
 
         $this->turnier['wertungszahl'] = 'dwz' === $feld ? 'nationale Wertungszahl' : 'Elo';
+
+        // Dieselbe Angabe in der Schreibweise, die das Turniermodell führt:
+        // 0 für die internationale Elo-Zahl, 1 für die nationale. Nur so
+        // steht über der Spalte, welche Zahl der Leser vor sich hat.
+        $this->turnier['twzErmittlung'] = 'dwz' === $feld ? 1 : 0;
     }
 
     /**

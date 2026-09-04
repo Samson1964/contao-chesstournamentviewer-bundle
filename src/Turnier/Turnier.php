@@ -66,6 +66,34 @@ final class Turnier
     }
 
     /**
+     * Liefert dasselbe Turnier mit ergänzten Kopfdaten.
+     *
+     * Gebraucht wird das für Angaben, die nicht aus der Turnierdatei stammen,
+     * sondern aus ihrer Umgebung — etwa das Änderungsdatum der Datei. Das
+     * Format kann sie nicht liefern, es sieht nur den Inhalt.
+     *
+     * @param array<string,mixed> $zusatz Die zu ergänzenden Kopfdaten; sie
+     *                                    überschreiben gleichnamige Angaben
+     *
+     * @return self Ein neues Turnier; das bestehende bleibt unverändert
+     */
+    public function mitKopf(array $zusatz): self
+    {
+        return new self(
+            $this->format,
+            array_merge($this->kopf, $zusatz),
+            $this->spieler,
+            $this->mannschaften,
+            $this->paarungen,
+            $this->rangliste,
+            $this->runden,
+            $this->kreuztabelle,
+            $this->hinweise,
+            $this->mannschaftspaarungen,
+        );
+    }
+
+    /**
      * Gibt die Wettkämpfe der Mannschaften zurück.
      *
      * Aufbau: `[Mannschaftsnummer][Runde]`. Jeder Satz nennt mindestens

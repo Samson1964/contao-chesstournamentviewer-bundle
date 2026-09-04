@@ -26,7 +26,7 @@ $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'] =
     .'{ctv_spalten_legend},ctvSpalten;'
     .'{ctv_runden_legend},ctvStand,ctvRunden;'
     .'{ctv_mannschaft_legend},ctvMannschaftSpieler,ctvKreuzKurz;'
-    .'{ctv_hinweis_legend},ctvHinweise;'
+    .'{ctv_hinweis_legend},ctvDatum,ctvHinweise;'
     .'{template_legend:hide},customTpl;'
     .'{protected_legend:hide},protected;'
     .'{expert_legend:hide},cssID;'
@@ -139,6 +139,15 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvRunden'] = [
         'tl_class' => 'clr',
     ],
     'sql' => 'blob NULL',
+];
+
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvDatum'] = [
+    'exclude' => true,
+    'inputType' => 'checkbox',
+    'eval' => [
+        'tl_class' => 'clr',
+    ],
+    'sql' => "char(1) NOT NULL default ''",
 ];
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['ctvHinweise'] = [

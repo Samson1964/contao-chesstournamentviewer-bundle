@@ -528,3 +528,11 @@
 .ctv .ctv-tabelle td.ctv-farbe--s {
     background: var(--ctv-schwarz);
 }
+
+/* --- Stand der Turnierdatei --------------------------------------------- */
+
+.ctv-datum {
+    margin: .5rem 0 0 !important;
+    color: var(--ctv-gedaempft) !important;
+    font-size: .85em !important;
+}

@@ -1,5 +1,35 @@
 # Änderungen
 
+## Version 1.9.0 (2026-09-03)
+
+Diese Fassung bringt ein neues Datenbankfeld mit. Nach dem Aktualisieren ist
+ein **Datenbank-Abgleich** nötig.
+
+* Fix: Die Spalte der Turnierwertungszahl hieß **„Elo", wenn die Datei nicht
+  sagt, welche Zahl das Turnier führt** — und stand dann neben einer echten
+  Elo-Spalte zweimal gleich da. Ohne Angabe trägt sie jetzt den Sammelbegriff
+  „TWZ". Für Swiss-Manager wird die Angabe außerdem nachgeliefert: Dort steht
+  sie zwar nicht in der Datei, ergibt sich aber daraus, nach welcher Zahl die
+  Startrangliste geordnet ist. Betroffen war jede Swiss-Manager-Datei.
+* Fix: Der FIDE-Titel steht vor dem Namen — „IM Berger,Steve". Hat er eine
+  **eigene Spalte**, verschwindet er jetzt aus dem Namen; vorher stand er in
+  derselben Zeile zweimal.
+* Add: Kästchen **„Stand der Turnierdatei anzeigen"**. Setzt unter die Tabelle,
+  wann die Turnierdatei zuletzt geändert wurde. Maßgeblich ist das
+  Änderungsdatum in der Dateiverwaltung — Turnierleitungen laden nach jeder
+  Runde eine neue Fassung hoch, und damit ist es die verlässliche Auskunft
+  darüber, wie aktuell die Zahlen sind. Bringt ein Format eine eigene Angabe
+  mit, hat diese Vorrang.
+* Add: **Mannschafts-Rundenturniere (`.TUTx`) geprüft.** Die Endung war bisher
+  nur angemeldet, aber nie an einer gespielten Datei erprobt. Die
+  Senioren-Mannschaftsmeisterschaft der Landesverbände 2025 trifft die
+  Endtabelle von chess-results exakt: acht Mannschaften, Mannschafts- und
+  Brettpunkte ohne Abweichung.
+* Add: Neuer Swiss-Manager-Prüfbestand mit 78 Dateien in allen vier Endungen —
+  58 Schweizer System, 12 Rundenturniere, 4 Mannschafts-Rundenturniere und 4
+  Mannschaftsturniere nach Schweizer System. Alle laufen ohne Lesefehler durch
+  die volle Kette.
+
 ## Version 1.8.0 (2026-09-03)
 
 Diese Fassung ändert die Bedienung grundlegend und bringt neue

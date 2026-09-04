@@ -186,9 +186,14 @@ final class Ausgabe
             $einstellung = $turnier->kopf('twzErmittlung');
         }
 
-        $schluessel = match ((int) $einstellung) {
-            0 => 'elo',
-            1 => 'nwz',
+        // Fehlt die Angabe, bleibt es beim Sammelbegriff. Sie auf „Elo" zu
+        // legen — die 0 der SWT-Dateien — hieße, eine Aussage zu treffen, die
+        // nicht in der Datei steht: In einem Turnier nach nationalen Zahlen
+        // stünde dann „Elo" über der falschen Spalte.
+        $schluessel = match (true) {
+            null === $einstellung => 'twz',
+            0 === (int) $einstellung => 'elo',
+            1 === (int) $einstellung => 'nwz',
             default => 'twz',
         };
 
@@ -264,18 +269,21 @@ final class Ausgabe
      * Das Ergebnis ist bereits maskiert und kann unmittelbar ausgegeben
      * werden.
      *
-     * @param array<string,mixed> $zeile  Ein Teilnehmersatz
-     * @param string              $spalte Schlüssel der Spalte
+     * @param array<string,mixed> $zeile      Ein Teilnehmersatz
+     * @param string              $spalte     Schlüssel der Spalte
+     * @param bool                $ohneTitel  Lässt den Titel vor dem Namen weg.
+     *                                        Wahr, wenn der Titel eine eigene
+     *                                        Spalte hat — sonst stünde er zweimal da
      *
      * @return string Der Zelleninhalt, maskiert; leer, wenn nichts vorliegt
      */
-    public static function zelle(array $zeile, string $spalte): string
+    public static function zelle(array $zeile, string $spalte, bool $ohneTitel = false): string
     {
         return match ($spalte) {
             'nr' => self::zahl($zeile['tnr'] ?? 0),
             'platz' => self::zahl($zeile['platz'] ?? 0),
             'brett' => self::zahl($zeile['brett'] ?? 0),
-            'name' => self::esc(self::name($zeile)),
+            'name' => self::esc($ohneTitel ? trim((string) ($zeile['name'] ?? '')) : self::name($zeile)),
             'titel' => self::esc($zeile['titel'] ?? ''),
             'elo' => self::zahl($zeile['elo'] ?? 0),
             'dwz' => self::zahl($zeile['dwz'] ?? 0),

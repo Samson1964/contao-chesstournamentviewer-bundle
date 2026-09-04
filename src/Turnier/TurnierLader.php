@@ -106,7 +106,16 @@ class TurnierLader
             throw new \RuntimeException(sprintf('Die Turnierdatei "%s" konnte nicht gelesen werden.', $datei->path));
         }
 
-        return $this->gelesen[$schluessel] = $this->formate->lese(basename($datei->path), $inhalt, '' !== $format ? $format : 'auto');
+        $turnier = $this->formate->lese(basename($datei->path), $inhalt, '' !== $format ? $format : 'auto');
+
+        // Wann die Datei zuletzt geändert wurde, steht nicht in ihr, sondern
+        // im Dateisystem. Sie ist die einzige verlässliche Auskunft darüber,
+        // wie aktuell die gezeigten Zahlen sind: Die Turnierleitung lädt nach
+        // jeder Runde eine neue Fassung hoch.
+        return $this->gelesen[$schluessel] = $turnier->mitKopf([
+            'dateiname' => basename($datei->path),
+            'dateidatum' => filemtime($pfad) ?: 0,
+        ]);
     }
 
     /**

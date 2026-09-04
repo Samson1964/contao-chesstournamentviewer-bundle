@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Tests\Liste;
 
 use PHPUnit\Framework\TestCase;
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Auswahl;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Spalten;
@@ -24,8 +25,8 @@ class SpaltenTest extends TestCase
     /**
      * Prüft, dass nur Spalten angeboten werden, die Werte haben.
      *
-     * Das Prüfturnier führt eine TWZ, aber weder Elo noch DWZ, weder Titel
-     * noch Geburtsjahr. Diese Spalten sollen im Backend gar nicht erst
+     * Das Prüfturnier führt eine TWZ und einen Titel, aber weder Elo noch DWZ
+     * noch ein Geburtsjahr. Diese Spalten sollen im Backend gar nicht erst
      * erscheinen — ein Kästchen ohne Wirkung ist eine schlechte Auskunft.
      *
      * @return void
@@ -126,6 +127,48 @@ class SpaltenTest extends TestCase
 
         $this->assertSame(['name', 'nr'], array_column($listen[0]['daten']['spalten'], 'schluessel'));
         $this->assertTrue($listen[0]['daten']['sortierbar']);
+    }
+
+    /**
+     * Prüft, dass der Titel nicht zweimal erscheint.
+     *
+     * Vor dem Namen steht üblicherweise der Titel — „IM Berger,Steve". Hat er
+     * eine eigene Spalte, muss er aus dem Namen verschwinden; sonst steht er
+     * in derselben Zeile zweimal.
+     *
+     * @return void
+     */
+    public function testTitelStehtNichtZweimal(): void
+    {
+        $turnier = TurnierBauer::einzelturnier();
+        $spieler = $turnier->getSpieler()[1];
+
+        $ohneTitelspalte = Spalten::fuerAusgabe('teilnehmer', ['name'], $turnier);
+        $mitTitelspalte = Spalten::fuerAusgabe('teilnehmer', ['titel', 'name'], $turnier);
+
+        $this->assertFalse($ohneTitelspalte[0]['ohneTitel']);
+        $this->assertTrue($mitTitelspalte[1]['ohneTitel']);
+
+        $this->assertSame('IM Spieler 1', Ausgabe::zelle($spieler, 'name'));
+        $this->assertSame('Spieler 1', Ausgabe::zelle($spieler, 'name', true));
+    }
+
+    /**
+     * Prüft, dass die Wertungsspalte nicht zweimal „Elo" heißt.
+     *
+     * Fehlt in der Datei die Angabe, welche Zahl das Turnier führt, trug die
+     * Spalte bis Fassung 1.8.0 die Beschriftung „Elo" — auch in einem Turnier
+     * nach nationalen Zahlen, und neben einer echten Elo-Spalte gleich
+     * zweimal. Ohne Angabe steht dort jetzt der Sammelbegriff.
+     *
+     * @return void
+     */
+    public function testWertungsspalteOhneAngabe(): void
+    {
+        $turnier = TurnierBauer::einzelturnier();
+
+        $this->assertNull($turnier->kopf('twzErmittlung'));
+        $this->assertSame('TWZ', Ausgabe::wertungsname($turnier));
     }
 
     /**

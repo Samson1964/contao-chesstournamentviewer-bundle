@@ -10,9 +10,11 @@ declare(strict_types=1);
 
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Controller\ContentElement;
 
+use Contao\Config;
 use Contao\ContentModel;
 use Contao\CoreBundle\Controller\ContentElement\AbstractContentElementController;
 use Contao\CoreBundle\Security\Authentication\Token\TokenChecker;
+use Contao\Date;
 use Contao\StringUtil;
 use Contao\Template;
 use Psr\Log\LoggerInterface;
@@ -20,6 +22,7 @@ use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListene
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Auswahl;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Rundenschnitt;
+use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -137,6 +140,7 @@ class TurnierBetrachterController extends AbstractContentElementController
         // deshalb erscheinen sie nur auf Wunsch.
         $template->hinweise = $model->ctvHinweise ? $turnier->getHinweise() : [];
         $template->kennung = 'ctv-'.$model->id;
+        $template->aktualisiert = $model->ctvDatum ? $this->aktualisiert($turnier) : '';
 
         // Der Zwischenstand steht unabhängig von den Hinweisen über der
         // Ausgabe: Eine Tabelle nach Runde 4 sähe sonst aus wie die
@@ -144,6 +148,40 @@ class TurnierBetrachterController extends AbstractContentElementController
         $template->stand = (int) $turnier->kopf('standNachRunde', 0);
 
         return $template->getResponse();
+    }
+
+    /**
+     * Ermittelt, wann die Turnierdatei zuletzt aktualisiert wurde.
+     *
+     * Vorrang hat eine Angabe aus der Datei selbst — bislang liefert sie
+     * keines der beiden Formate, künftige mögen es tun. Sonst gilt das
+     * Änderungsdatum der Datei im Dateisystem: Die Turnierleitung lädt nach
+     * jeder Runde eine neue Fassung hoch, und damit ist es die verlässliche
+     * Auskunft darüber, wie aktuell die Zahlen sind.
+     *
+     * Geschrieben wird im Datums- und Zeitformat der Contao-Einstellungen,
+     * damit die Zeile aussieht wie der Rest der Seite.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier
+     *
+     * @return string Das Datum als Text, oder eine leere Zeichenkette wenn
+     *                sich keines ermitteln ließ
+     */
+    private function aktualisiert(Turnier $turnier): string
+    {
+        $angabe = trim((string) $turnier->kopf('aktualisiert', ''));
+
+        if ('' !== $angabe) {
+            return $angabe;
+        }
+
+        $stempel = (int) $turnier->kopf('dateidatum', 0);
+
+        if ($stempel < 1) {
+            return '';
+        }
+
+        return Date::parse((string) Config::get('datimFormat'), $stempel);
     }
 
     /**

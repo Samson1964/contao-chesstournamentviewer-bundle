@@ -127,3 +127,5 @@ $GLOBALS['TL_LANG']['ctv']['hinweisOhneFeinwertung'] = 'The tie-break %s is omit
 $GLOBALS['TL_LANG']['ctv']['spalte']['geburtsjahr'] = 'Born';
 $GLOBALS['TL_LANG']['ctv']['spalte']['fideId'] = 'FIDE ID';
 $GLOBALS['TL_LANG']['ctv']['spalte']['gruppe'] = 'Group';
+
+$GLOBALS['TL_LANG']['ctv']['aktualisiert'] = 'Tournament file as of %s';

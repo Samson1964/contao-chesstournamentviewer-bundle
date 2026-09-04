@@ -23,6 +23,6 @@ $zeile = $this->zeile;
       $wert = Ausgabe::sortierwert($zeile, $spalte['schluessel']);
       $attribute = ('' === $klasse ? '' : ' class="'.$klasse.'"').('' === $wert ? '' : ' data-wert="'.$wert.'"');
     ?>
-    <td<?= $attribute ?>><?= Ausgabe::zelle($zeile, $spalte['schluessel']) ?></td>
+    <td<?= $attribute ?>><?= Ausgabe::zelle($zeile, $spalte['schluessel'], (bool) ($spalte['ohneTitel'] ?? false)) ?></td>
   <?php endforeach; ?>
 </tr>

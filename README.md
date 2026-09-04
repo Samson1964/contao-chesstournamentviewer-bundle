@@ -60,7 +60,12 @@ sie gewählt und gespeichert ist.
 | Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden** |
 | Mannschaften, Wettkämpfe | **Spieler mit ausgeben** |
 | Kreuztabelle der Mannschaften | **Kreuztabelle kürzen** |
-| alle | **Hinweise zu den Zahlen anzeigen**, sofern die Datei welche erzeugt |
+| alle | **Stand der Turnierdatei anzeigen** und **Hinweise zu den Zahlen anzeigen** |
+
+„Stand der Turnierdatei anzeigen" setzt unter die Tabelle, wann die Datei
+zuletzt geändert wurde — maßgeblich ist das Änderungsdatum in der
+Dateiverwaltung. Turnierleitungen laden nach jeder Runde eine neue Fassung
+hoch; damit sagt die Zeile, wie aktuell die Zahlen sind.
 
 Das Feld **Format der Turnierdatei** steht ab Schritt 2 bereit. „Automatisch
 erkennen" ist der Regelfall; die Formate erkennen ihre Dateien am Inhalt,

@@ -40,6 +40,10 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
       <?php $this->insert($this->liste['template'], array_merge($this->liste['daten'], ['turnier' => $this->turnier])); ?>
 
+      <?php if ($this->aktualisiert): ?>
+        <p class="ctv-datum"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['aktualisiert'] ?? 'Stand der Turnierdatei: %s', $this->aktualisiert)) ?></p>
+      <?php endif; ?>
+
     </section>
 
   </div>

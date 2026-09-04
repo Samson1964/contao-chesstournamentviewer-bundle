@@ -201,7 +201,9 @@ final class TurnierBauer
                 'tnr' => $tnr,
                 'startnummer' => $tnr,
                 'name' => 'Spieler '.$tnr,
-                'titel' => '',
+                // Nur der erste trägt einen Titel: So ist die Titelspalte
+                // belegt, ohne dass jede Zeile gleich aussieht.
+                'titel' => 1 === $tnr ? 'IM' : '',
                 'twz' => 1600 + $tnr,
                 'mannschaft' => '',
                 'mannschaftsnummer' => 0,
