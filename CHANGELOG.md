@@ -40,6 +40,8 @@ nötig.
 erste.** Wer Reiter hatte, baut sie mit dem neuen Umschlag nach: ein Element
 je Liste, eingeklammert von „Umschlag Anfang" und „Umschlag Ende".
 
+### Ein Element je Ausgabe
+
 * Change: **Ein Inhaltselement gibt genau eine Liste aus.** Aus der
   Mehrfachauswahl „Auszugebende Listen" wird das Auswahlfeld „Auszugebende
   Liste". Damit trägt jedes Element nur noch die Einstellungen, die zu seiner
@@ -56,36 +58,31 @@ je Liste, eingeklammert von „Umschlag Anfang" und „Umschlag Ende".
   die Dateiauswahl da; nach dem Speichern kommt die Auswahl der Ausgabe hinzu;
   nach deren Wahl erscheinen sofort deren Einstellungen. Der Redakteur steht
   damit nie vor Feldern, die noch nichts bewirken können.
-* Change: Statt zweier Spaltenfelder gibt es eins. Es zeigt die Spalten der
-  gewählten Liste, und die gebräuchlichen sind vorangehakt.
-* Change: Die Vorauswahl der Teilnehmerliste ist schlanker: Nr., Name,
-  Turnierwertungszahl und Verein. Elo und DWZ lassen sich dazuhaken; alle drei
-  Wertungszahlen nebeneinander machten die Tabelle auf schmalen Bildschirmen
-  unlesbar.
+* Change: Die Reiterleiste baut das Skript aus den Ausgaben, die es im
+  Umschlag findet. Der Server kann sie nicht bauen: Das öffnende Element weiß
+  beim Ausliefern nicht, was nach ihm kommt. Ohne JavaScript stehen die
+  Ausgaben untereinander, jede mit ihrer Beschriftung und vollständig lesbar.
 * Change: „Stand nach Runde" heißt in der Vorgabe jetzt „Aktueller Stand
   (letzte Runde)" — dieselbe Wirkung, aber die Bezeichnung sagt, was sie tut:
   Sie nimmt die gespeicherten Zahlen der Datei und wächst mit, wenn eine neue
   Fassung hochgeladen wird.
-* Change: Die Reiterleiste baut jetzt das Skript aus den Ausgaben, die es im
-  Umschlag findet. Der Server kann sie nicht bauen: Das öffnende Element weiß
-  beim Ausliefern nicht, was nach ihm kommt. Ohne JavaScript stehen die
-  Ausgaben untereinander, jede vollständig lesbar.
 
-## Version 1.7.0 (2026-09-03)
-
-Diese Fassung bringt zwei neue Datenbankfelder mit. Nach dem Aktualisieren
-ist ein **Datenbank-Abgleich** nötig.
+### Wählbare Spalten und Sortierung
 
 * Add: **Wählbare Spalten für Teilnehmerliste und Rangliste.** Angeboten wird,
   was die gewählte Datei hergibt — ein Turnier ohne Elo-Zahlen bietet keine
   Elo-Spalte an, ein Einzelturnier keine Brettspalte, eine Datei ohne
   Feinwertung keine Feinwertungsspalte. Das Auswahlfeld lässt sich ziehen; die
-  Reihenfolge ist die der Ausgabe. Ohne Auswahl erscheinen die bisherigen
-  Spalten, bestehende Inhaltselemente ändern sich also nicht.
+  Reihenfolge ist die der Ausgabe. Die gebräuchlichen Spalten sind
+  vorangehakt.
 * Add: Neue Spalten, die es bisher nicht gab: Titel, Geburtsjahr,
   FIDE-Kennung, Gruppe, Land, Verein und die Zahl der Partien. Das Geburtsjahr
   kommt aus beiden Formaten — Swiss-Manager führt es als Zahl, der SWT-Leser
   als Datumstext.
+* Change: Die Vorauswahl der Teilnehmerliste ist schlanker als die bisherige
+  feste Spaltenfolge: Nr., Name, Turnierwertungszahl und Verein. Elo und DWZ
+  lassen sich dazuhaken; alle drei Wertungszahlen nebeneinander machten die
+  Tabelle auf schmalen Bildschirmen unlesbar.
 * Add: **Sortierung im Frontend.** In Teilnehmerliste und Rangliste ordnet ein
   Klick auf den Spaltenkopf die Tabelle; ein zweiter dreht die Richtung um.
   Punktestände wie „3½" und Bilanzen wie „5/2/1" werden nach ihrem Zahlenwert
@@ -95,13 +92,9 @@ ist ein **Datenbank-Abgleich** nötig.
   Turnierdatei.
 * Change: Nach Mannschaften gegliederte Tabellen sind nicht sortierbar — die
   Kopfzeilen der Mannschaften rutschten sonst zwischen die Spieler.
-* Change: **Bei einer einzigen Liste steht keine Überschrift mehr über der
-  Ausgabe.** Wer nur die Teilnehmerliste einbindet, hat die Überschrift des
-  Inhaltselements dafür. Ab zwei Listen erscheint sie weiterhin — und wird
-  ausgeblendet, sobald die Reiter stehen. Ohne JavaScript bleibt sie sichtbar,
-  was bisher fehlte: Dort standen die Listen ohne jede Beschriftung
-  untereinander.
-* Change: Das Inhaltselement heißt **„Schachturnier-Betrachter"**.
+
+### Kleineres
+
 * Change: Die Warnung zu den erlaubten Dateitypen nennt die Endungen ohne
   Leerzeichen — genau so, wie sie in „Einstellungen → Erlaubte Dateitypen"
   einzutragen sind.
