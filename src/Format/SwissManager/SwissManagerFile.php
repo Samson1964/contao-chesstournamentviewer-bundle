@@ -80,13 +80,20 @@ class SwissManagerFile
 
     /**
      * Zahl der Zeichenkettenfelder einer Mannschaftskarte.
+     *
+     * Bis Fassung 1.10.0 stand hier 27, beim Zahlenblock 52 — zusammen
+     * dieselbe Satzlänge, solange das erste Wort des Zahlenblocks null ist.
+     * Bei der Schacholympiade für Menschen mit Behinderung 2026 steht dort bei
+     * Spanien eine 18. Als 27. Zeichenkette gelesen, wurde daraus eine Länge
+     * von 18 Zeichen, der Leser verrutschte und brach nach 20 von 41
+     * Mannschaften ab.
      */
-    private const TEXTE_MANNSCHAFT = 27;
+    private const TEXTE_MANNSCHAFT = 26;
 
     /**
      * Länge des Zahlenblocks hinter den Zeichenketten einer Mannschaftskarte.
      */
-    private const ZAHLEN_MANNSCHAFT = 52;
+    private const ZAHLEN_MANNSCHAFT = 54;
 
     /**
      * Ergebnisschlüssel der Partiesätze.
@@ -589,13 +596,29 @@ class SwissManagerFile
     private function ordneSpielerZu(): void
     {
         $nach = [];
+        $verwaist = [];
 
         foreach ($this->spieler as $nummer => $spieler) {
             $mnr = (int) $spieler['mannschaftsnummer'];
 
             if (isset($this->mannschaften[$mnr])) {
                 $nach[$mnr][(int) $spieler['brett']] = $nummer;
+            } elseif ($mnr > 0) {
+                $verwaist[$mnr] = true;
             }
+        }
+
+        // Verweist ein Spieler auf eine Mannschaft, die nicht gelesen wurde,
+        // ist der Mannschaftsabschnitt nicht vollständig ausgewertet. Genau so
+        // fiel der Fehler bis Fassung 1.10.0 aus: 41 Mannschaften in der
+        // Datei, 20 gelesen, und keine Meldung.
+        if ([] !== $verwaist) {
+            $this->hinweise[] = sprintf(
+                'Spieler verweisen auf %d Mannschaften, die nicht gelesen werden konnten (höchste Nummer %d, gelesen %d). Die Mannschaftslisten sind unvollständig.',
+                \count($verwaist),
+                max(array_keys($verwaist)),
+                \count($this->mannschaften)
+            );
         }
 
         foreach ($nach as $mnr => $spieler) {

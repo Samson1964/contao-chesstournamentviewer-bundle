@@ -124,9 +124,23 @@ Sonderwerte zählen dabei nicht mit.
 
 ### Mannschaftskarte (`B5`)
 
-**27 Zeichenketten, dann 52 Byte Zahlen.** Zeichenketten: 0 Name, 1 Kurzname,
+**26 Zeichenketten, dann 54 Byte Zahlen.** Zeichenketten: 0 Name, 1 Kurzname,
 2 Mannschaftsführer, 3 Föderation. Die Startnummer ergibt sich wieder aus der
 Reihenfolge; die Aufstellung steht in den Teilnehmerkarten.
+
+Bis Fassung 1.10.0 galt hier „27 Zeichenketten, dann 52 Byte". Beide Annahmen
+sind gleich lang, solange die 27. Zeichenkette leer ist und die beiden
+zusätzlichen Byte null sind — und das trifft auf fast alle Dateien zu. Die
+Schacholympiade für Menschen mit Behinderung 2026 (chess-results 1470206)
+widerlegt es: Bei der 19. Mannschaft (Spanien) steht an dieser Stelle der Wert
+`0x12`, die alte Lesart las ihn als Länge einer Zeichenkette und kam aus dem
+Tritt. Übrig blieben 20 von 41 Mannschaften, die letzte davon mit dem
+Mannschaftsführer von „Uzbekistan 1" als Namen. Mit 26 + 54 stimmen alle 41
+Mannschaften, und alle übrigen Mannschaftsdateien des Prüfbestands lesen sich
+unverändert.
+
+Verweisen Teilnehmerkarten auf Mannschaftsnummern, die nicht gelesen wurden,
+meldet der Leser das als Hinweis — so fällt ein solcher Versatz künftig auf.
 
 ### Wettkampf (`C3`)
 

@@ -2,6 +2,21 @@
 
 ## Version 1.10.0 (2026-09-03)
 
+* Fix: **Swiss-Manager: Mannschaftslisten brachen nach etwa der Hälfte ab.**
+  Bei der Schacholympiade für Menschen mit Behinderung 2026 erschienen nur 20
+  von 41 Mannschaften, die letzte davon unter dem Namen „Shermuhammadov,
+  Samandar" — das ist der Mannschaftsführer von „Uzbekistan 1". Die
+  Mannschaftskarte ist 26 Zeichenketten und 54 Byte lang, nicht 27 und 52;
+  der Unterschied fällt nur auf, wenn in den beiden Byte etwas steht. Jetzt
+  erscheinen alle 41 Mannschaften, und ein Hinweis meldet, wenn Spieler auf
+  Mannschaften verweisen, die nicht gelesen werden konnten.
+* Add: **Ländernamen werden in die Sprache der Seite übersetzt.** Aus
+  „Poland", „Uzbekistan 2" und „Czech Republic" werden auf einer deutschen
+  Seite „Polen", „Usbekistan 2" und „Tschechien" — in allen Listen und auch
+  als Gegner in den Paarungen. Vereinsnamen und Verbände ohne Land wie „IBCA"
+  bleiben unverändert. Am Flaggenfeld steht jetzt der Ländername mit Code als
+  Titel, etwa „Polen (POL)".
+
 * Change: **Die Rangliste beginnt mit anderen Spalten** — Platz, Titel, Name,
   Turnierwertungszahl, Verein, Punkte und die Feinwertungen. Zur Wahl stehen
   jetzt außerdem alle Spalten der Teilnehmerliste, also auch Gruppe,

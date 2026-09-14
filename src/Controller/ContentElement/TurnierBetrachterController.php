@@ -20,6 +20,7 @@ use Contao\Template;
 use Psr\Log\LoggerInterface;
 use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Auswahl;
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Laender;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Rundenschnitt;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
@@ -107,6 +108,10 @@ class TurnierBetrachterController extends AbstractContentElementController
             array_map('intval', StringUtil::deserialize($model->ctvRunden, true)),
             [$schluessel => StringUtil::deserialize($model->ctvSpalten, true)],
         );
+
+        // Nationalmannschaften heißen in den Dateien meist englisch —
+        // „Poland", „Uzbekistan 2". Übersetzt wird in die Sprache der Seite.
+        $turnier = Laender::uebersetzeMannschaften($turnier, $request->getLocale());
 
         // Der Rundenschnitt versetzt das Turnier zurück; von da an gelten
         // dessen Zahlen, auch für Kopfdaten und Hinweise.

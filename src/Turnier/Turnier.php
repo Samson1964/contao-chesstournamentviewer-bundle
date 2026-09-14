@@ -94,6 +94,33 @@ final class Turnier
     }
 
     /**
+     * Liefert dasselbe Turnier mit ausgetauschten Mannschaftsdaten.
+     *
+     * Gebraucht wird das für die Übersetzung der Mannschaftsnamen: Sie hängt
+     * an der Sprache der Seite, und die kennt erst der Controller.
+     *
+     * @param array<int,array<string,mixed>>            $mannschaften         Die Mannschaften
+     * @param array<int,array<int,array<string,mixed>>> $mannschaftspaarungen Die Wettkämpfe
+     *
+     * @return self Ein neues Turnier; das bestehende bleibt unverändert
+     */
+    public function mitMannschaften(array $mannschaften, array $mannschaftspaarungen): self
+    {
+        return new self(
+            $this->format,
+            $this->kopf,
+            $this->spieler,
+            $mannschaften,
+            $this->paarungen,
+            $this->rangliste,
+            $this->runden,
+            $this->kreuztabelle,
+            $this->hinweise,
+            $mannschaftspaarungen,
+        );
+    }
+
+    /**
      * Gibt die Wettkämpfe der Mannschaften zurück.
      *
      * Aufbau: `[Mannschaftsnummer][Runde]`. Jeder Satz nennt mindestens

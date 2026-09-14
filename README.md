@@ -126,9 +126,20 @@ Verein, bei der Rangliste Platz, Titel, Name, Wertungszahl, Verein, Punkte und
 die Feinwertungen.
 
 Zwei Spalten werden besonders gesetzt: **Die Föderation erscheint als
-Flagge** — der dreibuchstabige Code steht als Titel am Feld —, und **Punkte
-und Feinwertungen stehen mit Komma**, also „7,5" statt „7½". Das ½ bleibt
-dort, wo eine Zahl für sich steht: in Ergebnislisten und Kreuztabellen.
+Flagge** — als Titel am Feld stehen Ländername und Code, etwa „Polen (POL)" —,
+und **Punkte und Feinwertungen stehen mit Komma**, also „7,5" statt „7½". Das
+½ bleibt dort, wo eine Zahl für sich steht: in Ergebnislisten und
+Kreuztabellen.
+
+**Ländernamen werden in die Sprache der Seite übersetzt.** Nationalmannschaften
+heißen in den Turnierdateien meist englisch — „Poland", „Uzbekistan 2",
+„Czech Republic". Auf einer deutschen Seite erscheinen sie als „Polen",
+„Usbekistan 2" und „Tschechien", in allen Listen, auch als Gegner in den
+Paarungen. Übersetzt wird nur, was eindeutig ein Ländername ist: Der Name muss
+— von einer angehängten Nummer abgesehen — zur Föderation der Mannschaft
+passen. Vereinsnamen wie „SK Deizisau" und Verbände ohne Land wie „IBCA"
+bleiben, wie sie sind. Die Namen stammen aus Symfony Intl, das Contao ohnehin
+mitbringt.
 
 Dieselbe Auswahl taugt für mehrere Turnierdateien: Was eine Datei nicht
 hergibt, wird übergangen. Bleibt nichts übrig, greift die Vorgabe.

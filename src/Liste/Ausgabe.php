@@ -24,62 +24,6 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftswertung;
 final class Ausgabe
 {
     /**
-     * Die Länderkennungen des Weltschachbundes und ihre ISO-Entsprechung.
-     *
-     * Turnierdateien führen die dreibuchstabigen Kennungen der FIDE; für eine
-     * Flagge braucht es die zweibuchstabigen nach ISO 3166. Die FIDE folgt
-     * überwiegend den Kennungen des Olympischen Komitees, die sich von den
-     * ISO-Kennungen an vielen Stellen unterscheiden — „GER" gegen „DE".
-     *
-     * Was hier fehlt, erscheint als Code. Das ist der bessere Ausgang als
-     * eine falsche Flagge: Bei „FID" — Sportler unter der Flagge des
-     * Weltschachbundes — gibt es keine.
-     *
-     * @var array<string,string>
-     */
-    private const LAENDER = [
-        'AFG' => 'AF', 'ALB' => 'AL', 'ALG' => 'DZ', 'AND' => 'AD', 'ANG' => 'AO',
-        'ANT' => 'AG', 'ARG' => 'AR', 'ARM' => 'AM', 'ARU' => 'AW', 'AUS' => 'AU',
-        'AUT' => 'AT', 'AZE' => 'AZ', 'BAH' => 'BS', 'BAN' => 'BD', 'BAR' => 'BB',
-        'BDI' => 'BI', 'BEL' => 'BE', 'BEN' => 'BJ', 'BER' => 'BM', 'BHU' => 'BT',
-        'BIH' => 'BA', 'BLR' => 'BY', 'BLZ' => 'BZ', 'BOL' => 'BO', 'BOT' => 'BW',
-        'BRA' => 'BR', 'BRN' => 'BH', 'BRU' => 'BN', 'BUL' => 'BG', 'BUR' => 'BF',
-        'CAF' => 'CF', 'CAM' => 'KH', 'CAN' => 'CA', 'CAY' => 'KY', 'CGO' => 'CG',
-        'CHA' => 'TD', 'CHI' => 'CL', 'CHN' => 'CN', 'CIV' => 'CI', 'CMR' => 'CM',
-        'COD' => 'CD', 'COL' => 'CO', 'COM' => 'KM', 'CPV' => 'CV', 'CRC' => 'CR',
-        'CRO' => 'HR', 'CUB' => 'CU', 'CYP' => 'CY', 'CZE' => 'CZ', 'DEN' => 'DK',
-        'DJI' => 'DJ', 'DOM' => 'DO', 'ECU' => 'EC', 'EGY' => 'EG', 'ENG' => 'GB',
-        'ERI' => 'ER', 'ESA' => 'SV', 'ESP' => 'ES', 'EST' => 'EE', 'ETH' => 'ET',
-        'FAI' => 'FO', 'FIJ' => 'FJ', 'FIN' => 'FI', 'FRA' => 'FR', 'GAB' => 'GA',
-        'GAM' => 'GM', 'GCI' => 'GG', 'GEO' => 'GE', 'GER' => 'DE', 'GHA' => 'GH',
-        'GRE' => 'GR', 'GRN' => 'GD', 'GUA' => 'GT', 'GUM' => 'GU', 'GUY' => 'GY',
-        'HAI' => 'HT', 'HKG' => 'HK', 'HON' => 'HN', 'HUN' => 'HU', 'INA' => 'ID',
-        'IND' => 'IN', 'IRI' => 'IR', 'IRL' => 'IE', 'IRQ' => 'IQ', 'ISL' => 'IS',
-        'ISR' => 'IL', 'ISV' => 'VI', 'ITA' => 'IT', 'IVB' => 'VG', 'JAM' => 'JM',
-        'JCI' => 'JE', 'JOR' => 'JO', 'JPN' => 'JP', 'KAZ' => 'KZ', 'KEN' => 'KE',
-        'KGZ' => 'KG', 'KOR' => 'KR', 'KOS' => 'XK', 'KSA' => 'SA', 'KUW' => 'KW',
-        'LAO' => 'LA', 'LAT' => 'LV', 'LBA' => 'LY', 'LBN' => 'LB', 'LBR' => 'LR',
-        'LCA' => 'LC', 'LES' => 'LS', 'LIE' => 'LI', 'LTU' => 'LT', 'LUX' => 'LU',
-        'MAC' => 'MO', 'MAD' => 'MG', 'MAR' => 'MA', 'MAS' => 'MY', 'MAW' => 'MW',
-        'MDA' => 'MD', 'MDV' => 'MV', 'MEX' => 'MX', 'MGL' => 'MN', 'MKD' => 'MK',
-        'MLI' => 'ML', 'MLT' => 'MT', 'MNE' => 'ME', 'MNC' => 'MC', 'MOZ' => 'MZ',
-        'MRI' => 'MU', 'MTN' => 'MR', 'MYA' => 'MM', 'NAM' => 'NA', 'NCA' => 'NI',
-        'NED' => 'NL', 'NEP' => 'NP', 'NGR' => 'NG', 'NIG' => 'NE', 'NOR' => 'NO',
-        'NZL' => 'NZ', 'OMA' => 'OM', 'PAK' => 'PK', 'PAN' => 'PA', 'PAR' => 'PY',
-        'PER' => 'PE', 'PHI' => 'PH', 'PLE' => 'PS', 'PNG' => 'PG', 'POL' => 'PL',
-        'POR' => 'PT', 'PUR' => 'PR', 'QAT' => 'QA', 'ROU' => 'RO', 'RSA' => 'ZA',
-        'RUS' => 'RU', 'RWA' => 'RW', 'SCO' => 'GB', 'SEN' => 'SN', 'SEY' => 'SC',
-        'SGP' => 'SG', 'SLE' => 'SL', 'SLO' => 'SI', 'SMR' => 'SM', 'SOL' => 'SB',
-        'SOM' => 'SO', 'SRB' => 'RS', 'SRI' => 'LK', 'SSD' => 'SS', 'STP' => 'ST',
-        'SUD' => 'SD', 'SUI' => 'CH', 'SUR' => 'SR', 'SVK' => 'SK', 'SWE' => 'SE',
-        'SWZ' => 'SZ', 'SYR' => 'SY', 'TAN' => 'TZ', 'THA' => 'TH', 'TJK' => 'TJ',
-        'TKM' => 'TM', 'TLS' => 'TL', 'TOG' => 'TG', 'TPE' => 'TW', 'TTO' => 'TT',
-        'TUN' => 'TN', 'TUR' => 'TR', 'UAE' => 'AE', 'UGA' => 'UG', 'UKR' => 'UA',
-        'URU' => 'UY', 'USA' => 'US', 'UZB' => 'UZ', 'VEN' => 'VE', 'VIE' => 'VN',
-        'VIN' => 'VC', 'WLS' => 'GB', 'YEM' => 'YE', 'ZAM' => 'ZM', 'ZIM' => 'ZW',
-    ];
-
-    /**
      * Schreibt eine Punktzahl in der im Schach üblichen Form.
      *
      * Halbe Punkte erscheinen als ½, ganze ohne Nachkommastelle. Der Wert
@@ -418,7 +362,7 @@ final class Ausgabe
             return '';
         }
 
-        $zwei = self::LAENDER[$code] ?? null;
+        $zwei = Laender::iso($code);
 
         if (null === $zwei) {
             return self::esc($code);
@@ -427,7 +371,12 @@ final class Ausgabe
         $flagge = mb_chr(0x1F1E6 + \ord($zwei[0]) - \ord('A'), 'UTF-8')
             .mb_chr(0x1F1E6 + \ord($zwei[1]) - \ord('A'), 'UTF-8');
 
-        return sprintf('<span class="ctv-flagge" title="%s">%s</span>', self::esc($code), $flagge);
+        // Im Titel steht der Ländername in der Sprache der Seite, dahinter der
+        // Code — so ist die Flagge auch ohne Flaggenkenntnis zuzuordnen.
+        $name = Laender::name($code);
+        $titel = null === $name ? $code : $name.' ('.$code.')';
+
+        return sprintf('<span class="ctv-flagge" title="%s">%s</span>', self::esc($titel), $flagge);
     }
 
     /**
