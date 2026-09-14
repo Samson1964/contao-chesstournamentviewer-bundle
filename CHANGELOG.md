@@ -1,6 +1,6 @@
 # Änderungen
 
-## Version 1.10.0 (2026-09-03)
+## Version 1.10.0 (2026-09-14)
 
 * Fix: **Swiss-Manager: Mannschaftslisten brachen nach etwa der Hälfte ab.**
   Bei der Schacholympiade für Menschen mit Behinderung 2026 erschienen nur 20
