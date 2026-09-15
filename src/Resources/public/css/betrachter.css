@@ -481,6 +481,21 @@
     font-weight: 400;
 }
 
+/*
+ * Kopfzeile eines Wettkampfs in Paarungen und Ergebnissen. Sie ersetzt den
+ * Tabellenkopf und trägt dieselben sechs Spalten wie die Bretter darunter;
+ * Zahlen und Ergebnis stehen deshalb wie dort ausgerichtet, nicht links.
+ */
+.ctv .ctv-tabelle .ctv-kampfkopf > th.ctv-zahl {
+    text-align: right !important;
+    color: var(--ctv-gedaempft);
+    font-weight: 400;
+}
+
+.ctv .ctv-tabelle .ctv-kampfkopf > th.ctv-paarung__ergebnis {
+    text-align: center !important;
+}
+
 /* Der Wettkampf selbst tritt gegenüber seinen Brettern hervor. */
 .ctv .ctv-tabelle .ctv-wettkampf > td {
     padding-top: .5rem !important;

@@ -49,18 +49,28 @@ sie gewählt und gespeichert ist.
    werden nur Dateien mit einer Endung, die ein registriertes Format kennt.
 2. **Speichern.** Jetzt kommt **Auszugebende Liste** hinzu, ein Auswahlfeld
    mit dem, was diese Datei hergibt: Bei einem Einzelturnier fehlen die
-   Mannschaftslisten, vor der ersten Runde die Kreuztabelle.
+   Mannschaftslisten, bei einem Mannschaftsturnier Kreuztabelle und
+   Fortschrittstabellen der Spieler, vor der ersten Runde die Kreuztabelle.
 3. **Liste wählen.** Deren Einstellungen erscheinen sofort — das Auswahlfeld
    schickt die Maske ab. Welche das sind, hängt von der Liste ab:
 
 | Liste | Einstellungen |
 | --- | --- |
 | Teilnehmer, Rangliste | **Spalten** — siehe [Spalten und Sortierung](#spalten-und-sortierung) |
-| Rangliste, Kreuztabelle, Fortschritt, Mannschaftstabelle, Kreuztabelle der Mannschaften | **Stand nach Runde** — siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden) |
-| Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden** |
+| Rangliste, Kreuztabelle, Fortschritt, Mannschaftstabelle, Fortschrittstabelle der Mannschaften, Kreuztabelle der Mannschaften | **Stand nach Runde** und **Zeile „Stand nach Runde" ausblenden** — siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden) |
+| Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden**; bei Mannschaftsturnieren zusätzlich **Mannschaften** |
 | Mannschaften, Wettkämpfe | **Spieler mit ausgeben** |
 | Kreuztabelle der Mannschaften | **Kreuztabelle kürzen** |
 | alle | **Stand der Turnierdatei anzeigen** und **Hinweise zu den Zahlen anzeigen** |
+
+**Eine Einstellung wirkt nur bei den Listen, zu denen sie gehört.** Wer ein
+Element von der Mannschaftstabelle nach Runde 3 auf die Mannschaftsliste
+umstellt, behält den Wert zwar im Datensatz, er bleibt aber ohne Wirkung.
+
+**Mannschaften** beschränkt Paarungen, Ergebnisse und Wettkämpfe auf die
+gewählten Mannschaften — wer nur „Deutschland" wählt, sieht dessen
+Wettkämpfe samt Gegnern. Runden, in denen keine gewählte Mannschaft antrat,
+entfallen.
 
 „Stand der Turnierdatei anzeigen" setzt unter die Tabelle, wann die Datei
 zuletzt geändert wurde — maßgeblich ist das Änderungsdatum in der
@@ -99,15 +109,21 @@ Rückfallebene wie bisher.
 | Turnierdaten | Name, Ort, Zeitraum, Turnierform, Runden, Feinwertungen |
 | Teilnehmer | Startliste mit Elo, DWZ, TWZ und Verein; bei Mannschaftsturnieren nach Mannschaften gegliedert |
 | Rangliste | Endstand mit Bilanz, Punkten und Feinwertungen; bei Mannschaftsturnieren nach Mannschaften gegliedert |
-| Kreuztabelle | Jeder gegen jeden, in Ranglistenreihenfolge |
-| Fortschrittstabelle | Je Runde Ergebnis, Farbe und Gegner, darunter der Punktestand |
-| Fortschritt ohne Punktestand | Dieselbe Tabelle, nur der Verlauf |
-| Paarungen | Auslosung je Runde, ohne Ergebnisse; bei Mannschaftsturnieren nach Wettkämpfen gegliedert |
-| Ergebnisse | Dieselben Partien mit Ergebnis |
+| Kreuztabelle | Jeder gegen jeden, in Ranglistenreihenfolge; nur bei Einzelturnieren |
+| Fortschrittstabelle | Je Runde Ergebnis, Farbe und Gegner, darunter der Punktestand; nur bei Einzelturnieren |
+| Fortschritt ohne Punktestand | Dieselbe Tabelle, nur der Verlauf; nur bei Einzelturnieren |
+| Paarungen | Auslosung je Runde, ohne Ergebnisse; bei Mannschaftsturnieren je Wettkampf eine Kopfzeile mit beiden Mannschaften — bei Ländern mit Flagge —, darunter die Bretter ab 1 |
+| Ergebnisse | Dieselben Partien mit Ergebnis; in der Kopfzeile eines Wettkampfs steht dessen Endstand |
 | Mannschaften | Mannschaftsliste, auf Wunsch mit Aufstellung |
 | Mannschaftstabelle | Wettkämpfe, Bilanz, Mannschafts- und Brettpunkte |
+| Fortschrittstabelle der Mannschaften | Je Runde die eigenen Brettpunkte und die Startnummer des Gegners, darunter der Stand der Mannschaftspunkte |
 | Wettkämpfe | Die Begegnungen je Runde mit Wertungsschnitt, auf Wunsch mit Einzelpartien; die Bretter stehen nach Mannschaft ausgerichtet, die Farbe ist am Grund der Felder abzulesen |
 | Kreuztabelle der Mannschaften | Die Wettkampfergebnisse als Kreuztabelle |
+
+In Paarungen, Ergebnissen und Wettkämpfen eines Mannschaftsturniers stehen die
+Spieler als „Titel Vorname Nachname", also „IM Marcin Molenda" statt
+„IM Molenda,Marcin". Die Spalten gehören dort den Mannschaften, nicht den
+Farben; wer Schwarz führte, sitzt auf dunklerem Grund.
 
 ### Spalten und Sortierung
 
@@ -162,7 +178,9 @@ Verschiedenes:
 den Mannschaftstabellen. Es ist ein Schnitt durch das ganze Turnier: Alles,
 was danach gespielt wurde, ist weg — nicht ausgeblendet, sondern entfernt.
 Über der Ausgabe steht dann „Stand nach Runde 4", damit niemand einen
-Zwischenstand für die Endtabelle hält.
+Zwischenstand für die Endtabelle hält. Nennt die Überschrift des Elements die
+Runde schon, lässt sich die Zeile mit **Zeile „Stand nach Runde"
+ausblenden** abschalten.
 
 „Aktueller Stand (letzte Runde)" ist die Vorgabe. Sie nimmt die gespeicherten
 Zahlen der Turnierdatei — die des jeweils letzten Standes — und rechnet
@@ -231,6 +249,7 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 | `ctv_spaltenzeile` | Eine Zeile von Teilnehmerliste und Rangliste, mit den gewählten Spalten |
 | `ctv_mannschaften` | Mannschaften |
 | `ctv_mannschaftsrangliste` | Mannschaftstabelle |
+| `ctv_mannschaftsfortschritt` | Fortschrittstabelle der Mannschaften |
 | `ctv_mannschaftspaarungen` | Wettkämpfe |
 | `ctv_mannschaftskreuztabelle` | Kreuztabelle der Mannschaften |
 

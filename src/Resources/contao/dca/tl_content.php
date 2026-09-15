@@ -24,8 +24,8 @@ $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'] =
     '{type_legend},type,headline;'
     .'{ctv_legend},ctvDatei,ctvFormat,ctvListe;'
     .'{ctv_spalten_legend},ctvSpalten;'
-    .'{ctv_runden_legend},ctvStand,ctvRunden;'
-    .'{ctv_mannschaft_legend},ctvMannschaftSpieler,ctvKreuzKurz;'
+    .'{ctv_runden_legend},ctvStand,ctvStandAus,ctvRunden;'
+    .'{ctv_mannschaft_legend},ctvMannschaftswahl,ctvMannschaftSpieler,ctvKreuzKurz;'
     .'{ctv_hinweis_legend},ctvDatum,ctvHinweise;'
     .'{template_legend:hide},customTpl;'
     .'{protected_legend:hide},protected;'
@@ -128,6 +128,36 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvStand'] = [
         'tl_class' => 'w50 clr',
     ],
     'sql' => "smallint(5) unsigned NOT NULL default '0'",
+];
+
+/*
+ * Blendet die Zeile „Stand nach Runde" über der Ausgabe aus. Standard ist
+ * die Zeile sichtbar: Eine zurückgesetzte Tabelle ohne Angabe sähe aus wie
+ * die Endtabelle.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvStandAus'] = [
+    'exclude' => true,
+    'inputType' => 'checkbox',
+    'eval' => [
+        'tl_class' => 'w50 m12',
+    ],
+    'sql' => "char(1) NOT NULL default ''",
+];
+
+/*
+ * Beschränkt Paarungen, Ergebnisse und Wettkämpfe auf einzelne Mannschaften.
+ * Die Auswahl entsteht aus der Datei; gespeichert werden die
+ * Mannschaftsnummern.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvMannschaftswahl'] = [
+    'exclude' => true,
+    'inputType' => 'checkbox',
+    'reference' => &$GLOBALS['TL_LANG']['ctv']['mannschaftswahl'],
+    'eval' => [
+        'multiple' => true,
+        'tl_class' => 'clr ctv-mannschaftswahl',
+    ],
+    'sql' => 'blob NULL',
 ];
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['ctvRunden'] = [

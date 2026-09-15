@@ -37,6 +37,9 @@ final class Auswahl
      * @param array<string,string[]> $spalten Gewählte Spalten je Liste, in der
      *                              Reihenfolge der Ausgabe; eine Liste ohne
      *                              Eintrag bekommt ihre Vorgabespalten
+     * @param int[]    $mannschaften Mannschaftsnummern, auf deren Wettkämpfe
+     *                              Paarungen, Ergebnisse und Wettkämpfe
+     *                              beschränkt werden; leer für alle
      */
     public function __construct(
         public readonly array $listen = [],
@@ -45,7 +48,54 @@ final class Auswahl
         public readonly int $stand = 0,
         public readonly array $runden = [],
         public readonly array $spalten = [],
+        public readonly array $mannschaften = [],
     ) {
+    }
+
+    /**
+     * Baut die Auswahl für ein Element, das genau eine Liste ausgibt.
+     *
+     * Übernommen wird nur, was zu dieser Liste gehört. Das ist nötig, weil
+     * ein Element seine Einstellungen behält, wenn der Redakteur die Liste
+     * wechselt: Die Maske blendet „Stand nach Runde" dann zwar aus, der Wert
+     * steht aber weiter im Datensatz. Bis Fassung 1.10.0 wirkte er trotzdem —
+     * wer von der Mannschaftstabelle nach Runde 3 auf die Mannschaftsliste
+     * umstellte, sah darüber weiter „Stand nach Runde 3", und die Liste war
+     * tatsächlich zurückgesetzt.
+     *
+     * @param string   $liste        Schlüssel der Liste; leer ergibt eine leere Auswahl
+     * @param bool     $mitSpielern  Wert des Feldes „Spieler mit ausgeben"
+     * @param bool     $kreuzKurz    Wert des Feldes „Kreuztabelle kürzen"
+     * @param int      $stand        Wert des Feldes „Stand nach Runde"
+     * @param int[]    $runden       Wert des Feldes „Angezeigte Runden"
+     * @param string[] $spalten      Wert des Feldes „Spalten"
+     * @param int[]    $mannschaften Wert des Feldes „Mannschaften"
+     *
+     * @return self Die Auswahl, in der alles Unpassende auf seinen
+     *              Ausgangswert zurückgesetzt ist
+     */
+    public static function fuerListe(
+        string $liste,
+        bool $mitSpielern = false,
+        bool $kreuzKurz = false,
+        int $stand = 0,
+        array $runden = [],
+        array $spalten = [],
+        array $mannschaften = [],
+    ): self {
+        if ('' === $liste) {
+            return new self();
+        }
+
+        return new self(
+            [$liste],
+            $mitSpielern && \in_array($liste, Listen::MIT_SPIELERN, true),
+            $kreuzKurz && 'mannschaftskreuztabelle' === $liste,
+            \in_array($liste, Listen::MIT_STAND, true) ? max(0, $stand) : 0,
+            \in_array($liste, Listen::MIT_RUNDEN, true) ? array_values(array_map('intval', $runden)) : [],
+            Spalten::einstellbar($liste) ? [$liste => $spalten] : [],
+            \in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true) ? array_values(array_filter(array_map('intval', $mannschaften))) : [],
+        );
     }
 
     /**
@@ -76,5 +126,27 @@ final class Auswahl
     public function zeigtRunde(int $runde): bool
     {
         return [] === $this->runden || \in_array($runde, $this->runden, true);
+    }
+
+    /**
+     * Sagt, ob ein Wettkampf erscheinen soll.
+     *
+     * Ein Wettkampf erscheint, wenn eine der beiden Mannschaften gewählt ist —
+     * wer „Deutschland" wählt, will auch sehen, gegen wen gespielt wurde.
+     * Ohne Auswahl erscheinen alle.
+     *
+     * @param array<string,mixed> $kampf Ein Wettkampf, wie ihn
+     *                                   Mannschaftswertung::kaempfe() liefert
+     *
+     * @return bool Wahr, wenn der Wettkampf ausgegeben wird
+     */
+    public function zeigtKampf(array $kampf): bool
+    {
+        if ([] === $this->mannschaften) {
+            return true;
+        }
+
+        return \in_array((int) ($kampf['heim'] ?? 0), $this->mannschaften, true)
+            || \in_array((int) ($kampf['gast'] ?? 0), $this->mannschaften, true);
     }
 }

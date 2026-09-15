@@ -533,8 +533,9 @@ class SwissManagerFile
     /**
      * Liest die Mannschaftskarten des Abschnitts B5.
      *
-     * Eine Karte besteht aus 27 Zeichenketten und einem Zahlenblock von 52
-     * Byte. Bei Einzelturnieren gibt es den Abschnitt nicht.
+     * Eine Karte besteht aus 26 Zeichenketten und einem Zahlenblock von 54
+     * Byte; siehe die Konstanten. Bei Einzelturnieren gibt es den Abschnitt
+     * nicht.
      *
      * @return void
      */

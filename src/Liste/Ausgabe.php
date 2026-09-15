@@ -95,6 +95,57 @@ final class Ausgabe
     }
 
     /**
+     * Setzt einen Spielernamen in Lesereihenfolge zusammen.
+     *
+     * Turnierdateien führen „Nachname,Vorname" — praktisch zum Sortieren, in
+     * einer Wettkampfaufstellung aber sperrig. Hier entsteht „IM Marcin
+     * Molenda" statt „IM Molenda,Marcin".
+     *
+     * Swiss-Manager liefert Vor- und Nachname getrennt; dann gelten diese
+     * Felder. Der SWT-Leser liefert nur den ganzen Namen; dann wird am ersten
+     * Komma getrennt. Ohne Komma — bei Vereinsnamen als Platzhalter oder bei
+     * einem einzelnen Namen — bleibt der Name, wie er ist.
+     *
+     * @param array<string,mixed> $spieler Der Teilnehmerdatensatz
+     *
+     * @return string Titel, Vorname und Nachname, unmaskiert
+     */
+    public static function vollname(array $spieler): string
+    {
+        $titel = trim((string) ($spieler['titel'] ?? ''));
+        $vorname = trim((string) ($spieler['vorname'] ?? ''));
+        $nachname = trim((string) ($spieler['nachname'] ?? ''));
+
+        if ('' === $nachname) {
+            $name = trim((string) ($spieler['name'] ?? ''));
+            $teile = explode(',', $name, 2);
+            $nachname = trim($teile[0]);
+            $vorname = trim($teile[1] ?? '');
+        }
+
+        $name = trim($vorname.' '.$nachname);
+
+        return '' === $titel ? $name : $titel.' '.$name;
+    }
+
+    /**
+     * Gibt eine Flagge nur aus, wenn die Föderation ein Land ist.
+     *
+     * Anders als flagge() bleibt hier nichts stehen, wenn es keine Flagge
+     * gibt: Vor einem Mannschaftsnamen wie „IBCA" wäre der Code „IBCA" nur
+     * eine Wiederholung.
+     *
+     * @param mixed $land Die Föderation, dreibuchstabig
+     *
+     * @return string Die Flagge als HTML mit folgendem Leerzeichen, oder eine
+     *                leere Zeichenkette
+     */
+    public static function landesflagge(mixed $land): string
+    {
+        return null === Laender::iso($land) ? '' : self::flagge($land).' ';
+    }
+
+    /**
      * Maskiert einen Wert für die Ausgabe im HTML.
      *
      * Turnierdateien kommen nicht durch die Eingabeprüfung von Contao; ihre

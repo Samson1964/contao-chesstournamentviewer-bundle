@@ -33,6 +33,17 @@ final class Listen
     public const MANNSCHAFT = 'mannschaft';
 
     /**
+     * Die Liste gibt es nur bei Einzelturnieren.
+     *
+     * Kreuztabelle und Fortschrittstabelle der Spieler sagen bei einem
+     * Mannschaftsturnier wenig: Ein Spieler begegnet dort nur den Spielern
+     * am selben Brett der gegnerischen Mannschaft, und bei einer Olympiade
+     * mit zweihundert Teilnehmern ist die Kreuztabelle fast leer. An ihre
+     * Stelle treten die Mannschaftslisten.
+     */
+    public const EINZEL = 'einzel';
+
+    /**
      * Alle bekannten Listen in der Reihenfolge ihrer Ausgabe.
      *
      * Der Schlüssel steht in der Datenbank und darf sich nicht mehr ändern.
@@ -45,13 +56,14 @@ final class Listen
         'turnierdaten' => ['template' => 'ctv_turnierdaten', 'gilt' => self::IMMER],
         'teilnehmer' => ['template' => 'ctv_teilnehmer', 'gilt' => self::IMMER],
         'rangliste' => ['template' => 'ctv_rangliste', 'gilt' => self::IMMER],
-        'kreuztabelle' => ['template' => 'ctv_kreuztabelle', 'gilt' => self::IMMER],
-        'fortschritt' => ['template' => 'ctv_fortschritt', 'gilt' => self::IMMER],
-        'fortschrittohne' => ['template' => 'ctv_fortschrittohne', 'gilt' => self::IMMER],
+        'kreuztabelle' => ['template' => 'ctv_kreuztabelle', 'gilt' => self::EINZEL],
+        'fortschritt' => ['template' => 'ctv_fortschritt', 'gilt' => self::EINZEL],
+        'fortschrittohne' => ['template' => 'ctv_fortschrittohne', 'gilt' => self::EINZEL],
         'paarungen' => ['template' => 'ctv_paarungen', 'gilt' => self::IMMER],
         'ergebnisse' => ['template' => 'ctv_ergebnisse', 'gilt' => self::IMMER],
         'mannschaften' => ['template' => 'ctv_mannschaften', 'gilt' => self::MANNSCHAFT],
         'mannschaftsrangliste' => ['template' => 'ctv_mannschaftsrangliste', 'gilt' => self::MANNSCHAFT],
+        'mannschaftsfortschritt' => ['template' => 'ctv_mannschaftsfortschritt', 'gilt' => self::MANNSCHAFT],
         'mannschaftspaarungen' => ['template' => 'ctv_mannschaftspaarungen', 'gilt' => self::MANNSCHAFT],
         'mannschaftskreuztabelle' => ['template' => 'ctv_mannschaftskreuztabelle', 'gilt' => self::MANNSCHAFT],
     ];
@@ -69,6 +81,7 @@ final class Listen
         'fortschritt',
         'fortschrittohne',
         'mannschaftsrangliste',
+        'mannschaftsfortschritt',
         'mannschaftskreuztabelle',
     ];
 
@@ -76,6 +89,12 @@ final class Listen
      * Listen, die je Runde ausgeben und sich auf Runden beschränken lassen.
      */
     public const MIT_RUNDEN = ['paarungen', 'ergebnisse', 'mannschaftspaarungen'];
+
+    /**
+     * Listen, die sich bei Mannschaftsturnieren auf einzelne Mannschaften
+     * beschränken lassen — etwa nur die Wettkämpfe der eigenen.
+     */
+    public const MIT_MANNSCHAFTSWAHL = ['paarungen', 'ergebnisse', 'mannschaftspaarungen'];
 
     /**
      * Listen, in denen die Spieler einer Mannschaft vorkommen können.
@@ -102,7 +121,8 @@ final class Listen
      * Mannschaftslisten bei einem Einzelturnier auszugeben, hieße leere
      * Tabellen zu zeigen. Sie werden deshalb übergangen, ohne dass die
      * Einstellung am Inhaltselement geändert werden müsste — dieselbe
-     * Auswahl soll für Einzel- wie Mannschaftsturniere taugen.
+     * Auswahl soll für Einzel- wie Mannschaftsturniere taugen. Umgekehrt
+     * entfallen bei Mannschaftsturnieren die reinen Einzellisten.
      *
      * @param string  $schluessel Schlüssel der Liste
      * @param Turnier $turnier    Das eingelesene Turnier
@@ -117,7 +137,11 @@ final class Listen
             return false;
         }
 
-        return self::MANNSCHAFT !== $liste['gilt'] || $turnier->istMannschaftsturnier();
+        return match ($liste['gilt']) {
+            self::MANNSCHAFT => $turnier->istMannschaftsturnier(),
+            self::EINZEL => !$turnier->istMannschaftsturnier(),
+            default => true,
+        };
     }
 
     /**

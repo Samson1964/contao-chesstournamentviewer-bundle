@@ -99,14 +99,19 @@ class TurnierBetrachterController extends AbstractContentElementController
             return $template->getResponse();
         }
 
+        // Übernommen wird nur, was zur gewählten Liste gehört. Wechselt der
+        // Redakteur die Liste, bleiben die alten Werte im Datensatz stehen —
+        // ein „Stand nach Runde 3" aus der Mannschaftstabelle darf die
+        // Mannschaftsliste nicht zurücksetzen.
         $schluessel = TlContentListener::liste($model->ctvListe, $model->ctvListen);
-        $auswahl = new Auswahl(
-            '' === $schluessel ? [] : [$schluessel],
+        $auswahl = Auswahl::fuerListe(
+            $schluessel,
             (bool) $model->ctvMannschaftSpieler,
             (bool) $model->ctvKreuzKurz,
             (int) $model->ctvStand,
-            array_map('intval', StringUtil::deserialize($model->ctvRunden, true)),
-            [$schluessel => StringUtil::deserialize($model->ctvSpalten, true)],
+            StringUtil::deserialize($model->ctvRunden, true),
+            StringUtil::deserialize($model->ctvSpalten, true),
+            StringUtil::deserialize($model->ctvMannschaftswahl, true),
         );
 
         // Nationalmannschaften heißen in den Dateien meist englisch —
@@ -149,8 +154,9 @@ class TurnierBetrachterController extends AbstractContentElementController
 
         // Der Zwischenstand steht unabhängig von den Hinweisen über der
         // Ausgabe: Eine Tabelle nach Runde 4 sähe sonst aus wie die
-        // Endtabelle, und niemand könnte den Unterschied erkennen.
-        $template->stand = (int) $turnier->kopf('standNachRunde', 0);
+        // Endtabelle, und niemand könnte den Unterschied erkennen. Wer die
+        // Runde schon in der Überschrift nennt, kann die Zeile abschalten.
+        $template->stand = $model->ctvStandAus ? 0 : (int) $turnier->kopf('standNachRunde', 0);
 
         return $template->getResponse();
     }

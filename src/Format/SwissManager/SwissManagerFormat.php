@@ -151,8 +151,15 @@ class SwissManagerFormat implements TurnierFormatInterface
                 $gast = (int) $kampf['gast'];
                 $punkte = $this->brettpunkte($spieler, $paarungen, $mannschaften, $heim, $gast, (int) $runde);
 
-                $wettkaempfe[$heim][$runde] = $this->wettkampfsatz($mannschaften, $gast, $punkte[0], $punkte[1], (int) $kampf['tisch']);
-                $wettkaempfe[$gast][$runde] = $this->wettkampfsatz($mannschaften, $heim, $punkte[1], $punkte[0], (int) $kampf['tisch']);
+                // Ohne ein einziges gewertetes Brett ist der Wettkampf zwar
+                // ausgelost, aber noch nicht gespielt. Bis Fassung 1.10.0 ging
+                // er als 0:0 und damit als Unentschieden in die Tabelle ein:
+                // Bei der Olympiade 2026 stand Kuba nach vier Runden mit 9
+                // statt 8 Mannschaftspunkten da, weil Runde 5 schon ausgelost war.
+                $gespielt = $punkte[2] > 0;
+
+                $wettkaempfe[$heim][$runde] = $this->wettkampfsatz($mannschaften, $gast, $punkte[0], $punkte[1], (int) $kampf['tisch'], $gespielt);
+                $wettkaempfe[$gast][$runde] = $this->wettkampfsatz($mannschaften, $heim, $punkte[1], $punkte[0], (int) $kampf['tisch'], $gespielt);
             }
         }
 
@@ -169,12 +176,15 @@ class SwissManagerFormat implements TurnierFormatInterface
      * @param int                                       $gast         Nummer der zweiten
      * @param int                                       $runde        Die Runde
      *
-     * @return array{0:float,1:float} Brettpunkte der ersten und der zweiten Mannschaft
+     * @return array{0:float,1:float,2:int} Brettpunkte der ersten und der
+     *         zweiten Mannschaft sowie die Zahl der gewerteten Partien; 0
+     *         heißt, der Wettkampf ist noch nicht gespielt
      */
     private function brettpunkte(array $spieler, array $paarungen, array $mannschaften, int $heim, int $gast, int $runde): array
     {
         $eigen = 0.0;
         $fremd = 0.0;
+        $anzahl = 0;
 
         foreach ([$heim, $gast] as $seite) {
             foreach ($mannschaften[$seite]['spieler'] ?? [] as $tnr) {
@@ -206,6 +216,7 @@ class SwissManagerFormat implements TurnierFormatInterface
                 }
 
                 $ergebnis = (float) $satz['ergebnis'];
+                ++$anzahl;
 
                 if ($seite === $heim) {
                     $eigen += $ergebnis;
@@ -217,21 +228,26 @@ class SwissManagerFormat implements TurnierFormatInterface
             }
         }
 
-        return [$eigen, $fremd];
+        return [$eigen, $fremd, $anzahl];
     }
 
     /**
      * Baut einen Wettkampfsatz aus Sicht einer Mannschaft.
+     *
+     * Ein noch nicht gespielter Wettkampf trägt keine Mannschaftspunkte,
+     * sondern null — so kennzeichnet es auch der SWT-Leser, und Tabelle,
+     * Kreuztabelle und Fortschrittstabelle lassen ihn dann aus.
      *
      * @param array<int,array<string,mixed>> $mannschaften Die Mannschaften
      * @param int                            $gegner       Nummer der Gegenmannschaft
      * @param float                          $eigen        Eigene Brettpunkte
      * @param float                          $fremd        Brettpunkte der Gegenseite
      * @param int                            $tisch        Tischnummer
+     * @param bool                           $gespielt     Ob mindestens ein Brett gewertet ist
      *
      * @return array<string,mixed> Der Wettkampfsatz
      */
-    private function wettkampfsatz(array $mannschaften, int $gegner, float $eigen, float $fremd, int $tisch): array
+    private function wettkampfsatz(array $mannschaften, int $gegner, float $eigen, float $fremd, int $tisch, bool $gespielt = true): array
     {
         return [
             'gegner' => $gegner,
@@ -239,6 +255,7 @@ class SwissManagerFormat implements TurnierFormatInterface
             'brettpunkte' => $eigen,
             'brettpunkteGegner' => $fremd,
             'mannschaftspunkte' => match (true) {
+                !$gespielt => null,
                 $eigen > $fremd => 2.0,
                 $eigen < $fremd => 0.0,
                 default => 1.0,

@@ -17,6 +17,7 @@ use Contao\DataContainer;
 use Contao\Message;
 use Contao\StringUtil;
 use Schachbulle\ContaoChesstournamentviewerBundle\Format\FormatVerzeichnis;
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Laender;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Listen;
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Spalten;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
@@ -107,7 +108,7 @@ class TlContentListener
         // Schritt 1: Ohne lesbare Datei bleibt nur die Dateiauswahl. Alles
         // Weitere hinge am Inhalt der Datei.
         if (null === $turnier) {
-            $this->kuerze(['ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
+            $this->kuerze(['ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
 
             return;
         }
@@ -117,7 +118,7 @@ class TlContentListener
 
         // Schritt 2: Datei da, aber noch keine Ausgabe gewählt.
         if ('' === $liste) {
-            $this->kuerze(['ctvSpalten', 'ctvStand', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
+            $this->kuerze(['ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
 
             return;
         }
@@ -129,6 +130,11 @@ class TlContentListener
 
         if (!\in_array($liste, Listen::MIT_STAND, true) || $turnier->getLetzteRunde() < 2) {
             $weg[] = 'ctvStand';
+            $weg[] = 'ctvStandAus';
+        }
+
+        if (!$turnier->istMannschaftsturnier() || !\in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true)) {
+            $weg[] = 'ctvMannschaftswahl';
         }
 
         if (!\in_array($liste, Listen::MIT_RUNDEN, true) || $turnier->getLetzteRunde() < 2) {
@@ -292,6 +298,48 @@ class TlContentListener
         }
 
         $GLOBALS['TL_LANG']['ctv']['runden'] = $beschriftungen;
+
+        return array_keys($beschriftungen);
+    }
+
+    /**
+     * Liefert die Auswahl für „Mannschaften".
+     *
+     * Angeboten werden die Mannschaften der Datei in der Reihenfolge ihrer
+     * Startnummern, die Platzhaltermannschaft für Freilose ausgenommen. Die
+     * Namen erscheinen übersetzt in der Sprache des Backends, so wie sie im
+     * Frontend einer gleichsprachigen Seite stehen.
+     *
+     * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
+     *
+     * @return int[] Die Mannschaftsnummern; leer bei einem Einzelturnier oder
+     *               ohne lesbare Datei
+     */
+    public function mannschaftOptionen(DataContainer $dc = null): array
+    {
+        $turnier = $this->turnier($dc);
+
+        if (null === $turnier || !$turnier->istMannschaftsturnier()) {
+            return [];
+        }
+
+        $mannschaften = Laender::uebersetzeMannschaften($turnier)->getMannschaften();
+        $beschriftungen = [];
+
+        uasort(
+            $mannschaften,
+            static fn (array $a, array $b): int => ((int) ($a['startnummer'] ?? 0)) <=> ((int) ($b['startnummer'] ?? 0))
+        );
+
+        foreach ($mannschaften as $nummer => $mannschaft) {
+            if ($mannschaft['spielfrei'] ?? false) {
+                continue;
+            }
+
+            $beschriftungen[(int) $nummer] = trim((string) ($mannschaft['name'] ?? '')) ?: '#'.$nummer;
+        }
+
+        $GLOBALS['TL_LANG']['ctv']['mannschaftswahl'] = $beschriftungen;
 
         return array_keys($beschriftungen);
     }

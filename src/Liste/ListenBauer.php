@@ -129,6 +129,7 @@ class ListenBauer
             'paarungen', 'ergebnisse' => $this->runden($turnier, 'ergebnisse' === $schluessel, $auswahl),
             'mannschaften' => $this->mannschaften($turnier, $auswahl->mitSpielern),
             'mannschaftsrangliste' => $this->schluessellos('mannschaften', Mannschaftswertung::tabelle($turnier)),
+            'mannschaftsfortschritt' => $this->mannschaftsfortschritt($turnier),
             'mannschaftspaarungen' => $this->mannschaftspaarungen($turnier, $auswahl),
             'mannschaftskreuztabelle' => $this->mannschaftskreuztabelle($turnier, $auswahl->kreuzKurz),
             default => [],
@@ -535,6 +536,15 @@ class ListenBauer
             return [];
         }
 
+        // Bei einem Mannschaftsturnier gliedert sich die Liste nach
+        // Wettkämpfen. Ist die Ausgabe auf Mannschaften beschränkt, bleiben
+        // nur deren Wettkämpfe und die Runden, in denen sie angetreten sind.
+        $kaempfe = $turnier->istMannschaftsturnier() ? $this->kaempfe($turnier, $auswahl) : [];
+
+        if ($turnier->istMannschaftsturnier() && [] === $kaempfe) {
+            return [];
+        }
+
         // Swiss-Chess führt je nach Turnierart die Tischnummer oder die
         // Brettnummer. Bei Mannschaftsturnieren steht in den Einzelpaarungen
         // die Brettnummer und die Tischnummer bleibt durchweg null — dann
@@ -561,13 +571,17 @@ class ListenBauer
             // Mannschaften, darunter die Bretter. Eine Runde einer
             // Betriebsmeisterschaft hat sonst hundert Zeilen ohne jede
             // Gliederung.
-            'kaempfe' => $turnier->istMannschaftsturnier() ? $this->kaempfe($turnier, $auswahl) : [],
+            'kaempfe' => $kaempfe,
             'hoechstwert' => (float) $turnier->getPartienProRunde(),
         ];
     }
 
     /**
-     * Holt die Wettkämpfe und lässt die abgewählten Runden weg.
+     * Holt die Wettkämpfe und lässt abgewählte Runden und Mannschaften weg.
+     *
+     * Eine Runde, in der keine der gewählten Mannschaften antrat, fällt
+     * mitsamt ihrer Überschrift heraus — eine leere „Runde 3" wäre keine
+     * Auskunft.
      *
      * @param Turnier $turnier Das eingelesene Turnier
      * @param Auswahl $auswahl Die Einstellungen des Inhaltselements
@@ -576,11 +590,45 @@ class ListenBauer
      */
     private function kaempfe(Turnier $turnier, Auswahl $auswahl): array
     {
-        return array_filter(
-            Mannschaftswertung::kaempfe($turnier),
-            static fn (int $runde): bool => $auswahl->zeigtRunde($runde),
-            ARRAY_FILTER_USE_KEY
-        );
+        $ergebnis = [];
+
+        foreach (Mannschaftswertung::kaempfe($turnier) as $runde => $kaempfe) {
+            if (!$auswahl->zeigtRunde((int) $runde)) {
+                continue;
+            }
+
+            $kaempfe = array_values(array_filter($kaempfe, $auswahl->zeigtKampf(...)));
+
+            if ([] !== $kaempfe) {
+                $ergebnis[$runde] = $kaempfe;
+            }
+        }
+
+        return $ergebnis;
+    }
+
+    /**
+     * Bereitet die Fortschrittstabelle der Mannschaften auf.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier, gegebenenfalls
+     *                         bereits auf den gewählten Stand zurückversetzt
+     *
+     * @return array<string,mixed> Unter `zeilen` die Mannschaften, unter
+     *                             `runden` die Rundennummern; leer, wenn es
+     *                             keine Mannschaften gibt
+     */
+    private function mannschaftsfortschritt(Turnier $turnier): array
+    {
+        $zeilen = Mannschaftswertung::fortschritt($turnier);
+
+        if ([] === $zeilen) {
+            return [];
+        }
+
+        $runden = array_keys($turnier->getRunden());
+        sort($runden);
+
+        return ['zeilen' => $zeilen, 'runden' => $runden];
     }
 
     /**

@@ -1,5 +1,42 @@
 # Änderungen
 
+## Version 1.11.0 (2026-09-15)
+
+* Fix: **„Stand nach Runde" blieb nach einem Wechsel der Liste stehen.** Wer
+  ein Element von der Mannschaftstabelle nach Runde 3 auf die
+  Mannschaftsliste oder die Ergebnisse umstellte, sah darüber weiter „Stand
+  nach Runde 3" — und die Liste war tatsächlich zurückgesetzt. Die Maske
+  blendet das Feld aus, der Wert stand aber noch im Datensatz. Jetzt wirkt
+  jede Einstellung nur bei den Listen, zu denen sie gehört.
+* Fix: **Swiss-Manager: Ausgeloste, aber noch nicht gespielte Wettkämpfe
+  zählten als Unentschieden.** Die Mannschaftstabelle der Olympiade 2026 zeigte
+  nach vier Runden fünf Wettkämpfe und für Kuba 9 statt 8 Mannschaftspunkte,
+  weil Runde 5 schon ausgelost war. Ein Wettkampf ohne gewertetes Brett bleibt
+  jetzt offen; die Tabelle stimmt mit chess-results überein.
+* Add: Kästchen **„Zeile ‚Stand nach Runde' ausblenden"**, für Elemente, deren
+  Überschrift die Runde schon nennt. Standard bleibt die Zeile sichtbar.
+* Change: **Paarungen und Ergebnisse bei Mannschaftsturnieren neu gegliedert.**
+  Statt eines Tabellenkopfs „Br. – Weiß – Elo – Schwarz – Elo" hat jeder
+  Wettkampf seine eigene Kopfzeile: Brett, Mannschaft, Wertungszahl,
+  Ergebnis, Mannschaft, Wertungszahl — bei Ländern mit Flagge. Darunter
+  stehen die Bretter nach Mannschaften ausgerichtet; wer Schwarz führte,
+  sitzt auf dunklerem Grund.
+* Change: **Bretter zählen in jedem Wettkampf ab 1.** Swiss-Manager nummeriert
+  über die ganze Runde durch; Tisch 2 einer Olympiade spielte bisher an den
+  Brettern 5 bis 8.
+* Change: **Spielernamen in Wettkämpfen als „Titel Vorname Nachname"** —
+  „IM Marcin Molenda" statt „IM Molenda,Marcin".
+* Add: **Auswahl der Mannschaften** für Paarungen, Ergebnisse und Wettkämpfe.
+  Wer nur „Deutschland" wählt, sieht dessen Wettkämpfe samt Gegnern; Runden
+  ohne gewählte Mannschaft entfallen.
+* Add: **Fortschrittstabelle der Mannschaften**: je Runde die eigenen
+  Brettpunkte, die Startnummer des Gegners und der Stand der
+  Mannschaftspunkte.
+* Change: **Kreuztabelle, Fortschrittstabelle und „Fortschritt ohne
+  Punktestand" gibt es nur noch bei Einzelturnieren.** Bei
+  Mannschaftsturnieren sagen sie wenig; ein bestehendes Element mit einer
+  dieser Listen bleibt dort leer.
+
 ## Version 1.10.0 (2026-09-14)
 
 * Fix: **Swiss-Manager: Mannschaftslisten brachen nach etwa der Hälfte ab.**

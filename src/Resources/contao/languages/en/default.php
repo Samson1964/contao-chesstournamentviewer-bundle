@@ -23,6 +23,7 @@ $GLOBALS['TL_LANG']['ctv']['listen']['paarungen'] = 'Pairings';
 $GLOBALS['TL_LANG']['ctv']['listen']['ergebnisse'] = 'Results';
 $GLOBALS['TL_LANG']['ctv']['listen']['mannschaften'] = 'Teams';
 $GLOBALS['TL_LANG']['ctv']['listen']['mannschaftsrangliste'] = 'Team standings';
+$GLOBALS['TL_LANG']['ctv']['listen']['mannschaftsfortschritt'] = 'Team progress table';
 $GLOBALS['TL_LANG']['ctv']['listen']['mannschaftspaarungen'] = 'Team matches';
 $GLOBALS['TL_LANG']['ctv']['listen']['mannschaftskreuztabelle'] = 'Team cross table';
 
