@@ -120,7 +120,7 @@ class MaskeListener
         // Schritt 1: Ohne lesbare Datei bleibt nur die Dateiauswahl. Alles
         // Weitere hinge am Inhalt der Datei.
         if (null === $turnier) {
-            $this->kuerze(['ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
+            $this->kuerze(['ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvRundenkopfAus', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
 
             return;
         }
@@ -130,7 +130,7 @@ class MaskeListener
 
         // Schritt 2: Datei da, aber noch keine Ausgabe gewählt.
         if ('' === $liste) {
-            $this->kuerze(['ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
+            $this->kuerze(['ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvRundenkopfAus', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
 
             return;
         }
@@ -147,6 +147,7 @@ class MaskeListener
 
         if (!\in_array($liste, Listen::MIT_RUNDEN, true) || $turnier->getLetzteRunde() < 2) {
             $weg[] = 'ctvRunden';
+            $weg[] = 'ctvRundenkopfAus';
         }
 
         if (!$turnier->istMannschaftsturnier() || !\in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true)) {

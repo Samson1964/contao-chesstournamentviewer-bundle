@@ -572,6 +572,7 @@ class ListenBauer
             // Betriebsmeisterschaft hat sonst hundert Zeilen ohne jede
             // Gliederung.
             'kaempfe' => $kaempfe,
+            'rundenkopf' => $auswahl->rundenkopf,
             'hoechstwert' => (float) $turnier->getPartienProRunde(),
         ];
     }
@@ -716,6 +717,7 @@ class ListenBauer
         return [
             'runden' => $kaempfe,
             'mitSpielern' => $auswahl->mitSpielern,
+            'rundenkopf' => $auswahl->rundenkopf,
             'hoechstwert' => (float) $turnier->getPartienProRunde(),
         ];
     }

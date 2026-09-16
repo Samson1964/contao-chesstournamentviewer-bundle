@@ -59,6 +59,31 @@ class MannschaftsausgabeTest extends TestCase
     }
 
     /**
+     * Prüft das Ausblenden der Rundenüberschriften.
+     *
+     * Das Kästchen wirkt nur bei den Listen, die je Runde ausgeben; eine
+     * Rangliste hat gar keine Rundenüberschrift. Der Wert geht bis in die
+     * Daten der Liste durch, denn dort holt ihn das Template ab.
+     *
+     * @return void
+     */
+    public function testRundenueberschriftenLassenSichAusblenden(): void
+    {
+        $this->assertFalse(Auswahl::fuerListe('ergebnisse', false, false, 0, [], [], [], true)->rundenkopf);
+        $this->assertTrue(Auswahl::fuerListe('ergebnisse', false, false, 0, [], [], [], false)->rundenkopf);
+        $this->assertTrue(Auswahl::fuerListe('rangliste', false, false, 0, [], [], [], true)->rundenkopf);
+
+        $bauer = new ListenBauer();
+        $turnier = TurnierBauer::mannschaftsturnier();
+
+        $ohne = $bauer->baue($turnier, Auswahl::fuerListe('ergebnisse', false, false, 0, [], [], [], true));
+        $mit = $bauer->baue($turnier, Auswahl::fuerListe('mannschaftspaarungen', false, false, 0, [], [], [], false));
+
+        $this->assertFalse($ohne[0]['daten']['rundenkopf']);
+        $this->assertTrue($mit[0]['daten']['rundenkopf']);
+    }
+
+    /**
      * Prüft, dass die reinen Einzellisten bei Mannschaftsturnieren entfallen.
      *
      * @return void

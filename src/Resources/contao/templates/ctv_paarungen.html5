@@ -5,6 +5,10 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 $wertung = Ausgabe::wertungsname($this->turnier);
 $gruppiert = (bool) $this->kaempfe;
 
+// Ohne ausdrückliches Nein steht die Rundenüberschrift da: Eine Liste über
+// mehrere Runden wäre ohne sie nicht zu lesen.
+$rundenkopf = false !== $this->rundenkopf;
+
 ?>
 <?php if ($gruppiert): ?>
 
@@ -16,7 +20,9 @@ $gruppiert = (bool) $this->kaempfe;
            dunklerem Grund. */ ?>
   <?php foreach ($this->kaempfe as $runde => $kaempfe): ?>
 
-    <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+    <?php if ($rundenkopf): ?>
+      <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+    <?php endif; ?>
 
     <div class="ctv-rollbar">
       <table class="ctv-tabelle ctv-tabelle--paarungen ctv-tabelle--kaempfe">
@@ -55,7 +61,9 @@ $gruppiert = (bool) $this->kaempfe;
 
   <?php foreach ($this->runden as $runde => $partien): ?>
 
-    <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+    <?php if ($rundenkopf): ?>
+      <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+    <?php endif; ?>
 
     <div class="ctv-rollbar">
       <table class="ctv-tabelle ctv-tabelle--paarungen">

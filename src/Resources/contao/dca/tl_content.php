@@ -24,7 +24,7 @@ $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'] =
     '{type_legend},type,headline;'
     .'{ctv_legend},ctvDatei,ctvFormat,ctvListe;'
     .'{ctv_spalten_legend},ctvSpalten;'
-    .'{ctv_runden_legend},ctvStand,ctvStandAus,ctvRunden;'
+    .'{ctv_runden_legend},ctvStand,ctvStandAus,ctvRunden,ctvRundenkopfAus;'
     .'{ctv_mannschaft_legend},ctvMannschaftswahl,ctvMannschaftSpieler,ctvKreuzKurz;'
     .'{ctv_hinweis_legend},ctvDatum,ctvHinweise;'
     .'{template_legend:hide},customTpl;'
@@ -169,6 +169,22 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvRunden'] = [
         'tl_class' => 'clr',
     ],
     'sql' => 'blob NULL',
+];
+
+/*
+ * Blendet die Überschriften „Runde 1", „Runde 2" über den Paarungen,
+ * Ergebnissen und Wettkämpfen aus. Gebraucht wird das, wo die Runde schon
+ * anderswo steht — in der Überschrift des Elements oder im Text um einen
+ * Inserttag herum. Standard sind die Überschriften sichtbar: Eine Liste über
+ * mehrere Runden wäre ohne sie nicht zu lesen.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvRundenkopfAus'] = [
+    'exclude' => true,
+    'inputType' => 'checkbox',
+    'eval' => [
+        'tl_class' => 'clr',
+    ],
+    'sql' => "char(1) NOT NULL default ''",
 ];
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['ctvDatum'] = [

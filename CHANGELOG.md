@@ -1,5 +1,14 @@
 # Änderungen
 
+## Version 1.14.0 (2026-09-16)
+
+* Add: Kästchen **„Rundenüberschriften ausblenden"** bei Paarungen,
+  Ergebnissen und Wettkämpfen — am Inhaltselement wie am Inserttag. Bisher
+  stand über jeder Tabelle „Runde 4", auch wenn die Runde schon in der
+  Überschrift des Elements oder im Text um den Inserttag herum genannt war.
+  Ohne Auswahl bleiben die Überschriften stehen: Eine Liste über mehrere
+  Runden wäre ohne sie nicht zu lesen.
+
 ## Version 1.13.1 (2026-09-16)
 
 * Fix: **Das Backend-Modul „Turnier-Inserttags" stand in einer eigenen

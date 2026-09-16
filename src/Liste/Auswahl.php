@@ -40,6 +40,8 @@ final class Auswahl
      * @param int[]    $mannschaften Mannschaftsnummern, auf deren Wettkämpfe
      *                              Paarungen, Ergebnisse und Wettkämpfe
      *                              beschränkt werden; leer für alle
+     * @param bool     $rundenkopf  Ob über jeder Runde die Überschrift
+     *                              „Runde 1" steht
      */
     public function __construct(
         public readonly array $listen = [],
@@ -49,6 +51,7 @@ final class Auswahl
         public readonly array $runden = [],
         public readonly array $spalten = [],
         public readonly array $mannschaften = [],
+        public readonly bool $rundenkopf = true,
     ) {
     }
 
@@ -68,8 +71,10 @@ final class Auswahl
      * @param bool     $kreuzKurz    Wert des Feldes „Kreuztabelle kürzen"
      * @param int      $stand        Wert des Feldes „Stand nach Runde"
      * @param int[]    $runden       Wert des Feldes „Angezeigte Runden"
-     * @param string[] $spalten      Wert des Feldes „Spalten"
-     * @param int[]    $mannschaften Wert des Feldes „Mannschaften"
+     * @param string[] $spalten       Wert des Feldes „Spalten"
+     * @param int[]    $mannschaften  Wert des Feldes „Mannschaften"
+     * @param bool     $rundenkopfAus Wert des Feldes „Rundenüberschriften
+     *                                ausblenden"
      *
      * @return self Die Auswahl, in der alles Unpassende auf seinen
      *              Ausgangswert zurückgesetzt ist
@@ -82,6 +87,7 @@ final class Auswahl
         array $runden = [],
         array $spalten = [],
         array $mannschaften = [],
+        bool $rundenkopfAus = false,
     ): self {
         if ('' === $liste) {
             return new self();
@@ -95,6 +101,7 @@ final class Auswahl
             \in_array($liste, Listen::MIT_RUNDEN, true) ? array_values(array_map('intval', $runden)) : [],
             Spalten::einstellbar($liste) ? [$liste => $spalten] : [],
             \in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true) ? array_values(array_filter(array_map('intval', $mannschaften))) : [],
+            !($rundenkopfAus && \in_array($liste, Listen::MIT_RUNDEN, true)),
         );
     }
 

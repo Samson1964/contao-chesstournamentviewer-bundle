@@ -4,10 +4,15 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
 
 $wertung = Ausgabe::wertungsname($this->turnier);
 
+// Ohne ausdrückliches Nein steht die Rundenüberschrift da; siehe ctv_paarungen.
+$rundenkopf = false !== $this->rundenkopf;
+
 ?>
 <?php foreach ($this->runden as $runde => $kaempfe): ?>
 
-  <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+  <?php if ($rundenkopf): ?>
+    <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+  <?php endif; ?>
 
   <div class="ctv-rollbar">
     <table class="ctv-tabelle ctv-tabelle--wettkaempfe">

@@ -237,6 +237,12 @@ Beschränkt die Ausgabe auf einzelne Runden; ohne Auswahl erscheinen alle. Die
 Rundennummern kommen aus der Datei: Ein Turnier über fünf Runden bietet fünf
 Kästchen an.
 
+**Rundenüberschriften ausblenden** — ebenfalls bei diesen drei Listen. Über
+jeder Tabelle steht sonst „Runde 4". Steht die Runde schon in der Überschrift
+des Elements oder im Text um einen Inserttag herum, ist sie dort zu viel.
+Ohne Auswahl bleiben die Überschriften stehen — eine Liste über mehrere
+Runden wäre ohne sie nicht zu lesen.
+
 #### Woher die Zahlen eines Zwischenstands kommen
 
 Die Turnierdatei speichert Punkte und Feinwertungen **nur für den Endstand**.

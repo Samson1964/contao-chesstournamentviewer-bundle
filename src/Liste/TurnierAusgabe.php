@@ -82,6 +82,7 @@ class TurnierAusgabe
             StringUtil::deserialize($einstellungen['ctvRunden'] ?? null, true),
             StringUtil::deserialize($einstellungen['ctvSpalten'] ?? null, true),
             StringUtil::deserialize($einstellungen['ctvMannschaftswahl'] ?? null, true),
+            (bool) ($einstellungen['ctvRundenkopfAus'] ?? false),
         );
 
         // Nationalmannschaften heißen in den Dateien meist englisch —

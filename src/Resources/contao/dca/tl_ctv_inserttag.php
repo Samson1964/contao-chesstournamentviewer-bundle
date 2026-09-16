@@ -87,7 +87,7 @@ $GLOBALS['TL_DCA']['tl_ctv_inserttag'] = [
         'default' => '{ctv_titel_legend},titel,alias;'
             .'{ctv_legend},ctvDatei,ctvFormat,ctvListe;'
             .'{ctv_spalten_legend},ctvSpalten;'
-            .'{ctv_runden_legend},ctvStand,ctvStandAus,ctvRunden;'
+            .'{ctv_runden_legend},ctvStand,ctvStandAus,ctvRunden,ctvRundenkopfAus;'
             .'{ctv_mannschaft_legend},ctvMannschaftswahl,ctvMannschaftSpieler,ctvKreuzKurz;'
             .'{ctv_hinweis_legend},ctvDatum,ctvHinweise',
     ],
@@ -138,7 +138,7 @@ $GLOBALS['TL_DCA']['tl_ctv_inserttag'] = [
  * Inhaltselements aus der Zeit vor Fassung 1.8.0 und hat in einer neuen
  * Tabelle nichts zu suchen.
  */
-foreach (['ctvDatei', 'ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz', 'ctvDatum', 'ctvHinweise'] as $feld) {
+foreach (['ctvDatei', 'ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvRundenkopfAus', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz', 'ctvDatum', 'ctvHinweise'] as $feld) {
     if (isset($GLOBALS['TL_DCA']['tl_content']['fields'][$feld])) {
         $GLOBALS['TL_DCA']['tl_ctv_inserttag']['fields'][$feld] = $GLOBALS['TL_DCA']['tl_content']['fields'][$feld];
     }
