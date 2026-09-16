@@ -23,9 +23,11 @@ $GLOBALS['TL_WRAPPERS']['stop'][] = 'chesstournamentviewerStop';
 
 /*
  * Backend-Modul für die Turnierausgaben, die über einen Inserttag eingebunden
- * werden. Es steht in derselben Gruppe wie die übrigen Schach-Module.
+ * werden. Es steht in der Gruppe „Inhalte", wie die Module der übrigen
+ * Schach-Bundles dieses Hauses auch — eine eigene Menügruppe für ein einzelnes
+ * Modul wäre mehr Menü als Nutzen.
  */
-$GLOBALS['BE_MOD']['schach']['ctv_inserttag'] = [
+$GLOBALS['BE_MOD']['content']['ctv_inserttag'] = [
     'tables' => ['tl_ctv_inserttag'],
 ];
 

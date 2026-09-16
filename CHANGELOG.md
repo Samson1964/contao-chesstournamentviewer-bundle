@@ -1,5 +1,12 @@
 # Änderungen
 
+## Version 1.13.1 (2026-09-16)
+
+* Fix: **Das Backend-Modul „Turnier-Inserttags" stand in einer eigenen
+  Menügruppe „Schach".** Die Module der übrigen Schach-Bundles dieses Hauses
+  stehen in der Gruppe „Inhalte"; dort steht es jetzt auch. Eine eigene
+  Menügruppe für ein einzelnes Modul war mehr Menü als Nutzen.
+
 ## Version 1.13.0 (2026-09-16)
 
 * Add: **Backend-Modul „Turnier-Inserttags".** Dort lassen sich
