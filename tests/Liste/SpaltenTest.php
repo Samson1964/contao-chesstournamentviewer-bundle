@@ -190,4 +190,56 @@ class SpaltenTest extends TestCase
 
         $this->assertFalse($listen[0]['daten']['sortierbar']);
     }
+
+    /**
+     * Prüft die Spaltenauswahl der Mannschaftstabelle.
+     *
+     * Ohne Auswahl sieht die Tabelle aus wie vor der Spaltenauswahl. Die
+     * Freilose erscheinen, weil im Prüfturnier zwei Mannschaften eines haben;
+     * der Wertungsschnitt ist wählbar, aber nicht vorgegeben. Die Tabelle ist
+     * flach und deshalb sortierbar.
+     *
+     * @return void
+     */
+    public function testMannschaftstabelleHatWaehlbareSpalten(): void
+    {
+        $turnier = TurnierBauer::mannschaftsturnier();
+
+        $this->assertTrue(Spalten::einstellbar('mannschaftsrangliste'));
+        $this->assertSame(
+            ['platz', 'mannschaft', 'kaempfe', 'bilanz', 'freilose', 'mannschaftspunkte', 'brettpunkte'],
+            Spalten::vorauswahl('mannschaftsrangliste', $turnier)
+        );
+
+        $bauer = new ListenBauer();
+        $vorgabe = $bauer->baue($turnier, Auswahl::fuerListe('mannschaftsrangliste'));
+        $gewaehlt = $bauer->baue($turnier, Auswahl::fuerListe('mannschaftsrangliste', false, false, 0, [], ['mannschaft', 'brettpunkte', 'gibtesnicht']));
+
+        $this->assertTrue($vorgabe[0]['daten']['sortierbar']);
+        $this->assertSame(['mannschaft', 'brettpunkte'], array_column($gewaehlt[0]['daten']['spalten'], 'schluessel'));
+    }
+
+    /**
+     * Prüft die Zellen der Mannschaftstabelle.
+     *
+     * Startnummer, Bilanz und Föderation laufen über dieselben Spalten wie
+     * bei den Teilnehmern; die Zeile bekommt dafür die passenden Felder.
+     * Mannschaftspunkte stehen ohne Komma, Brettpunkte mit.
+     *
+     * @return void
+     */
+    public function testZellenDerMannschaftstabelle(): void
+    {
+        $zeilen = array_column(Spalten::mannschaftszeilen(TurnierBauer::mannschaftsturnier()), null, 'nummer');
+        $eins = $zeilen[1];
+
+        $this->assertSame('1', Ausgabe::zelle($eins, 'nr'));
+        $this->assertSame('1/0/1', Ausgabe::zelle($eins, 'bilanz'));
+        $this->assertSame('Mannschaft 1', Ausgabe::zelle($eins, 'mannschaft'));
+        $this->assertSame('2', Ausgabe::zelle($eins, 'mannschaftspunkte'));
+        $this->assertSame('2,5', Ausgabe::zelle($eins, 'brettpunkte'));
+        $this->assertSame('2.5', Ausgabe::sortierwert($eins, 'brettpunkte'));
+        $this->assertSame('ctv-mannschaft', Ausgabe::zellklasse($eins, 'mannschaft'));
+        $this->assertSame('ctv-mannschaft ctv-land--ger', Ausgabe::zellklasse(['land' => 'GER'], 'mannschaft'));
+    }
 }

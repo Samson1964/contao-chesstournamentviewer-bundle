@@ -19,7 +19,7 @@ $zeile = $this->zeile;
 <tr>
   <?php foreach ($this->spalten as $spalte): ?>
     <?php
-      $klasse = trim(str_replace('ctv-schmal', '', $spalte['klasse']));
+      $klasse = trim(str_replace('ctv-schmal', '', $spalte['klasse']).' '.Ausgabe::zellklasse($zeile, $spalte['schluessel']));
       $wert = Ausgabe::sortierwert($zeile, $spalte['schluessel']);
       $attribute = ('' === $klasse ? '' : ' class="'.$klasse.'"').('' === $wert ? '' : ' data-wert="'.$wert.'"');
     ?>

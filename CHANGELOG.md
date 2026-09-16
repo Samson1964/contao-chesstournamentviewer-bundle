@@ -1,5 +1,17 @@
 # Änderungen
 
+## Version 1.16.0 (2026-09-16)
+
+* Add: **Spaltenauswahl für die Mannschaftstabelle**, wie bei Teilnehmerliste
+  und Rangliste: Platz, Startnummer, Mannschaft, Land, Wettkämpfe, Bilanz,
+  Freilose, Mannschaftspunkte, Brettpunkte und Wertungsschnitt, in frei
+  wählbarer Reihenfolge. Ohne Auswahl sieht die Tabelle aus wie bisher.
+* Add: **Die Mannschaftstabelle lässt sich im Frontend sortieren** — ein Klick
+  auf den Spaltenkopf.
+* Change: **Brettpunkte stehen in der Mannschaftstabelle mit Komma**, also
+  „11,5" statt „11½", wie die Punkte der Rangliste. Mannschaftspunkte bleiben
+  ganze Zahlen.
+
 ## Version 1.15.1 (2026-09-16)
 
 * Fix: **Swiss-Manager: Mannschaften ohne Gegner erschienen als Wettkampf

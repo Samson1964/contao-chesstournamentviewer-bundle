@@ -88,6 +88,8 @@ $GLOBALS['TL_LANG']['ctv']['spalte']['freilose'] = 'Freilose';
 $GLOBALS['TL_LANG']['ctv']['spalte']['spieler'] = 'Spieler';
 $GLOBALS['TL_LANG']['ctv']['spalte']['schnitt'] = 'Ø TWZ';
 $GLOBALS['TL_LANG']['ctv']['spalte']['wettkampf'] = 'Wettkampf';
+$GLOBALS['TL_LANG']['ctv']['spalte']['mannschaftspunkteVoll'] = 'Mannschaftspunkte';
+$GLOBALS['TL_LANG']['ctv']['spalte']['brettpunkteVoll'] = 'Brettpunkte';
 
 // Einzelne Wörter und Wendungen in der Ausgabe
 $GLOBALS['TL_LANG']['ctv']['runde'] = 'Runde %s';

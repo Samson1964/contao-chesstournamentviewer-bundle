@@ -128,7 +128,7 @@ class ListenBauer
             'fortschrittohne' => $this->fortschritt($turnier, false),
             'paarungen', 'ergebnisse' => $this->runden($turnier, 'ergebnisse' === $schluessel, $auswahl),
             'mannschaften' => $this->mannschaften($turnier, $auswahl->mitSpielern),
-            'mannschaftsrangliste' => $this->schluessellos('mannschaften', Mannschaftswertung::tabelle($turnier)),
+            'mannschaftsrangliste' => $this->mannschaftsrangliste($turnier, $auswahl),
             'mannschaftsfortschritt' => $this->mannschaftsfortschritt($turnier),
             'mannschaftspaarungen' => $this->mannschaftspaarungen($turnier, $auswahl),
             'mannschaftskreuztabelle' => $this->mannschaftskreuztabelle($turnier, $auswahl->kreuzKurz),
@@ -606,6 +606,36 @@ class ListenBauer
         }
 
         return $ergebnis;
+    }
+
+    /**
+     * Stellt die Mannschaftstabelle mit den gewählten Spalten zusammen.
+     *
+     * Die Tabelle ist flach und lässt sich deshalb im Frontend sortieren —
+     * anders als Teilnehmerliste und Rangliste eines Mannschaftsturniers, die
+     * nach Mannschaften gegliedert sind.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier, gegebenenfalls bereits
+     *                         auf den gewählten Stand zurückversetzt
+     * @param Auswahl $auswahl Die Einstellungen des Inhaltselements
+     *
+     * @return array<string,mixed> Unter `mannschaften` die Zeilen, unter
+     *                             `spalten` die Spalten; leer, wenn es keine
+     *                             Mannschaften gibt
+     */
+    private function mannschaftsrangliste(Turnier $turnier, Auswahl $auswahl): array
+    {
+        $zeilen = Spalten::mannschaftszeilen($turnier);
+
+        if ([] === $zeilen) {
+            return [];
+        }
+
+        return [
+            'mannschaften' => $zeilen,
+            'spalten' => Spalten::fuerAusgabe('mannschaftsrangliste', $auswahl->spaltenFuer('mannschaftsrangliste'), $turnier),
+            'sortierbar' => true,
+        ];
     }
 
     /**

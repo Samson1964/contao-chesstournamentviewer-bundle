@@ -56,7 +56,7 @@ sie gewählt und gespeichert ist.
 
 | Liste | Einstellungen |
 | --- | --- |
-| Teilnehmer, Rangliste | **Spalten** — siehe [Spalten und Sortierung](#spalten-und-sortierung) |
+| Teilnehmer, Rangliste, Mannschaftstabelle | **Spalten** — siehe [Spalten und Sortierung](#spalten-und-sortierung) |
 | Rangliste, Kreuztabelle, Fortschritt, Mannschaftstabelle, Fortschrittstabelle der Mannschaften, Kreuztabelle der Mannschaften | **Stand nach Runde** — siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden) |
 | Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden**; bei Mannschaftsturnieren zusätzlich **Mannschaften** |
 | Mannschaften, Wettkämpfe | **Spieler mit ausgeben** |
@@ -159,8 +159,8 @@ Farben; wer Schwarz führte, sitzt auf dunklerem Grund.
 
 ### Spalten und Sortierung
 
-Für **Teilnehmerliste** und **Rangliste** lässt sich einstellen, welche
-Spalten erscheinen und in welcher Reihenfolge. Angeboten wird nur, was die
+Für **Teilnehmerliste**, **Rangliste** und **Mannschaftstabelle** lässt sich
+einstellen, welche Spalten erscheinen und in welcher Reihenfolge. Angeboten wird nur, was die
 gewählte Datei hergibt: Ein Turnier ohne Elo-Zahlen bietet keine Elo-Spalte
 an, ein Einzelturnier keine Brettspalte, eine Datei ohne Feinwertung keine
 Feinwertungsspalte.
@@ -172,6 +172,15 @@ sich ziehen; die Reihenfolge ist die der Ausgabe.** Ohne Auswahl erscheinen
 die Vorgabespalten: bei der Teilnehmerliste Nr., Name, Wertungszahl und
 Verein, bei der Rangliste Platz, Titel, Name, Wertungszahl, Verein, Punkte und
 die Feinwertungen.
+
+Die **Mannschaftstabelle** bietet Platz, Startnummer, Mannschaft, Land,
+Wettkämpfe, Bilanz, Freilose, Mannschaftspunkte, Brettpunkte und den
+Wertungsschnitt an. Vorgabe ist die Tabelle, wie sie vor der Spaltenauswahl
+aussah: Platz, Mannschaft, Wettkämpfe, Bilanz, Freilose — nur wenn es welche
+gibt —, Mannschafts- und Brettpunkte. Mannschaftspunkte stehen als ganze Zahl,
+Brettpunkte mit Komma. Die Tabelle lässt sich im Frontend sortieren; die
+Teilnehmerliste und die Rangliste eines Mannschaftsturniers dagegen nicht, weil
+sie nach Mannschaften gegliedert sind.
 
 Zwei Spalten werden besonders gesetzt: **Die Föderation erscheint als
 Flagge** — als Titel am Feld stehen Ländername und Code, etwa „Polen (POL)";

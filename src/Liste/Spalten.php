@@ -10,10 +10,12 @@ declare(strict_types=1);
 
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Liste;
 
+use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftswertung;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
 
 /**
- * Verzeichnis der Spalten, die Teilnehmerliste und Rangliste zeigen können.
+ * Verzeichnis der Spalten, die Teilnehmerliste, Rangliste und
+ * Mannschaftstabelle zeigen können.
  *
  * Welche Spalten sinnvoll sind, hängt am Turnier: Ein Turnier ohne
  * Wertungszahlen braucht keine Elo-Spalte, ein Einzelturnier keine
@@ -34,7 +36,7 @@ final class Spalten
      * Paarungsliste steht in jeder Spalte etwas, ohne das die Zeile nicht zu
      * lesen wäre.
      */
-    public const LISTEN = ['teilnehmer', 'rangliste'];
+    public const LISTEN = ['teilnehmer', 'rangliste', 'mannschaftsrangliste'];
 
     /**
      * Alle bekannten Spalten mit ihrer Darstellung.
@@ -65,6 +67,13 @@ final class Spalten
         'punkte' => ['label' => 'punkte', 'kurz' => 'punkteKurz', 'klasse' => 'ctv-zahl ctv-schmal ctv-punkte', 'zahl' => true],
         'feinwertung1' => ['label' => 'feinwertung1', 'kurz' => '', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
         'feinwertung2' => ['label' => 'feinwertung2', 'kurz' => '', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
+        // Spalten der Mannschaftstabelle
+        'mannschaft' => ['label' => 'mannschaft', 'kurz' => '', 'klasse' => '', 'zahl' => false],
+        'kaempfe' => ['label' => 'kaempfe', 'kurz' => '', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
+        'freilose' => ['label' => 'freilose', 'kurz' => '', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
+        'mannschaftspunkte' => ['label' => 'mannschaftspunkteVoll', 'kurz' => 'mannschaftspunkte', 'klasse' => 'ctv-zahl ctv-schmal ctv-punkte', 'zahl' => true],
+        'brettpunkte' => ['label' => 'brettpunkteVoll', 'kurz' => 'brettpunkte', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
+        'schnitt' => ['label' => 'schnitt', 'kurz' => '', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
     ];
 
     /**
@@ -77,6 +86,7 @@ final class Spalten
     private const ANGEBOT = [
         'teilnehmer' => ['nr', 'brett', 'name', 'titel', 'elo', 'dwz', 'twz', 'verein', 'land', 'gruppe', 'geburtsjahr', 'fideId'],
         'rangliste' => ['platz', 'nr', 'titel', 'name', 'twz', 'elo', 'dwz', 'verein', 'land', 'gruppe', 'geburtsjahr', 'fideId', 'bilanz', 'partien', 'punkte', 'feinwertung1', 'feinwertung2'],
+        'mannschaftsrangliste' => ['platz', 'nr', 'mannschaft', 'land', 'kaempfe', 'bilanz', 'freilose', 'mannschaftspunkte', 'brettpunkte', 'schnitt'],
     ];
 
     /**
@@ -93,6 +103,8 @@ final class Spalten
     public const VORGABE = [
         'teilnehmer' => ['nr', 'name', 'twz', 'verein'],
         'rangliste' => ['platz', 'titel', 'name', 'twz', 'verein', 'punkte', 'feinwertung1', 'feinwertung2'],
+        // Die Mannschaftstabelle, wie sie vor der Spaltenauswahl aussah.
+        'mannschaftsrangliste' => ['platz', 'mannschaft', 'kaempfe', 'bilanz', 'freilose', 'mannschaftspunkte', 'brettpunkte'],
     ];
 
     /**
@@ -145,7 +157,11 @@ final class Spalten
             return [];
         }
 
-        $zeilen = 'rangliste' === $liste ? $turnier->getRangliste() : $turnier->getTeilnehmer();
+        $zeilen = match ($liste) {
+            'rangliste' => $turnier->getRangliste(),
+            'mannschaftsrangliste' => self::mannschaftszeilen($turnier),
+            default => $turnier->getTeilnehmer(),
+        };
 
         return array_values(array_filter(
             $angebot,
@@ -259,6 +275,34 @@ final class Spalten
     }
 
     /**
+     * Bringt die Zeilen der Mannschaftstabelle in die Form der Spaltenzeilen.
+     *
+     * Die Zellen aller wählbaren Spalten gibt `Ausgabe::zelle()` aus, und die
+     * kennt die Felder eines Teilnehmersatzes. Wo eine Mannschaftsspalte
+     * dasselbe meint wie eine Teilnehmerspalte — Startnummer, Föderation,
+     * Bilanz —, bekommt die Zeile das Feld unter dem Namen, den die Ausgabe
+     * erwartet. So braucht es für „Nr." und „S/R/N" keine zweite Fassung.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier
+     *
+     * @return array<int,array<string,mixed>> Die Zeilen in Tabellenreihenfolge
+     */
+    public static function mannschaftszeilen(Turnier $turnier): array
+    {
+        $zeilen = [];
+
+        foreach (Mannschaftswertung::tabelle($turnier) as $zeile) {
+            $zeilen[] = array_merge($zeile, [
+                'tnr' => (int) ($zeile['datensatz']['startnummer'] ?? 0) ?: (int) $zeile['nummer'],
+                'land' => (string) ($zeile['datensatz']['land'] ?? ''),
+                'remis' => (int) $zeile['unentschieden'],
+            ]);
+        }
+
+        return $zeilen;
+    }
+
+    /**
      * Prüft, ob eine Spalte in diesem Turnier überhaupt Werte hat.
      *
      * Textspalten gelten als belegt, sobald irgendwo etwas steht;
@@ -273,7 +317,7 @@ final class Spalten
      */
     private static function belegt(string $spalte, array $zeilen, Turnier $turnier): bool
     {
-        if (\in_array($spalte, ['nr', 'platz', 'name', 'punkte', 'bilanz'], true)) {
+        if (\in_array($spalte, ['nr', 'platz', 'name', 'punkte', 'bilanz', 'mannschaft', 'kaempfe', 'mannschaftspunkte', 'brettpunkte'], true)) {
             return true;
         }
 

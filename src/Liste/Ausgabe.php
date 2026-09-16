@@ -380,8 +380,37 @@ final class Ausgabe
             'punkte' => self::kommazahl($zeile['punkte'] ?? 0),
             'feinwertung1' => self::kommazahl($zeile['feinwertung1'] ?? 0),
             'feinwertung2' => self::kommazahl($zeile['feinwertung2'] ?? 0),
+            // Spalten der Mannschaftstabelle
+            'mannschaft' => self::landesflagge($zeile['land'] ?? '').self::esc($zeile['name'] ?? ''),
+            'kaempfe' => (string) (int) ($zeile['kaempfe'] ?? 0),
+            'freilose' => self::zahl($zeile['freilose'] ?? 0),
+            // Mannschaftspunkte sind ganze Zahlen; ein Komma wäre dort Lärm.
+            'mannschaftspunkte' => self::punkte($zeile['mannschaftspunkte'] ?? 0),
+            'brettpunkte' => self::kommazahl($zeile['brettpunkte'] ?? 0),
+            'schnitt' => self::zahl($zeile['schnitt'] ?? 0),
             default => '',
         };
+    }
+
+    /**
+     * Liefert zusätzliche Stilklassen für eine Zelle.
+     *
+     * Gebraucht wird das für das Mannschaftsfeld: Es trägt die Klasse seiner
+     * Föderation, damit sich Nationen hervorheben lassen — so wie in den
+     * übrigen Mannschaftslisten auch.
+     *
+     * @param array<string,mixed> $zeile  Ein Zeilensatz
+     * @param string              $spalte Schlüssel der Spalte
+     *
+     * @return string Die Klassen ohne führendes Leerzeichen, oder leer
+     */
+    public static function zellklasse(array $zeile, string $spalte): string
+    {
+        if ('mannschaft' !== $spalte) {
+            return '';
+        }
+
+        return trim('ctv-mannschaft'.self::landklasse($zeile['land'] ?? ''));
     }
 
     /**
@@ -480,7 +509,7 @@ final class Ausgabe
             'nr' => $zeile['tnr'] ?? null,
             'verein' => $zeile['mannschaft'] ?? null,
             'geburtsjahr' => self::geburtsjahr($zeile),
-            'name' => self::name($zeile),
+            'name', 'mannschaft' => 'mannschaft' === $spalte ? ($zeile['name'] ?? null) : self::name($zeile),
             'bilanz' => ($zeile['siege'] ?? 0) + ($zeile['remis'] ?? 0) + ($zeile['niederlagen'] ?? 0),
             default => $zeile[$spalte] ?? null,
         };
@@ -502,7 +531,10 @@ final class Ausgabe
     public static function sortierwert(array $zeile, string $spalte): string
     {
         return match ($spalte) {
-            'punkte', 'feinwertung1', 'feinwertung2' => (string) (float) ($zeile[$spalte] ?? 0),
+            'punkte', 'feinwertung1', 'feinwertung2', 'mannschaftspunkte', 'brettpunkte' => (string) (float) ($zeile[$spalte] ?? 0),
+            // In der Mannschaftszelle steht vor dem Namen eine Flagge; geordnet
+            // wird nach dem Namen allein.
+            'mannschaft' => (string) ($zeile['name'] ?? ''),
             'bilanz' => (string) (int) ($zeile['siege'] ?? 0),
             // In der Zelle steht eine Flagge; nach ihr zu ordnen ergäbe die
             // Reihenfolge der Unicode-Zeichen. Geordnet wird nach dem Code.

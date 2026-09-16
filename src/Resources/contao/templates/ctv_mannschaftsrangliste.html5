@@ -1,46 +1,27 @@
 <?php
 
-use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
-
-$freilose = false;
-
-foreach ($this->mannschaften as $zeile) {
-    if ($zeile['freilose'] > 0) {
-        $freilose = true;
-
-        break;
-    }
-}
+/*
+ * Mannschaftstabelle.
+ *
+ * Die Spalten sind wählbar wie bei Teilnehmerliste und Rangliste; Kopf und
+ * Zeilen kommen deshalb aus denselben Templates. Ohne eigene Auswahl
+ * erscheinen Platz, Mannschaft, Wettkämpfe, Bilanz, Freilose — sofern es
+ * welche gibt —, Mannschafts- und Brettpunkte.
+ */
 
 ?>
 <div class="ctv-rollbar">
-  <table class="ctv-tabelle ctv-tabelle--mannschaftsrangliste">
+  <table class="ctv-tabelle ctv-tabelle--mannschaftsrangliste"<?= $this->sortierbar ? ' data-ctv-sortierbar' : '' ?>>
     <thead>
       <tr>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('platz') ?></th>
-        <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('kaempfe') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('bilanz') ?></th>
-        <?php if ($freilose): ?>
-          <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('freilose') ?></th>
-        <?php endif; ?>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('mannschaftspunkte') ?></th>
-        <th scope="col" class="ctv-zahl"><?= Ausgabe::spalte('brettpunkte') ?></th>
+        <?php foreach ($this->spalten as $spalte): ?>
+          <?php $this->insert('ctv_spaltenkopf', ['spalte' => $spalte, 'sortierbar' => $this->sortierbar]); ?>
+        <?php endforeach; ?>
       </tr>
     </thead>
     <tbody>
       <?php foreach ($this->mannschaften as $zeile): ?>
-        <tr>
-          <td class="ctv-zahl"><?= (int) $zeile['platz'] ?></td>
-          <td class="ctv-mannschaft<?= Ausgabe::landklasse($zeile['datensatz']['land'] ?? '') ?>"><?= Ausgabe::landesflagge($zeile['datensatz']['land'] ?? '') ?><?= Ausgabe::esc($zeile['name']) ?></td>
-          <td class="ctv-zahl"><?= (int) $zeile['kaempfe'] ?></td>
-          <td class="ctv-zahl"><?= sprintf('%d/%d/%d', $zeile['siege'], $zeile['unentschieden'], $zeile['niederlagen']) ?></td>
-          <?php if ($freilose): ?>
-            <td class="ctv-zahl"><?= Ausgabe::zahl($zeile['freilose']) ?></td>
-          <?php endif; ?>
-          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($zeile['mannschaftspunkte']) ?></td>
-          <td class="ctv-zahl"><?= Ausgabe::punkte($zeile['brettpunkte']) ?></td>
-        </tr>
+        <?php $this->insert('ctv_spaltenzeile', ['zeile' => $zeile, 'spalten' => $this->spalten]); ?>
       <?php endforeach; ?>
     </tbody>
   </table>

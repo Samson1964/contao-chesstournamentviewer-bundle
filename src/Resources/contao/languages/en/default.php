@@ -80,6 +80,8 @@ $GLOBALS['TL_LANG']['ctv']['spalte']['freilose'] = 'Byes';
 $GLOBALS['TL_LANG']['ctv']['spalte']['spieler'] = 'Players';
 $GLOBALS['TL_LANG']['ctv']['spalte']['schnitt'] = 'Avg. rating';
 $GLOBALS['TL_LANG']['ctv']['spalte']['wettkampf'] = 'Match';
+$GLOBALS['TL_LANG']['ctv']['spalte']['mannschaftspunkteVoll'] = 'Match points';
+$GLOBALS['TL_LANG']['ctv']['spalte']['brettpunkteVoll'] = 'Board points';
 
 $GLOBALS['TL_LANG']['ctv']['runde'] = 'Round %s';
 $GLOBALS['TL_LANG']['ctv']['spielfrei'] = 'bye';
