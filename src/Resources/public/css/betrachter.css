@@ -552,10 +552,11 @@
     font-size: .85em !important;
 }
 
-/* Flaggen der Foederationen. Etwas groesser als der Text, damit sie in einer
- * Tabellenspalte zu erkennen sind. */
+/* Flaggen der Foederationen. Die Flagge selbst kommt aus flaggen.css; hier
+ * steht nur, wie sie im Text sitzt. Der feine Rahmen trennt helle Flaggen —
+ * Japan etwa ist fast weiss — vom Grund der Tabelle. */
 
 .ctv-flagge {
-    font-size: 1.25em !important;
-    line-height: 1 !important;
+    margin-right: .15em;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .12);
 }

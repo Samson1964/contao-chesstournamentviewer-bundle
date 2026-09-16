@@ -142,10 +142,23 @@ Verein, bei der Rangliste Platz, Titel, Name, Wertungszahl, Verein, Punkte und
 die Feinwertungen.
 
 Zwei Spalten werden besonders gesetzt: **Die Föderation erscheint als
-Flagge** — als Titel am Feld stehen Ländername und Code, etwa „Polen (POL)" —,
+Flagge** — als Titel am Feld stehen Ländername und Code, etwa „Polen (POL)";
+England, Schottland und Wales bekommen ihre eigene Flagge —,
 und **Punkte und Feinwertungen stehen mit Komma**, also „7,5" statt „7½". Das
 ½ bleibt dort, wo eine Zahl für sich steht: in Ergebnislisten und
 Kreuztabellen.
+
+**Die Flaggen sind SVG-Dateien, keine Emoji.** Emoji wären der kürzere Weg,
+sehen aber nicht überall gleich aus: Die Emoji-Schrift von Windows führt aus
+politischen Gründen keine Länderflaggen, weshalb Chrome dort zwei Buchstaben
+in Kästchen zeigte, während Firefox mit seiner eigenen Schrift die Flagge
+darstellte. Das Bundle liefert deshalb die Flaggen des Pakets
+[flag-icons](https://github.com/lipis/flag-icons) mit — 195 Dateien unter
+`src/Resources/public/flags`, dazu die Stilvorlage `flaggen.css`. Geladen wird
+nichts von fremden Servern; eine Kennung ohne Flagge, etwa „FID" für den
+Weltschachbund, erscheint weiterhin als Code. Die Klassennamen sind die von
+flag-icons, sodass eine Seite, die die Bibliothek ohnehin einbindet, keine
+zweite Fassung braucht.
 
 **Ländernamen werden in die Sprache der Seite übersetzt.** Nationalmannschaften
 heißen in den Turnierdateien meist englisch — „Poland", „Uzbekistan 2",
@@ -382,3 +395,7 @@ LGPL-3.0-or-later. Die Klasse `SwtFile` ist vom SWT-Parser des
 Zugzwang-Projekts abgeleitet (<http://www.zugzwang.org/projects/swtparser>),
 Copyright © 2005, 2012 Gustaf Mossakowski, Jacob Roggon, Falco Nogatz, und
 steht unter derselben Lizenz.
+
+Die Flaggen unter `src/Resources/public/flags` stammen aus dem Paket
+[flag-icons](https://github.com/lipis/flag-icons), Copyright © 2013 Panayiotis
+Lipiridis, MIT-Lizenz; der Lizenztext liegt im selben Verzeichnis.

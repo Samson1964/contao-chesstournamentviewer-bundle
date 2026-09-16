@@ -110,17 +110,50 @@ class LaenderTest extends TestCase
     }
 
     /**
-     * Prüft den Titel am Flaggenfeld.
+     * Prüft das Flaggenfeld.
      *
-     * Er nennt Ländername und Code; ohne Flagge bleibt der Code als Text.
+     * Ausgegeben wird ein leeres Feld mit den Klassen von flag-icons; Titel
+     * und `aria-label` nennen Ländername und Code. Ohne Flagge bleibt der
+     * Code als Text.
      *
      * @return void
      */
     public function testFlaggeTraegtLaendernamenAlsTitel(): void
     {
         $GLOBALS['TL_LANGUAGE'] = 'de';
+        $polen = Ausgabe::flagge('POL');
 
-        $this->assertStringContainsString('title="Polen (POL)"', Ausgabe::flagge('POL'));
+        $this->assertStringContainsString('title="Polen (POL)"', $polen);
+        $this->assertStringContainsString('aria-label="Polen (POL)"', $polen);
+        $this->assertStringContainsString('class="ctv-flagge fi fi-pl"', $polen);
         $this->assertSame('FID', Ausgabe::flagge('FID'));
+    }
+
+    /**
+     * Prüft die Flaggenkennungen und dass jede eine Datei hat.
+     *
+     * England, Schottland und Wales führen eigene Flaggen, obwohl sie sich
+     * die ISO-Kennung des Vereinigten Königreichs teilen. Eine Kennung ohne
+     * mitgelieferte Datei ergäbe ein leeres Feld statt einer Flagge — deshalb
+     * die Gegenprobe über alle bekannten Kennungen.
+     *
+     * @return void
+     */
+    public function testJedeFlaggenkennungHatEineDatei(): void
+    {
+        $this->assertSame('de', Laender::flaggenCode('GER'));
+        $this->assertSame('gb-eng', Laender::flaggenCode('ENG'));
+        $this->assertSame('gb-sct', Laender::flaggenCode('SCO'));
+        $this->assertNull(Laender::flaggenCode('IBCA'));
+
+        $verzeichnis = __DIR__.'/../../src/Resources/public/flags/';
+        $stil = (string) file_get_contents(__DIR__.'/../../src/Resources/public/css/flaggen.css');
+
+        foreach (array_keys((new \ReflectionClass(Laender::class))->getConstants()['ISO']) as $code) {
+            $flagge = Laender::flaggenCode($code);
+
+            $this->assertFileExists($verzeichnis.$flagge.'.svg', sprintf('Die Flagge zu "%s" fehlt.', $code));
+            $this->assertStringContainsString('.fi-'.$flagge.' ', $stil, sprintf('Die Stilregel zu "%s" fehlt.', $code));
+        }
     }
 }

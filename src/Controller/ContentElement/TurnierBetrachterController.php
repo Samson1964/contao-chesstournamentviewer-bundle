@@ -196,17 +196,23 @@ class TurnierBetrachterController extends AbstractContentElementController
     }
 
     /**
-     * Bindet Stilvorlage und Skript des Betrachters ein.
+     * Bindet Stilvorlagen und Skript des Betrachters ein.
      *
-     * Beide bekommen einen festen Schlüssel im Array, damit sie bei mehreren
-     * Betrachtern auf einer Seite nur einmal ausgegeben werden. Der Zusatz
-     * `|static` hält sie aus der Zusammenfassung dynamischer Dateien heraus.
+     * Jede Datei bekommt einen festen Schlüssel im Array, damit sie bei
+     * mehreren Betrachtern auf einer Seite nur einmal ausgegeben wird. Der
+     * Zusatz `|static` hält sie aus der Zusammenfassung dynamischer Dateien
+     * heraus.
+     *
+     * Die Flaggen stehen in einer eigenen Stilvorlage: Sie besteht fast nur
+     * aus Verweisen auf die SVG-Dateien und wäre in der Grundgestaltung ein
+     * Fremdkörper.
      *
      * @return void
      */
     private function bindeDateienEin(): void
     {
         $GLOBALS['TL_CSS']['ctv'] = 'bundles/contaochesstournamentviewer/css/betrachter.css|static';
+        $GLOBALS['TL_CSS']['ctv_flaggen'] = 'bundles/contaochesstournamentviewer/css/flaggen.css|static';
         $GLOBALS['TL_JAVASCRIPT']['ctv'] = 'bundles/contaochesstournamentviewer/js/betrachter.js|static';
     }
 }

@@ -152,6 +152,38 @@ final class Laender
     }
 
     /**
+     * Nennt die Flaggenkennung zu einer FIDE-Kennung.
+     *
+     * Das ist meist die kleingeschriebene ISO-Kennung — die Dateinamen des
+     * Pakets flag-icons folgen ihr. England, Schottland und Wales haben
+     * dort eigene Flaggen, obwohl sie sich die ISO-Kennung des Vereinigten
+     * Königreichs teilen; für sie gelten die Unterkennungen.
+     *
+     * @param mixed $code Die dreibuchstabige FIDE-Kennung
+     *
+     * @return string|null Die Kennung der Flaggendatei ohne Endung, oder null
+     *                     wenn es zu dieser Kennung keine Flagge gibt
+     */
+    public static function flaggenCode(mixed $code): ?string
+    {
+        $code = strtoupper(trim((string) $code));
+
+        $eigene = [
+            'ENG' => 'gb-eng',
+            'SCO' => 'gb-sct',
+            'WLS' => 'gb-wls',
+        ];
+
+        if (isset($eigene[$code])) {
+            return $eigene[$code];
+        }
+
+        $iso = self::ISO[$code] ?? null;
+
+        return null === $iso ? null : strtolower($iso);
+    }
+
+    /**
      * Nennt den Ländernamen zu einer FIDE-Kennung in einer Sprache.
      *
      * @param mixed       $code    Die dreibuchstabige FIDE-Kennung

@@ -142,7 +142,7 @@ final class Ausgabe
      */
     public static function landesflagge(mixed $land): string
     {
-        return null === Laender::iso($land) ? '' : self::flagge($land).' ';
+        return null === Laender::flaggenCode($land) ? '' : self::flagge($land).' ';
     }
 
     /**
@@ -391,8 +391,13 @@ final class Ausgabe
     /**
      * Gibt eine Föderation als Flagge aus.
      *
-     * Die Flagge entsteht aus zwei Regionalbuchstaben — dieselbe Schreibweise,
-     * die auch Smartphones benutzen; eine Bilddatei braucht es dafür nicht.
+     * Ausgegeben wird ein leeres Feld mit den Klassen von flag-icons; die
+     * Flagge selbst ist eine SVG-Datei aus `Resources/public/flags`, die die
+     * Stilvorlage als Hintergrund setzt. **Emoji taugen dafür nicht:** Die
+     * Emoji-Schrift von Windows führt keine Länderflaggen, weshalb Chrome
+     * dort zwei Buchstaben in Kästchen zeigte, während Firefox mit seiner
+     * eigenen Schrift die Flagge darstellte.
+     *
      * Nötig ist der Umweg über die zweibuchstabigen Landeskennungen, denn
      * Turnierdateien führen die dreibuchstabigen des Weltschachbundes.
      *
@@ -413,21 +418,25 @@ final class Ausgabe
             return '';
         }
 
-        $zwei = Laender::iso($code);
+        $flagge = Laender::flaggenCode($code);
 
-        if (null === $zwei) {
+        if (null === $flagge) {
             return self::esc($code);
         }
 
-        $flagge = mb_chr(0x1F1E6 + \ord($zwei[0]) - \ord('A'), 'UTF-8')
-            .mb_chr(0x1F1E6 + \ord($zwei[1]) - \ord('A'), 'UTF-8');
-
         // Im Titel steht der Ländername in der Sprache der Seite, dahinter der
-        // Code — so ist die Flagge auch ohne Flaggenkenntnis zuzuordnen.
+        // Code — so ist die Flagge auch ohne Flaggenkenntnis zuzuordnen. Als
+        // `aria-label` steht dasselbe da: Das Feld trägt keinen Text, und eine
+        // Vorlesehilfe hätte sonst nichts zu sagen.
         $name = Laender::name($code);
         $titel = null === $name ? $code : $name.' ('.$code.')';
 
-        return sprintf('<span class="ctv-flagge" title="%s">%s</span>', self::esc($titel), $flagge);
+        return sprintf(
+            '<span class="ctv-flagge fi fi-%s" role="img" title="%s" aria-label="%s"></span>',
+            $flagge,
+            self::esc($titel),
+            self::esc($titel)
+        );
     }
 
     /**

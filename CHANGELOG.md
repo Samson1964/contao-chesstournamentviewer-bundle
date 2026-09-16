@@ -1,5 +1,20 @@
 # Änderungen
 
+## Version 1.12.0 (2026-09-16)
+
+* Fix: **Die Länderflaggen fehlten in Chrome unter Windows.** Sie waren als
+  Emoji ausgegeben, und die Emoji-Schrift von Windows führt keine
+  Länderflaggen; statt der Flagge standen dort zwei Buchstaben in Kästchen,
+  während Firefox mit seiner eigenen Schrift die Flagge zeigte. Das Bundle
+  liefert die Flaggen jetzt als SVG mit — 195 Dateien aus dem Paket
+  [flag-icons](https://github.com/lipis/flag-icons) (MIT) unter
+  `src/Resources/public/flags`, dazu die Stilvorlage `flaggen.css`. Geladen
+  wird nichts von fremden Servern.
+* Add: **England, Schottland und Wales bekommen ihre eigene Flagge**, obwohl
+  sie sich die ISO-Kennung des Vereinigten Königreichs teilen.
+* Change: Das Flaggenfeld trägt den Ländernamen zusätzlich als `aria-label`;
+  vorher hatte eine Vorlesehilfe dort nur das Emoji.
+
 ## Version 1.11.0 (2026-09-15)
 
 * Fix: **„Stand nach Runde" blieb nach einem Wechsel der Liste stehen.** Wer
