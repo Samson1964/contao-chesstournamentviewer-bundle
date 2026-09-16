@@ -142,13 +142,17 @@ class MaskeListener
 
         if (!\in_array($liste, Listen::MIT_STAND, true) || $turnier->getLetzteRunde() < 2) {
             $weg[] = 'ctvStand';
-            $weg[] = 'ctvStandAus';
         }
 
         if (!\in_array($liste, Listen::MIT_RUNDEN, true) || $turnier->getLetzteRunde() < 2) {
             $weg[] = 'ctvRunden';
-            $weg[] = 'ctvRundenkopfAus';
         }
+
+        // Die beiden Kästchen der Feldgruppe „Überschriften" bleiben stehen,
+        // gleich welche Liste gewählt ist — so wie die Hinweise auch. Sie
+        // wirken nur dort, wo es die jeweilige Überschrift gibt, und ein
+        // Kästchen, das je nach Liste verschwindet, sucht der Redakteur beim
+        // nächsten Mal vergeblich.
 
         if (!$turnier->istMannschaftsturnier() || !\in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true)) {
             $weg[] = 'ctvMannschaftswahl';

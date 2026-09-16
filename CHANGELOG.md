@@ -2,12 +2,17 @@
 
 ## Version 1.14.0 (2026-09-16)
 
-* Add: Kästchen **„Rundenüberschriften ausblenden"** bei Paarungen,
-  Ergebnissen und Wettkämpfen — am Inhaltselement wie am Inserttag. Bisher
-  stand über jeder Tabelle „Runde 4", auch wenn die Runde schon in der
-  Überschrift des Elements oder im Text um den Inserttag herum genannt war.
-  Ohne Auswahl bleiben die Überschriften stehen: Eine Liste über mehrere
-  Runden wäre ohne sie nicht zu lesen.
+* Add: Kästchen **„Rundenüberschriften ausblenden"**. Bisher stand über jeder
+  Tabelle einer Paarungs-, Ergebnis- oder Wettkampfliste „Runde 4", auch wenn
+  die Runde schon in der Überschrift des Elements oder im Text um den
+  Inserttag herum genannt war.
+* Change: **Die beiden Kästchen für die automatischen Überschriften stehen in
+  einer eigenen Feldgruppe „Überschriften"** — und zwar in jedem
+  Inhaltselement und bei jedem Inserttag, gleich welche Liste gewählt ist, so
+  wie die Gruppe „Hinweise" auch. „Zeile ‚Stand nach Runde' ausblenden"
+  erschien vorher nur bei den Listen, die einen Stand zeigen; wer von dort
+  auf eine Ergebnisliste umstellte, fand das Kästchen nicht wieder.
+  Ohne Auswahl erscheinen beide Überschriften wie bisher.
 
 ## Version 1.13.1 (2026-09-16)
 

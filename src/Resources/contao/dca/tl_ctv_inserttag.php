@@ -87,7 +87,8 @@ $GLOBALS['TL_DCA']['tl_ctv_inserttag'] = [
         'default' => '{ctv_titel_legend},titel,alias;'
             .'{ctv_legend},ctvDatei,ctvFormat,ctvListe;'
             .'{ctv_spalten_legend},ctvSpalten;'
-            .'{ctv_runden_legend},ctvStand,ctvStandAus,ctvRunden,ctvRundenkopfAus;'
+            .'{ctv_runden_legend},ctvStand,ctvRunden;'
+            .'{ctv_ueberschrift_legend},ctvStandAus,ctvRundenkopfAus;'
             .'{ctv_mannschaft_legend},ctvMannschaftswahl,ctvMannschaftSpieler,ctvKreuzKurz;'
             .'{ctv_hinweis_legend},ctvDatum,ctvHinweise',
     ],

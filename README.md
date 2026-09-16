@@ -57,11 +57,11 @@ sie gewählt und gespeichert ist.
 | Liste | Einstellungen |
 | --- | --- |
 | Teilnehmer, Rangliste | **Spalten** — siehe [Spalten und Sortierung](#spalten-und-sortierung) |
-| Rangliste, Kreuztabelle, Fortschritt, Mannschaftstabelle, Fortschrittstabelle der Mannschaften, Kreuztabelle der Mannschaften | **Stand nach Runde** und **Zeile „Stand nach Runde" ausblenden** — siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden) |
+| Rangliste, Kreuztabelle, Fortschritt, Mannschaftstabelle, Fortschrittstabelle der Mannschaften, Kreuztabelle der Mannschaften | **Stand nach Runde** — siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden) |
 | Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden**; bei Mannschaftsturnieren zusätzlich **Mannschaften** |
 | Mannschaften, Wettkämpfe | **Spieler mit ausgeben** |
 | Kreuztabelle der Mannschaften | **Kreuztabelle kürzen** |
-| alle | **Stand der Turnierdatei anzeigen** und **Hinweise zu den Zahlen anzeigen** |
+| alle | **Zeile „Stand nach Runde" ausblenden** und **Rundenüberschriften ausblenden** (Feldgruppe „Überschriften"), **Stand der Turnierdatei anzeigen** und **Hinweise zu den Zahlen anzeigen** |
 
 **Eine Einstellung wirkt nur bei den Listen, zu denen sie gehört.** Wer ein
 Element von der Mannschaftstabelle nach Runde 3 auf die Mannschaftsliste
@@ -237,11 +237,26 @@ Beschränkt die Ausgabe auf einzelne Runden; ohne Auswahl erscheinen alle. Die
 Rundennummern kommen aus der Datei: Ein Turnier über fünf Runden bietet fünf
 Kästchen an.
 
-**Rundenüberschriften ausblenden** — ebenfalls bei diesen drei Listen. Über
-jeder Tabelle steht sonst „Runde 4". Steht die Runde schon in der Überschrift
-des Elements oder im Text um einen Inserttag herum, ist sie dort zu viel.
-Ohne Auswahl bleiben die Überschriften stehen — eine Liste über mehrere
-Runden wäre ohne sie nicht zu lesen.
+#### Die automatischen Überschriften
+
+Zwei Zeilen setzt der Betrachter von sich aus über die Tabelle: „Stand nach
+Runde 4", wenn ein früherer Stand gewählt ist, und „Runde 4" über jeder Runde
+einer Paarungs-, Ergebnis- oder Wettkampfliste. Beide lassen sich in der
+Feldgruppe **Überschriften** abschalten:
+
+| Kästchen | Wirkung |
+| --- | --- |
+| **Zeile „Stand nach Runde" ausblenden** | Unterdrückt die Angabe über der Ausgabe |
+| **Rundenüberschriften ausblenden** | Unterdrückt „Runde 1", „Runde 2" über den Tabellen |
+
+Die Gruppe steht in **jedem** Element und bei jedem Inserttag, gleich welche
+Liste gewählt ist — so wie die Gruppe „Hinweise" auch. Ein Kästchen, das je
+nach Liste verschwindet, sucht man beim nächsten Mal vergeblich; wo es die
+jeweilige Überschrift gar nicht gibt, bleibt es einfach wirkungslos.
+
+Ohne Auswahl erscheinen beide Überschriften. Das ist Absicht: Eine
+zurückversetzte Tabelle ohne Angabe sähe aus wie die Endtabelle, und eine
+Liste über mehrere Runden wäre ohne Rundenüberschriften nicht zu lesen.
 
 #### Woher die Zahlen eines Zwischenstands kommen
 

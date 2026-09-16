@@ -25,5 +25,6 @@ $GLOBALS['TL_LANG']['tl_content']['ctv_legend'] = 'Tournament file and output';
 $GLOBALS['TL_LANG']['tl_content']['ctv_spalten_legend'] = 'Columns';
 $GLOBALS['TL_LANG']['tl_content']['ctv_runden_legend'] = 'Point in time and rounds';
 $GLOBALS['TL_LANG']['tl_content']['ctv_mannschaft_legend'] = 'Teams';
+$GLOBALS['TL_LANG']['tl_content']['ctv_ueberschrift_legend'] = 'Headlines';
 $GLOBALS['TL_LANG']['tl_content']['ctv_hinweis_legend'] = 'Notes';
 $GLOBALS['TL_LANG']['tl_content']['ctvDatum'] = ['Show file date', 'Puts the date of the last change to the tournament file below the table. The modification date in the file manager is used — tournament organisers upload a new version after each round.'];

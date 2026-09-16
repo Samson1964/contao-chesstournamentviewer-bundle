@@ -27,5 +27,6 @@ $GLOBALS['TL_LANG']['tl_content']['ctv_legend'] = 'Turnierdatei und Ausgabe';
 $GLOBALS['TL_LANG']['tl_content']['ctv_spalten_legend'] = 'Spalten';
 $GLOBALS['TL_LANG']['tl_content']['ctv_runden_legend'] = 'Zeitpunkt und Runden';
 $GLOBALS['TL_LANG']['tl_content']['ctv_mannschaft_legend'] = 'Mannschaften';
+$GLOBALS['TL_LANG']['tl_content']['ctv_ueberschrift_legend'] = 'Überschriften';
 $GLOBALS['TL_LANG']['tl_content']['ctv_hinweis_legend'] = 'Hinweise';
 $GLOBALS['TL_LANG']['tl_content']['ctvDatum'] = ['Stand der Turnierdatei anzeigen', 'Setzt unter die Tabelle, wann die Turnierdatei zuletzt geändert wurde. Maßgeblich ist das Änderungsdatum der Datei in der Dateiverwaltung — die Turnierleitung lädt nach jeder Runde eine neue Fassung hoch.'];
