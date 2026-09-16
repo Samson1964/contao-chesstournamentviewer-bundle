@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Tests\EventListener;
 
 use PHPUnit\Framework\TestCase;
-use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener;
+use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\MaskeListener;
 
 /**
  * Prüft das Kürzen der Palette.
@@ -102,7 +102,7 @@ class PaletteTest extends TestCase
      */
     private function ohneFelder(array $felder): string
     {
-        $methode = new \ReflectionMethod(TlContentListener::class, 'ohneFelder');
+        $methode = new \ReflectionMethod(MaskeListener::class, 'ohneFelder');
         $methode->setAccessible(true);
 
         return $methode->invoke(null, self::PALETTE, $felder);

@@ -20,3 +20,18 @@ declare(strict_types=1);
  */
 $GLOBALS['TL_WRAPPERS']['start'][] = 'chesstournamentviewerStart';
 $GLOBALS['TL_WRAPPERS']['stop'][] = 'chesstournamentviewerStop';
+
+/*
+ * Backend-Modul für die Turnierausgaben, die über einen Inserttag eingebunden
+ * werden. Es steht in derselben Gruppe wie die übrigen Schach-Module.
+ */
+$GLOBALS['BE_MOD']['schach']['ctv_inserttag'] = [
+    'tables' => ['tl_ctv_inserttag'],
+];
+
+/*
+ * Das Model, mit dem der Inserttag seinen Datensatz findet. Ohne diesen
+ * Eintrag kennt Contao die Tabelle nicht und `findByIdOrAlias()` liefert
+ * nichts.
+ */
+$GLOBALS['TL_MODELS']['tl_ctv_inserttag'] = Schachbulle\ContaoChesstournamentviewerBundle\Model\CtvInserttagModel::class;

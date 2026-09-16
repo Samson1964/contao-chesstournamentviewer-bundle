@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Tests\EventListener;
 
 use PHPUnit\Framework\TestCase;
-use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener;
+use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\MaskeListener;
 
 /**
  * Prüft, welche Ausgabe ein Inhaltselement zeigt.
@@ -28,8 +28,8 @@ class ListeTest extends TestCase
      */
     public function testEinzelauswahlGilt(): void
     {
-        $this->assertSame('rangliste', TlContentListener::liste('rangliste', null));
-        $this->assertSame('rangliste', TlContentListener::liste('rangliste', serialize(['teilnehmer'])));
+        $this->assertSame('rangliste', MaskeListener::liste('rangliste', null));
+        $this->assertSame('rangliste', MaskeListener::liste('rangliste', serialize(['teilnehmer'])));
     }
 
     /**
@@ -41,7 +41,7 @@ class ListeTest extends TestCase
     {
         $this->assertSame(
             'teilnehmer',
-            TlContentListener::liste('', serialize(['teilnehmer', 'rangliste', 'kreuztabelle']))
+            MaskeListener::liste('', serialize(['teilnehmer', 'rangliste', 'kreuztabelle']))
         );
     }
 
@@ -52,8 +52,8 @@ class ListeTest extends TestCase
      */
     public function testLeereEintraegeWerdenUebergangen(): void
     {
-        $this->assertSame('kreuztabelle', TlContentListener::liste('', serialize(['', 'kreuztabelle'])));
-        $this->assertSame('', TlContentListener::liste('', serialize([])));
-        $this->assertSame('', TlContentListener::liste(null, null));
+        $this->assertSame('kreuztabelle', MaskeListener::liste('', serialize(['', 'kreuztabelle'])));
+        $this->assertSame('', MaskeListener::liste('', serialize([])));
+        $this->assertSame('', MaskeListener::liste(null, null));
     }
 }

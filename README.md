@@ -102,6 +102,38 @@ weiß beim Ausliefern nicht, was nach ihm kommt. Ohne JavaScript stehen die
 Ausgaben deshalb untereinander, jede vollständig lesbar — dieselbe
 Rückfallebene wie bisher.
 
+### Eine Ausgabe als Inserttag einbinden
+
+Nicht jede Tabelle soll ein eigenes Inhaltselement sein. Soll eine einzelne
+Tabelle **mitten in einem Text** stehen — in einer Box auf der Startseite, in
+einer Nachricht, in einem eigenen Template —, führt der Weg über das
+Backend-Modul **Turnier-Inserttags**.
+
+Dort wird eine Turnierausgabe genauso eingestellt wie am Inhaltselement:
+Datei wählen, speichern, Liste wählen, Einstellungen setzen. Dazu kommen ein
+**Titel** für die Übersicht und eine **Kennung**, die im Inserttag steht. Die
+Übersicht zeigt hinter jedem Titel den fertigen Tag zum Abschreiben:
+
+```
+{{ctv::olympiade-ger-r1}}
+```
+
+Statt der Kennung geht auch die Datensatz-ID, also `{{ctv::7}}`. Die Ausgabe
+ist dieselbe wie beim Inhaltselement, nur ohne dessen Überschrift und ohne
+Reiter. Stilvorlage und Skript meldet der Inserttag selbst an; auf einer
+Seite mit mehreren Ausgaben erscheinen sie trotzdem nur einmal.
+
+Findet der Inserttag seine Ausgabe nicht oder lässt sich die Turnierdatei
+nicht lesen, bleibt er **leer** — eine Fehlermeldung mitten im Text wäre für
+den Besucher unbrauchbar. Der Grund steht im Contao-Fehlerprotokoll.
+
+**Warum nicht die fertige Tabelle ins Textelement kopieren?** Weil Contao beim
+Speichern eines Textelements alle Auszeichnungen entfernt, die nicht unter
+„Erlaubte HTML-Tags" stehen — die `<span>` der Flaggen gehören dazu. Aus der
+Flagge wird dann nichts. Der Inserttag erzeugt die Tabelle erst beim Ausliefern
+und ist davon nicht betroffen. Außerdem wächst die Tabelle mit jeder neuen
+Fassung der Turnierdatei von selbst mit.
+
 ### Die Listen
 
 | Liste | Inhalt |
@@ -244,6 +276,7 @@ Alle Listen sind eigene Contao-Templates und lassen sich einzeln
 | Template | Liste |
 | --- | --- |
 | `ce_chesstournamentviewer` | Rahmen einer Turnierausgabe, mit Hinweisen |
+| `ctv_ausgabe` | Rahmen einer Ausgabe, die über einen Inserttag kommt |
 | `ce_chesstournamentviewerStart` | Öffnender Umschlag mit der Reiterleiste |
 | `ce_chesstournamentviewerStop` | Schließender Umschlag |
 | `ctv_spaltenkopf` | Ein Spaltenkopf von Teilnehmerliste und Rangliste |
@@ -283,19 +316,34 @@ CSS-Eigenschaften am Element `.ctv` und lassen sich im eigenen Theme
 
 ```css
 .ctv {
-    --ctv-grund: #fff;            /* Grund des aktiven Reiters */
-    --ctv-text: #1c1c1c;          /* Schrift in Reitern und Tabellen */
-    --ctv-linie: #d5d5d5;         /* Tabellen- und Reiterlinien */
-    --ctv-kopf: #eceef0;          /* Tabellenkopf, Blindfelder */
-    --ctv-wechsel: #f6f7f8;       /* jede zweite Zeile, ruhende Reiter */
-    --ctv-gedaempft: #6b6b6b;     /* Nebenangaben wie Farbe und Punktestand */
-    --ctv-akzent: #1c5a8c;        /* Balken über dem aktiven Reiter */
+    --ctv-grund: #fff;            /* Grund der Tabelle und des aktiven Reiters */
+    --ctv-text: #002533;          /* Schrift in Reitern und Tabellen */
+    --ctv-linie: #dfe5e9;         /* Tabellen- und Reiterlinien */
+    --ctv-kopf: #004f6e;          /* Tabellenkopf und Wettkampfkopf */
+    --ctv-kopf-text: #fff;        /* Schrift darin */
+    --ctv-wechsel: #f2f6f8;       /* jede zweite Zeile, ruhende Reiter */
+    --ctv-schweben: #e4eef4;      /* Zeile unter dem Mauszeiger */
+    --ctv-gedaempft: #5b7484;     /* Nebenangaben wie Farbe und Punktestand */
+    --ctv-akzent: #004f6e;        /* Balken über dem aktiven Reiter */
     --ctv-blind: #c9ced3;         /* Blindfelder der Kreuztabelle */
     --ctv-blind-figur: #6b7379;   /* der König darin */
-    --ctv-weiss: #fff;            /* Feld des Weißspielers im Wettkampf */
-    --ctv-schwarz: #e2e5e8;       /* Feld des Schwarzspielers */
+    --ctv-weiss: #fff;            /* Punkt des Weißspielers im Wettkampf */
+    --ctv-schwarz: #33454f;       /* Punkt des Schwarzspielers */
+    --ctv-farbrand: #7d919c;      /* Rand dieser Punkte */
+    --ctv-rundung: 10px;          /* Ecken der Tabelle */
+    --ctv-schatten: 0 2px 12px rgba(0, 0, 0, .18);
 }
 ```
+
+**Die Tabelle ist als Karte gestaltet**: heller Grund, abgerundete Ecken, ein
+flacher Schatten, dunkler Kopf mit Versalien und ein Zeilenwechsel in hellem
+Blaugrau. Das ist die Gestaltung der Olympia-Tabellen auf schachbund.de. Wer
+die schlichtere Fassung früherer Versionen möchte, setzt `--ctv-rundung: 0`,
+`--ctv-schatten: none` und einen hellen `--ctv-kopf`.
+
+**Die Farbe am Brett steht als Punkt vor dem Namen**, weiß gefüllt für Weiß,
+dunkel für Schwarz. Bis Fassung 1.12.0 war stattdessen die ganze Zelle
+eingefärbt; das nahm der Tabelle die Streifung.
 
 Auf einer dunklen Seite sind mindestens `--ctv-grund`, `--ctv-text` und
 `--ctv-wechsel` zu setzen: Die Reiter bringen ihre Farben ausdrücklich mit,

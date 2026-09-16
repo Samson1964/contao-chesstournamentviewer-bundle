@@ -1,0 +1,34 @@
+<?php
+
+/*
+ * Rahmen einer Turnierausgabe, die über einen Inserttag eingebunden wird.
+ *
+ * Das Markup ist dasselbe wie im Inhaltselement, nur ohne dessen Hülle: Ein
+ * Inserttag steht mitten im Text und bringt keine eigene Überschrift mit.
+ * Die Klasse `ctv` muss bleiben — an ihr hängen alle Stilregeln.
+ */
+
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
+
+?>
+<div class="ctv ctv--inserttag" id="<?= $this->kennung ?>">
+
+  <?php if ($this->stand): ?>
+    <p class="ctv-stand"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['standTitel'] ?? 'Stand nach Runde %d', $this->stand)) ?></p>
+  <?php endif; ?>
+
+  <?php if ($this->hinweise): ?>
+    <div class="ctv-hinweise">
+      <?php foreach ($this->hinweise as $hinweis): ?>
+        <p class="ctv-hinweis"><?= Ausgabe::esc($hinweis) ?></p>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php $this->insert($this->liste['template'], array_merge($this->liste['daten'], ['turnier' => $this->turnier])); ?>
+
+  <?php if ($this->aktualisiert): ?>
+    <p class="ctv-datum"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['aktualisiert'] ?? 'Stand der Turnierdatei: %s', $this->aktualisiert)) ?></p>
+  <?php endif; ?>
+
+</div>

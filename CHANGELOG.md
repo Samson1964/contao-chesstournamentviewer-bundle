@@ -1,5 +1,27 @@
 # Änderungen
 
+## Version 1.13.0 (2026-09-16)
+
+* Add: **Backend-Modul „Turnier-Inserttags".** Dort lassen sich
+  Turnierausgaben anlegen, die kein eigenes Inhaltselement sein sollen, und
+  mit `{{ctv::kennung}}` in beliebige Texte einbinden — etwa drei
+  Deutschland-Paarungen aus drei Turnieren in einer Box auf der Startseite.
+  Die Einstellungen sind dieselben wie am Inhaltselement; die Übersicht zeigt
+  hinter jedem Titel den fertigen Inserttag. Statt der Kennung geht auch die
+  Datensatz-ID.
+* Change: **Neues Standardlayout für alle Tabellen** nach dem Vorbild der
+  Olympia-Tabellen auf schachbund.de: helle Karte mit abgerundeten Ecken und
+  flachem Schatten, dunkler Kopf mit Versalien, Zeilenwechsel in hellem
+  Blaugrau und eine hervorgehobene Zeile unter dem Mauszeiger. Alle Werte
+  stehen weiterhin als CSS-Eigenschaften am `.ctv` und lassen sich im Theme
+  überschreiben.
+* Change: **Die Farbe am Brett steht als runder Punkt vor dem Namen**, weiß
+  gefüllt für Weiß und dunkel für Schwarz. Vorher war die ganze Zelle
+  eingefärbt; das nahm der Tabelle die Streifung.
+* Change: Die Ausgabe entsteht jetzt in einem eigenen Dienst, den
+  Inhaltselement und Inserttag gemeinsam benutzen. Für die Ausgabe ändert
+  sich dadurch nichts.
+
 ## Version 1.12.0 (2026-09-16)
 
 * Fix: **Die Länderflaggen fehlten in Chrome unter Windows.** Sie waren als

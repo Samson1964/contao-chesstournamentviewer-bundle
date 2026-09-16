@@ -11,8 +11,8 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoChesstournamentviewerBundle\EventListener;
 
 use Contao\Config;
-use Contao\ContentModel;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\Database;
 use Contao\DataContainer;
 use Contao\Message;
 use Contao\StringUtil;
@@ -24,7 +24,7 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
 
 /**
- * Rückrufe für den Data Container der Inhaltselemente.
+ * Rückrufe für die Eingabemasken des Bundles.
  *
  * Die Klasse baut die Eingabemaske in drei Schritten auf, damit der Redakteur
  * nie vor Einstellungen steht, die noch nichts bewirken können:
@@ -38,27 +38,39 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
  *
  * Der Umweg über das Speichern ist nicht zu vermeiden: Die Dateiauswahl setzt
  * ihren Wert per Skript, und eine Zuweisung löst kein `change`-Ereignis aus.
+ *
+ * **Dieselbe Maske gibt es zweimal:** am Inhaltselement in `tl_content` und
+ * im Backend-Modul der Inserttags in `tl_ctv_inserttag`. Deshalb bekommt die
+ * Klasse Tabelle und Palette als Dienstargumente und wird zweimal
+ * angemeldet; die Felder heißen in beiden Tabellen gleich.
  */
-class TlContentListener
+class MaskeListener
 {
     /**
      * Erzeugt den Rückruf.
      *
      * @param FormatVerzeichnis $formate   Kennt alle registrierten Turnierformate
      * @param TurnierLader      $lader     Liest die gewählte Turnierdatei
-     * @param ContaoFramework   $framework Für den Zugriff auf ContentModel
+     * @param ContaoFramework   $framework Für den Zugriff auf die Datenbank
+     * @param string            $tabelle   Die Tabelle, für die dieser Dienst zuständig ist
+     * @param string            $palette   Name der Palette, aus der Felder gestrichen werden
+     * @param string            $typ       Nur für `tl_content`: der Elementtyp, auf den die
+     *                                     Maske zutrifft; leer heißt „jeder Datensatz"
      */
     public function __construct(
         private readonly FormatVerzeichnis $formate,
         private readonly TurnierLader $lader,
         private readonly ContaoFramework $framework,
+        private readonly string $tabelle = 'tl_content',
+        private readonly string $palette = 'chesstournamentviewer',
+        private readonly string $typ = 'chesstournamentviewer',
     ) {
     }
 
     /**
      * Trägt die Dateiendungen der bekannten Formate in die Dateiauswahl ein.
      *
-     * Der Rückruf läuft beim Laden von `tl_content` und damit auch für alle
+     * Der Rückruf läuft beim Laden der Tabelle und damit auch für alle
      * anderen Inhaltselemente; er schreibt lediglich einen Wert ins DCA-Array
      * und fällt nicht ins Gewicht. Der Weg über einen Rückruf ist nötig, weil
      * die Liste erst feststeht, wenn der Container gebaut ist — in der
@@ -71,7 +83,7 @@ class TlContentListener
      */
     public function setzeDateiendungen(DataContainer $dc = null): void
     {
-        if (!isset($GLOBALS['TL_DCA']['tl_content']['fields']['ctvDatei'])) {
+        if (!isset($GLOBALS['TL_DCA'][$this->tabelle]['fields']['ctvDatei'])) {
             return;
         }
 
@@ -81,7 +93,7 @@ class TlContentListener
             return;
         }
 
-        $GLOBALS['TL_DCA']['tl_content']['fields']['ctvDatei']['eval']['extensions'] = implode(',', $endungen);
+        $GLOBALS['TL_DCA'][$this->tabelle]['fields']['ctvDatei']['eval']['extensions'] = implode(',', $endungen);
     }
 
     /**
@@ -113,7 +125,7 @@ class TlContentListener
             return;
         }
 
-        $liste = self::liste($datensatz->ctvListe, $datensatz->ctvListen);
+        $liste = self::liste($datensatz['ctvListe'] ?? '', $datensatz['ctvListen'] ?? null);
         $weg = [];
 
         // Schritt 2: Datei da, aber noch keine Ausgabe gewählt.
@@ -133,12 +145,12 @@ class TlContentListener
             $weg[] = 'ctvStandAus';
         }
 
-        if (!$turnier->istMannschaftsturnier() || !\in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true)) {
-            $weg[] = 'ctvMannschaftswahl';
-        }
-
         if (!\in_array($liste, Listen::MIT_RUNDEN, true) || $turnier->getLetzteRunde() < 2) {
             $weg[] = 'ctvRunden';
+        }
+
+        if (!$turnier->istMannschaftsturnier() || !\in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true)) {
+            $weg[] = 'ctvMannschaftswahl';
         }
 
         if (!\in_array($liste, Listen::MIT_SPIELERN, true)) {
@@ -152,7 +164,7 @@ class TlContentListener
         // Die Hinweise erklären Abweichungen der Zahlen. Gibt es in dieser
         // Datei keine und ist auch kein Zwischenstand eingestellt, der welche
         // erzeugen würde, ist das Kästchen wirkungslos.
-        if ([] === $turnier->getHinweise() && !(int) $datensatz->ctvStand) {
+        if ([] === $turnier->getHinweise() && !(int) ($datensatz['ctvStand'] ?? 0)) {
             $weg[] = 'ctvHinweise';
         }
 
@@ -163,9 +175,10 @@ class TlContentListener
      * Liefert die Ausgaben, die diese Turnierdatei hergibt.
      *
      * Bei einem Einzelturnier erscheinen die Mannschaftslisten gar nicht
-     * erst, und Listen ohne Inhalt — eine Kreuztabelle vor der ersten Runde —
-     * ebenso wenig. Ein Eintrag, der eine leere Ausgabe erzeugt, wäre eine
-     * schlechte Auskunft.
+     * erst, bei einem Mannschaftsturnier die reinen Einzellisten nicht, und
+     * Listen ohne Inhalt — eine Kreuztabelle vor der ersten Runde — ebenso
+     * wenig. Ein Eintrag, der eine leere Ausgabe erzeugt, wäre eine schlechte
+     * Auskunft.
      *
      * @param DataContainer|null $dc Der Data Container mit der Datensatz-ID
      *
@@ -201,7 +214,7 @@ class TlContentListener
             return [];
         }
 
-        $spalten = Spalten::verfuegbar(self::liste($datensatz->ctvListe, $datensatz->ctvListen), $turnier);
+        $spalten = Spalten::verfuegbar(self::liste($datensatz['ctvListe'] ?? '', $datensatz['ctvListen'] ?? null), $turnier);
         $beschriftungen = [];
 
         foreach ($spalten as $spalte) {
@@ -240,7 +253,7 @@ class TlContentListener
             return $wert;
         }
 
-        return serialize(Spalten::vorauswahl(self::liste($datensatz->ctvListe, $datensatz->ctvListen), $turnier));
+        return serialize(Spalten::vorauswahl(self::liste($datensatz['ctvListe'] ?? '', $datensatz['ctvListen'] ?? null), $turnier));
     }
 
     /**
@@ -394,9 +407,9 @@ class TlContentListener
     }
 
     /**
-     * Ermittelt die Ausgabe eines Inhaltselements.
+     * Ermittelt die Ausgabe eines Datensatzes.
      *
-     * Bis Fassung 1.7.0 führte ein Element mehrere Listen. Ein solches
+     * Bis Fassung 1.7.0 führte ein Inhaltselement mehrere Listen. Ein solches
      * Element behält seine erste — mehr lässt sich nicht retten, ohne zu
      * raten, und der Rest ist mit dem Umschlag nachzubauen.
      *
@@ -429,7 +442,7 @@ class TlContentListener
     }
 
     /**
-     * Streicht Felder aus der Palette der Turnierausgabe.
+     * Streicht Felder aus der Palette dieser Maske.
      *
      * @param string[] $felder Die zu entfernenden Feldnamen
      *
@@ -437,11 +450,11 @@ class TlContentListener
      */
     private function kuerze(array $felder): void
     {
-        if ([] === $felder) {
+        if ([] === $felder || !isset($GLOBALS['TL_DCA'][$this->tabelle]['palettes'][$this->palette])) {
             return;
         }
 
-        $palette = &$GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'];
+        $palette = &$GLOBALS['TL_DCA'][$this->tabelle]['palettes'][$this->palette];
         $palette = self::ohneFelder((string) $palette, $felder);
     }
 
@@ -457,7 +470,7 @@ class TlContentListener
      *
      * @return string Die gekürzte Palettenzeichenkette
      */
-    private static function ohneFelder(string $palette, array $felder): string
+    protected static function ohneFelder(string $palette, array $felder): string
     {
         $gruppen = [];
 
@@ -505,7 +518,7 @@ class TlContentListener
     }
 
     /**
-     * Liest das Turnier des gerade bearbeiteten Inhaltselements.
+     * Liest das Turnier des gerade bearbeiteten Datensatzes.
      *
      * Gibt null zurück, sobald irgendetwas fehlt oder nicht passt: kein
      * Datensatz, ein anderes Inhaltselement, keine Datei, eine unlesbare
@@ -523,30 +536,48 @@ class TlContentListener
             return null;
         }
 
-        return $this->lader->ladeStill($datensatz->ctvDatei, (string) ($datensatz->ctvFormat ?: 'auto'));
+        return $this->lader->ladeStill($datensatz['ctvDatei'] ?? null, (string) ($datensatz['ctvFormat'] ?? 'auto') ?: 'auto');
     }
 
     /**
-     * Holt den Datensatz des gerade bearbeiteten Inhaltselements.
+     * Holt den gerade bearbeiteten Datensatz als Array.
+     *
+     * Gelesen wird über die Datenbank und nicht über ein Model: Dieselbe
+     * Klasse bedient zwei Tabellen, und die Feldwerte sind alles, was hier
+     * gebraucht wird.
      *
      * @param DataContainer|null $dc Der Data Container
      *
-     * @return ContentModel|null Der Datensatz, oder null wenn es keine
-     *                           Turnierausgabe ist
+     * @return array<string,mixed>|null Der Datensatz, oder null wenn es
+     *                                  keiner dieser Maske ist
      */
-    private function datensatz(DataContainer $dc = null): ?ContentModel
+    private function datensatz(DataContainer $dc = null): ?array
     {
         if (null === $dc || !$dc->id) {
             return null;
         }
 
         $this->framework->initialize();
-        $datensatz = $this->framework->getAdapter(ContentModel::class)->findByPk($dc->id);
 
-        if (null === $datensatz || 'chesstournamentviewer' !== $datensatz->type) {
+        $satz = $this->framework
+            ->getAdapter(Database::class)
+            ->getInstance()
+            ->prepare(sprintf('SELECT * FROM %s WHERE id=?', $this->tabelle))
+            ->execute($dc->id)
+        ;
+
+        if (!$satz->numRows) {
             return null;
         }
 
-        return $datensatz;
+        $satz = $satz->row();
+
+        // In tl_content stehen alle Inhaltselemente; nur die Turnierausgabe
+        // geht diese Maske etwas an.
+        if ('' !== $this->typ && ($satz['type'] ?? null) !== $this->typ) {
+            return null;
+        }
+
+        return $satz;
     }
 }

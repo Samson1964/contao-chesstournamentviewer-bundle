@@ -12,20 +12,25 @@
  */
 
 .ctv {
-    --ctv-linie: #d5d5d5;
-    --ctv-kopf: #eceef0;
-    --ctv-wechsel: #f6f7f8;
+    --ctv-linie: #dfe5e9;
+    --ctv-kopf: #004f6e;
+    --ctv-kopf-text: #fff;
+    --ctv-wechsel: #f2f6f8;
+    --ctv-schweben: #e4eef4;
     --ctv-grund: #fff;
-    --ctv-text: #1c1c1c;
-    --ctv-gedaempft: #6b6b6b;
-    --ctv-akzent: #1c5a8c;
+    --ctv-text: #002533;
+    --ctv-gedaempft: #5b7484;
+    --ctv-akzent: #004f6e;
     --ctv-blind: #c9ced3;
     --ctv-blind-figur: #6b7379;
     --ctv-weiss: #fff;
-    --ctv-schwarz: #e2e5e8;
+    --ctv-schwarz: #33454f;
+    --ctv-farbrand: #7d919c;
     --ctv-hinweis: #8a6d3b;
     --ctv-hinweis-grund: #fdf5e6;
     --ctv-fehler: #a94442;
+    --ctv-rundung: 10px;
+    --ctv-schatten: 0 2px 12px rgba(0, 0, 0, .18);
 
     margin-block: 1rem;
 }
@@ -237,24 +242,84 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/*
+ * Die Tabelle ist eine Karte: heller Grund, feine Linien, abgerundete Ecken
+ * und ein flacher Schatten. Das ist die Gestaltung der Olympia-Tabellen auf
+ * schachbund.de, die sich dort bewährt hat; sie steht hier als Vorgabe, damit
+ * eine Turnierausgabe ohne eigenes Zutun ordentlich aussieht. Wer sie nicht
+ * will, überschreibt die Eigenschaften am `.ctv` — dafür sind sie da.
+ *
+ * `border-collapse: separate` ist nötig: Nur so lassen sich die Ecken runden.
+ * Die Linien liegen deshalb am unteren Rand der Zellen.
+ */
 .ctv-tabelle {
     width: 100%;
-    border-collapse: collapse;
+    margin: 0 0 1.5rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: var(--ctv-rundung);
+    background: var(--ctv-grund);
+    box-shadow: var(--ctv-schatten);
+    color: var(--ctv-text);
     font-size: .95em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
 }
 
 .ctv-tabelle th,
 .ctv-tabelle td {
-    padding: .25rem .5rem;
+    padding: .55rem .85rem;
     border-bottom: 1px solid var(--ctv-linie);
     text-align: left;
-    vertical-align: top;
+    vertical-align: middle;
     white-space: nowrap;
+}
+
+/* Namen dürfen umbrechen; sie sind die einzige Spalte ohne feste Breite. */
+.ctv .ctv-tabelle .ctv-paarung__seite {
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .ctv-tabelle thead th {
     background: var(--ctv-kopf);
+    border-bottom: 0;
+    color: var(--ctv-kopf-text);
+    font-size: .8em;
     font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+/*
+ * Die Ecken. Gerundet wird an den vier äußeren Zellen — oben am Tabellenkopf
+ * oder, wo es keinen gibt, an der ersten Zeile des ersten Abschnitts.
+ */
+.ctv-tabelle thead tr:first-child th:first-child,
+.ctv-tabelle tbody:first-child tr:first-child > *:first-child {
+    border-top-left-radius: var(--ctv-rundung);
+}
+
+.ctv-tabelle thead tr:first-child th:last-child,
+.ctv-tabelle tbody:first-child tr:first-child > *:last-child {
+    border-top-right-radius: var(--ctv-rundung);
+}
+
+.ctv-tabelle tbody:last-child tr:last-child > *:first-child {
+    border-bottom-left-radius: var(--ctv-rundung);
+}
+
+.ctv-tabelle tbody:last-child tr:last-child > *:last-child {
+    border-bottom-right-radius: var(--ctv-rundung);
+}
+
+.ctv-tabelle tbody:last-child tr:last-child > * {
+    border-bottom: 0;
+}
+
+/* Die Zeile unter dem Zeiger hebt sich ab — eine Lesehilfe in breiten Tabellen. */
+.ctv-tabelle tbody tr:hover > * {
+    background: var(--ctv-schweben);
 }
 
 /*
@@ -486,14 +551,36 @@
  * Tabellenkopf und trägt dieselben sechs Spalten wie die Bretter darunter;
  * Zahlen und Ergebnis stehen deshalb wie dort ausgerichtet, nicht links.
  */
+/*
+ * Die Kopfzeile eines Wettkampfs vertritt den Tabellenkopf und sieht deshalb
+ * aus wie einer: dunkler Grund, helle Schrift, Versalien.
+ */
+.ctv .ctv-tabelle .ctv-kampfkopf > th {
+    padding-top: .55rem !important;
+    border-bottom: 0 !important;
+    background: var(--ctv-kopf) !important;
+    color: var(--ctv-kopf-text) !important;
+    font-size: .8em;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.ctv-gruppe + .ctv-gruppe .ctv-kampfkopf > th {
+    padding-top: .55rem !important;
+}
+
 .ctv .ctv-tabelle .ctv-kampfkopf > th.ctv-zahl {
     text-align: right !important;
-    color: var(--ctv-gedaempft);
-    font-weight: 400;
 }
 
 .ctv .ctv-tabelle .ctv-kampfkopf > th.ctv-paarung__ergebnis {
     text-align: center !important;
+}
+
+/* Zwischen zwei Wettkämpfen etwas Luft, damit die Blöcke auseinandergehen. */
+.ctv-tabelle--kaempfe .ctv-gruppe + .ctv-gruppe .ctv-kampfkopf > th {
+    border-top: 12px solid var(--ctv-grund) !important;
 }
 
 /* Der Wettkampf selbst tritt gegenüber seinen Brettern hervor. */
@@ -531,16 +618,33 @@
 /* --- Farben am Brett ----------------------------------------------------
  *
  * In der Wettkampfansicht stehen die Mannschaften über den Spalten, nicht
- * die Farben. Damit trotzdem abzulesen ist, wer Weiß führte, bekommt sein
- * Feld hellen, das des Schwarzspielers grauen Grund. Der Streifenwechsel der
- * Zeilen liegt am `tr` und wird davon überdeckt — genau so ist es gemeint.
+ * die Farben. Abzulesen ist die Farbe an einem kleinen runden Feld vor dem
+ * Namen: weiß gefüllt für Weiß, dunkel für Schwarz.
+ *
+ * Bis Fassung 1.12.0 war stattdessen die ganze Zelle eingefärbt. Das trug
+ * zwar dieselbe Auskunft, nahm der Tabelle aber die Streifung und sah neben
+ * einem eingefärbten Zeilenwechsel unruhig aus. Die Wertungszahl bekommt
+ * keinen Punkt — einer je Zeile und Seite genügt.
  */
 
-.ctv .ctv-tabelle td.ctv-farbe--w {
+.ctv .ctv-tabelle td.ctv-farbe--w:not(.ctv-zahl)::before,
+.ctv .ctv-tabelle td.ctv-farbe--s:not(.ctv-zahl)::before {
+    content: "";
+    display: inline-block;
+    width: .62em;
+    height: .62em;
+    margin-right: .5em;
+    border: 1px solid var(--ctv-farbrand);
+    border-radius: 50%;
+    vertical-align: baseline;
+}
+
+.ctv .ctv-tabelle td.ctv-farbe--w:not(.ctv-zahl)::before {
     background: var(--ctv-weiss);
 }
 
-.ctv .ctv-tabelle td.ctv-farbe--s {
+.ctv .ctv-tabelle td.ctv-farbe--s:not(.ctv-zahl)::before {
+    border-color: var(--ctv-schwarz);
     background: var(--ctv-schwarz);
 }
 

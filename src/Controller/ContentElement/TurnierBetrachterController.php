@@ -10,21 +10,13 @@ declare(strict_types=1);
 
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Controller\ContentElement;
 
-use Contao\Config;
 use Contao\ContentModel;
 use Contao\CoreBundle\Controller\ContentElement\AbstractContentElementController;
 use Contao\CoreBundle\Security\Authentication\Token\TokenChecker;
-use Contao\Date;
 use Contao\StringUtil;
 use Contao\Template;
 use Psr\Log\LoggerInterface;
-use Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener;
-use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Auswahl;
-use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Laender;
-use Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer;
-use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Rundenschnitt;
-use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
-use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\TurnierLader;
+use Schachbulle\ContaoChesstournamentviewerBundle\Liste\TurnierAusgabe;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -35,21 +27,22 @@ use Symfony\Component\HttpFoundation\Response;
  * in der services.yaml und nicht über ein Attribut: Der Tag wirkt unter
  * Contao 4.13 genauso wie unter Contao 5, das Attribut gibt es erst ab
  * Contao 5.
+ *
+ * Die Ausgabe selbst baut der Dienst TurnierAusgabe; er wird ebenso vom
+ * Inserttag `{{ctv::…}}` benutzt.
  */
 class TurnierBetrachterController extends AbstractContentElementController
 {
     /**
      * Erzeugt den Controller.
      *
-     * @param TurnierLader    $lader        Liest die Turnierdatei aus der Dateiverwaltung
-     * @param ListenBauer     $listenBauer  Stellt die Daten der einzelnen Listen zusammen
+     * @param TurnierAusgabe  $ausgabe      Stellt die Ausgabe aus den Einstellungen zusammen
      * @param TokenChecker    $tokenChecker Wird gefragt, ob ein Backend-Benutzer angemeldet
      *                                      ist; nur diesem werden Fehlermeldungen gezeigt
      * @param LoggerInterface $logger       Schreibt Lesefehler ins Contao-Fehlerprotokoll
      */
     public function __construct(
-        private readonly TurnierLader $lader,
-        private readonly ListenBauer $listenBauer,
+        private readonly TurnierAusgabe $ausgabe,
         private readonly TokenChecker $tokenChecker,
         private readonly LoggerInterface $logger,
     ) {
@@ -73,7 +66,7 @@ class TurnierBetrachterController extends AbstractContentElementController
      * @param ContentModel $model    Der Datensatz des Inhaltselements
      * @param Request      $request  Die laufende Anfrage
      *
-     * @return Response Die Antwort mit den gewählten Listen, oder eine leere
+     * @return Response Die Antwort mit der gewählten Liste, oder eine leere
      *                  Antwort, wenn nichts auszugeben ist
      */
     protected function getResponse(Template $template, ContentModel $model, Request $request): Response
@@ -84,7 +77,7 @@ class TurnierBetrachterController extends AbstractContentElementController
         $template->hinweise = [];
 
         try {
-            $turnier = $this->lader->lade($model->ctvDatei, (string) ($model->ctvFormat ?: 'auto'));
+            $werte = $this->ausgabe->baue($model->row(), $request->getLocale());
         } catch (\Throwable $ausnahme) {
             $this->logger->error(
                 sprintf('Turnierdatei des Inhaltselements ID %s konnte nicht gelesen werden: %s', $model->id, $ausnahme->getMessage())
@@ -99,100 +92,24 @@ class TurnierBetrachterController extends AbstractContentElementController
             return $template->getResponse();
         }
 
-        // Übernommen wird nur, was zur gewählten Liste gehört. Wechselt der
-        // Redakteur die Liste, bleiben die alten Werte im Datensatz stehen —
-        // ein „Stand nach Runde 3" aus der Mannschaftstabelle darf die
-        // Mannschaftsliste nicht zurücksetzen.
-        $schluessel = TlContentListener::liste($model->ctvListe, $model->ctvListen);
-        $auswahl = Auswahl::fuerListe(
-            $schluessel,
-            (bool) $model->ctvMannschaftSpieler,
-            (bool) $model->ctvKreuzKurz,
-            (int) $model->ctvStand,
-            StringUtil::deserialize($model->ctvRunden, true),
-            StringUtil::deserialize($model->ctvSpalten, true),
-            StringUtil::deserialize($model->ctvMannschaftswahl, true),
-        );
-
-        // Nationalmannschaften heißen in den Dateien meist englisch —
-        // „Poland", „Uzbekistan 2". Übersetzt wird in die Sprache der Seite.
-        $turnier = Laender::uebersetzeMannschaften($turnier, $request->getLocale());
-
-        // Der Rundenschnitt versetzt das Turnier zurück; von da an gelten
-        // dessen Zahlen, auch für Kopfdaten und Hinweise.
-        if ($auswahl->stand > 0) {
-            $turnier = Rundenschnitt::bis($turnier, $auswahl->stand);
-        }
-
-        $listen = $this->listenBauer->baue($turnier, $auswahl);
-
-        if ([] === $listen) {
+        if (null === $werte) {
             return new Response();
         }
 
         $this->bindeDateienEin();
 
-        $template->turnier = $turnier;
-        $template->kopf = $turnier->getKopf();
-
-        // Ein Element gibt genau eine Liste aus. Mehrere Ausgaben als Reiter
-        // entstehen durch den Umschlag, nicht durch das Element selbst.
-        $template->liste = $listen[0];
+        foreach ($werte as $name => $wert) {
+            $template->{$name} = $wert;
+        }
 
         // Die Beschriftung des Reiters: die Überschrift des Elements, wenn
         // eine gesetzt ist, sonst der Name der Liste. So kann der Redakteur
         // die Lasche benennen, ohne dafür ein eigenes Feld zu brauchen.
         $ueberschrift = StringUtil::deserialize($model->headline, true);
-        $template->reitername = trim((string) ($ueberschrift['value'] ?? '')) ?: $listen[0]['name'];
-
-        // Die Hinweise erklären, warum Zahlen auseinandergehen können. Auf
-        // einer Vereinsseite ist das oft mehr, als der Besucher wissen will;
-        // deshalb erscheinen sie nur auf Wunsch.
-        $template->hinweise = $model->ctvHinweise ? $turnier->getHinweise() : [];
+        $template->reitername = trim((string) ($ueberschrift['value'] ?? '')) ?: $werte['name'];
         $template->kennung = 'ctv-'.$model->id;
-        $template->aktualisiert = $model->ctvDatum ? $this->aktualisiert($turnier) : '';
-
-        // Der Zwischenstand steht unabhängig von den Hinweisen über der
-        // Ausgabe: Eine Tabelle nach Runde 4 sähe sonst aus wie die
-        // Endtabelle, und niemand könnte den Unterschied erkennen. Wer die
-        // Runde schon in der Überschrift nennt, kann die Zeile abschalten.
-        $template->stand = $model->ctvStandAus ? 0 : (int) $turnier->kopf('standNachRunde', 0);
 
         return $template->getResponse();
-    }
-
-    /**
-     * Ermittelt, wann die Turnierdatei zuletzt aktualisiert wurde.
-     *
-     * Vorrang hat eine Angabe aus der Datei selbst — bislang liefert sie
-     * keines der beiden Formate, künftige mögen es tun. Sonst gilt das
-     * Änderungsdatum der Datei im Dateisystem: Die Turnierleitung lädt nach
-     * jeder Runde eine neue Fassung hoch, und damit ist es die verlässliche
-     * Auskunft darüber, wie aktuell die Zahlen sind.
-     *
-     * Geschrieben wird im Datums- und Zeitformat der Contao-Einstellungen,
-     * damit die Zeile aussieht wie der Rest der Seite.
-     *
-     * @param Turnier $turnier Das eingelesene Turnier
-     *
-     * @return string Das Datum als Text, oder eine leere Zeichenkette wenn
-     *                sich keines ermitteln ließ
-     */
-    private function aktualisiert(Turnier $turnier): string
-    {
-        $angabe = trim((string) $turnier->kopf('aktualisiert', ''));
-
-        if ('' !== $angabe) {
-            return $angabe;
-        }
-
-        $stempel = (int) $turnier->kopf('dateidatum', 0);
-
-        if ($stempel < 1) {
-            return '';
-        }
-
-        return Date::parse((string) Config::get('datimFormat'), $stempel);
     }
 
     /**

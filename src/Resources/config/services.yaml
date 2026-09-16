@@ -29,12 +29,28 @@ services:
 
     Schachbulle\ContaoChesstournamentviewerBundle\Liste\ListenBauer: ~
 
+    # Baut aus gespeicherten Einstellungen die fertige Ausgabe. Benutzt vom
+    # Inhaltselement und vom Inserttag.
+    Schachbulle\ContaoChesstournamentviewerBundle\Liste\TurnierAusgabe: ~
+
+    Schachbulle\ContaoChesstournamentviewerBundle\Liste\InserttagAusgabe:
+        arguments:
+            $logger: '@monolog.logger.contao.error'
+
     # --- Rückrufe des Data Containers --------------------------------------
 
     # Der Tag hängt an `target` selbsttätig `_callback` an; daraus werden
     # `config.onload_callback`, `fields.ctvFormat.options_callback` und so
     # fort. Die Schreibweise ist in Contao 4.13 und Contao 5 dieselbe.
-    Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlContentListener:
+    #
+    # Dieselbe Klasse bedient zwei Tabellen: das Inhaltselement in
+    # `tl_content` und die Inserttags in `tl_ctv_inserttag`. Deshalb steht sie
+    # hier zweimal, mit verschiedenen Argumenten.
+    Schachbulle\ContaoChesstournamentviewerBundle\EventListener\MaskeListener:
+        arguments:
+            $tabelle: 'tl_content'
+            $palette: 'chesstournamentviewer'
+            $typ: 'chesstournamentviewer'
         tags:
             - name: contao.callback
               table: tl_content
@@ -77,6 +93,65 @@ services:
               target: fields.ctvDatei.load
               method: pruefeUploadTypen
 
+    schachbulle_ctv.maske.inserttag:
+        class: Schachbulle\ContaoChesstournamentviewerBundle\EventListener\MaskeListener
+        arguments:
+            $tabelle: 'tl_ctv_inserttag'
+            $palette: 'default'
+            $typ: ''
+        tags:
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: config.onload
+              method: setzeDateiendungen
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: config.onload
+              method: passeMaskeAn
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvFormat.options
+              method: formatOptionen
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvListe.options
+              method: listenOptionen
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvStand.options
+              method: standOptionen
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvRunden.options
+              method: rundenOptionen
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvMannschaftswahl.options
+              method: mannschaftOptionen
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvSpalten.options
+              method: spaltenOptionen
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvSpalten.load
+              method: spaltenVorauswahl
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.ctvDatei.load
+              method: pruefeUploadTypen
+
+    Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlCtvInserttagListener:
+        tags:
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: list.label.label
+              method: beschriftung
+            - name: contao.callback
+              table: tl_ctv_inserttag
+              target: fields.alias.save
+              method: kennung
+
     # --- Frontend ----------------------------------------------------------
 
     Schachbulle\ContaoChesstournamentviewerBundle\Controller\ContentElement\TurnierBetrachterController:
@@ -107,3 +182,7 @@ services:
               category: schach
               type: chesstournamentviewerStop
               template: ce_chesstournamentviewerStop
+
+    # Den Inserttag `{{ctv::…}}` meldet die DI-Erweiterung an: Contao 5 kennt
+    # dafür eine eigene Schnittstelle, Contao 4.13 nur den alten Hook. Beide
+    # zugleich würden die Ausgabe verdoppeln.

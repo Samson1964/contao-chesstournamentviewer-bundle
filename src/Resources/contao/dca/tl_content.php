@@ -49,7 +49,7 @@ $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewerStop'] =
  * Ausgabe, die Spalten und die Runden tragen Rückrufe nach: Sie alle hängen
  * an Angaben, die erst zur Laufzeit feststehen — an den registrierten
  * Formaten und am Inhalt der gewählten Datei. Die Rückrufe hängen als
- * Dienst-Tag `contao.callback` an TlContentListener und stehen deshalb nicht
+ * Dienst-Tag `contao.callback` an MaskeListener und stehen deshalb nicht
  * hier. Bis sie greifen, steht `swt` als Rückfallebene im Feld — wäre es
  * leer, böte die Dateiauswahl jede beliebige Datei an.
  */
