@@ -149,6 +149,19 @@ class SwissManagerFormat implements TurnierFormatInterface
             foreach ($liste as $kampf) {
                 $heim = (int) $kampf['heim'];
                 $gast = (int) $kampf['gast'];
+
+                // Ohne Gegenseite ist die Mannschaft in dieser Runde
+                // spielfrei. Punkte gibt es dafür keine — siehe den
+                // Klassenkommentar der Mannschaftswertung: Was die Datei
+                // nicht sagt, wird nicht geraten.
+                if (0 === $gast) {
+                    $satz = $this->wettkampfsatz($mannschaften, 0, 0.0, 0.0, 0, false);
+                    $satz['nichtAusgelost'] = (bool) ($kampf['nichtAusgelost'] ?? false);
+                    $wettkaempfe[$heim][$runde] = $satz;
+
+                    continue;
+                }
+
                 $punkte = $this->brettpunkte($spieler, $paarungen, $mannschaften, $heim, $gast, (int) $runde);
 
                 // Ohne ein einziges gewertetes Brett ist der Wettkampf zwar

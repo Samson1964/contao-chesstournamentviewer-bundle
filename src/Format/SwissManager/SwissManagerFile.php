@@ -741,24 +741,54 @@ class SwissManagerFile
             $andere = $this->wort($offset + 2);
             $offset += self::LAENGE_WETTKAMPF;
 
+            /*
+             * Nummern ab `OHNE_GEGNER` sind Sonderwerte und keine
+             * Mannschaften: Dort steht die Gegenseite einer Mannschaft, die
+             * in dieser Runde nicht antritt. `SPIELFREI` (0xFFFF) heißt
+             * spielfrei, 0xFFFE heißt „nicht ausgelost" — chess-results
+             * schreibt die beiden als „-1" und „-2".
+             *
+             * Bis Fassung 1.15.0 galten sie als echte Mannschaft. In der
+             * Ausgabe stand dann ein Wettkampf „Angola – " ohne Gegner und
+             * ohne Bretter, und weil derselbe Sonderwert in jeder Runde
+             * wiederkehrt, verschob er außerdem die Rundengrenze: Die
+             * Olympiade 2026 zeigte fünf Runden, obwohl nur eine ausgelost
+             * war.
+             */
+            $sonderwert = max($eine >= self::OHNE_GEGNER ? $eine : 0, $andere >= self::OHNE_GEGNER ? $andere : 0);
+            $eine = $eine >= self::OHNE_GEGNER ? 0 : $eine;
+            $andere = $andere >= self::OHNE_GEGNER ? 0 : $andere;
+
             if (0 === $eine && 0 === $andere) {
                 continue;
             }
 
-            if (isset($gesehen[$eine]) || isset($gesehen[$andere])) {
+            // Die spielfreie Mannschaft steht links; die Gegenseite ist leer.
+            if (0 === $eine) {
+                $eine = $andere;
+                $andere = 0;
+            }
+
+            if (isset($gesehen[$eine]) || (0 !== $andere && isset($gesehen[$andere]))) {
                 ++$runde;
                 $gesehen = [];
                 $tisch = 0;
             }
 
             $gesehen[$eine] = true;
-            $gesehen[$andere] = true;
-            ++$tisch;
+
+            if (0 !== $andere) {
+                $gesehen[$andere] = true;
+                ++$tisch;
+            }
 
             $this->wettkaempfe[$runde][] = [
-                'tisch' => $tisch,
+                // Eine Mannschaft ohne Gegner sitzt an keinem Tisch.
+                'tisch' => 0 === $andere ? 0 : $tisch,
                 'heim' => $eine,
                 'gast' => $andere,
+                // Ohne Gegner: spielfrei, oder eben nicht ausgelost.
+                'nichtAusgelost' => 0 === $andere && self::SPIELFREI !== $sonderwert,
             ];
         }
     }

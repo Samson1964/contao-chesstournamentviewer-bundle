@@ -1,5 +1,21 @@
 # Änderungen
 
+## Version 1.15.1 (2026-09-16)
+
+* Fix: **Swiss-Manager: Mannschaften ohne Gegner erschienen als Wettkampf
+  gegen niemanden.** In der Wettkampfliste steht für eine Mannschaft, die in
+  einer Runde nicht antritt, ein Sonderwert statt einer Mannschaftsnummer.
+  Der Leser hielt ihn für eine Mannschaft; in der Ausgabe stand dann
+  „Angola – " ohne Gegner und ohne Bretter. Und weil derselbe Wert in jedem
+  solchen Satz steht, sah die Rundenerkennung darin eine Wiederholung: Die
+  Schacholympiade 2026 zeigte fünf Runden, obwohl nur eine ausgelost war.
+  Jetzt stimmt die Ausgabe mit chess-results überein — 101 Wettkämpfe und
+  fünf nicht ausgeloste Mannschaften in Runde 1.
+* Add: **„nicht ausgelost" wird von „Freilos" unterschieden.** Ein Freilos ist
+  eine Runde ohne Gegner im laufenden Turnier, „nicht ausgelost" heißt, dass
+  die Mannschaft gar nicht erst zugelost wurde — etwa weil sie nicht angereist
+  ist. Nur das Freilos zählt in der Spalte „Freilose".
+
 ## Version 1.15.0 (2026-09-16)
 
 * Change: **Ein Kästchen für beide automatischen Überschriften.** Aus „Zeile

@@ -38,7 +38,7 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
               <?php if (null === $zelle || $zelle['leer']): ?>
                 &nbsp;
               <?php elseif ($zelle['spielfrei']): ?>
-                <span class="ctv-fortschritt__frei" title="<?= Ausgabe::wort('freilos', 'Freilos') ?>">&mdash;</span>
+                <span class="ctv-fortschritt__frei" title="<?= ($zelle['nichtAusgelost'] ?? false) ? Ausgabe::wort('nichtAusgelost', 'nicht ausgelost') : Ausgabe::wort('freilos', 'Freilos') ?>">&mdash;</span>
                 <span class="ctv-fortschritt__stand"><?= Ausgabe::punkte($zelle['stand']) ?></span>
               <?php else: ?>
                 <span class="ctv-fortschritt__ergebnis"><?= $zelle['gespielt'] ? Ausgabe::punkte($zelle['brettpunkte']) : '&ndash;' ?></span><span class="ctv-fortschritt__gegner" title="<?= Ausgabe::esc($zelle['gegnerName']) ?>"><?= (int) $zelle['gegner'] ?></span>

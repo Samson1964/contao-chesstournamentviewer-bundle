@@ -84,6 +84,7 @@ $GLOBALS['TL_LANG']['ctv']['spalte']['wettkampf'] = 'Match';
 $GLOBALS['TL_LANG']['ctv']['runde'] = 'Round %s';
 $GLOBALS['TL_LANG']['ctv']['spielfrei'] = 'bye';
 $GLOBALS['TL_LANG']['ctv']['freilos'] = 'Bye';
+$GLOBALS['TL_LANG']['ctv']['nichtAusgelost'] = 'not paired';
 $GLOBALS['TL_LANG']['ctv']['unsicher'] = '(designation uncertain)';
 $GLOBALS['TL_LANG']['ctv']['weiss'] = 'White';
 $GLOBALS['TL_LANG']['ctv']['schwarz'] = 'Black';

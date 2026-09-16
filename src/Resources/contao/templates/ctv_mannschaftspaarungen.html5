@@ -41,7 +41,7 @@ $rundenkopf = false !== $this->rundenkopf;
             </td>
             <td>
               <?php if ($kampf['spielfrei']): ?>
-                <em><?= Ausgabe::wort('freilos', 'Freilos') ?></em>
+                <em><?= ($kampf['nichtAusgelost'] ?? false) ? Ausgabe::wort('nichtAusgelost', 'nicht ausgelost') : Ausgabe::wort('freilos', 'Freilos') ?></em>
               <?php else: ?>
                 <?= Ausgabe::landesflagge($kampf['gastLand'] ?? '') ?><?= Ausgabe::esc($kampf['gastName']) ?>
               <?php endif; ?>

@@ -148,6 +148,18 @@ meldet der Leser das als Hinweis — so fällt ein solcher Versatz künftig auf.
 führt der Satz nicht — Brett- und Mannschaftspunkte ergeben sich aus den
 Einzelpartien.
 
+**Sonderwerte statt einer Mannschaftsnummer**, wie in den Einzelpaarungen:
+`0xFFFF` heißt spielfrei, `0xFFFE` heißt „nicht ausgelost" — chess-results
+schreibt die beiden als `-1` und `-2`. Die Schacholympiade 2026 (chess-results
+1469895) führt in Runde 1 genau 106 Sätze: 101 Wettkämpfe und fünf
+Mannschaften mit `0xFFFE`, die nicht angereist waren; 101 × 2 + 5 = 207 und
+damit alle Mannschaften.
+
+Bis Fassung 1.15.0 galten diese Sonderwerte als Mannschaftsnummer. Die Folge
+war ein Wettkampf „Angola – " ohne Gegner und ohne Bretter — und weil derselbe
+Wert in jedem solchen Satz steht, sah die Rundenerkennung darin eine
+Wiederholung und teilte die eine ausgeloste Runde in fünf auf.
+
 ### Feinwertungen (`95`), teilweise entschlüsselt
 
 Im Abschnitt `95` steht, **welche** Feinwertungen das Turnier führt — die

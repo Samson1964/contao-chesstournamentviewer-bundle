@@ -80,7 +80,9 @@ final class Mannschaftswertung
                 // nur einmal in der Datei.
                 if (0 === $gegner) {
                     if (self::rundeAusgelost($turnier, (int) $runde)) {
-                        $kaempfe[(int) $runde][] = self::freilos($mnr, $mannschaften[$mnr]['name'] ?? '', (int) $runde, (string) ($mannschaften[$mnr]['land'] ?? ''));
+                        $eintrag = self::freilos($mnr, $mannschaften[$mnr]['name'] ?? '', (int) $runde, (string) ($mannschaften[$mnr]['land'] ?? ''));
+                        $eintrag['nichtAusgelost'] = (bool) ($satz['nichtAusgelost'] ?? false);
+                        $kaempfe[(int) $runde][] = $eintrag;
                     }
 
                     continue;
@@ -158,7 +160,10 @@ final class Mannschaftswertung
                 if (0 === (int) ($satz['gegner'] ?? 0)) {
                     // Nur ausgeloste Runden zählen als Freilos; die noch nicht
                     // ausgelosten stehen ebenfalls ohne Gegner in der Datei.
-                    if (self::rundeAusgelost($turnier, (int) $runde)) {
+                    // Und wer in einer ausgelosten Runde gar nicht erst
+                    // ausgelost wurde — weil die Mannschaft nicht angereist
+                    // ist —, hat kein Freilos, sondern schlicht keinen Kampf.
+                    if (self::rundeAusgelost($turnier, (int) $runde) && !($satz['nichtAusgelost'] ?? false)) {
                         ++$zeile['freilose'];
                     }
 
@@ -329,6 +334,7 @@ final class Mannschaftswertung
             'gespielt' => null !== $mannschaftspunkte[$heim],
             'amGruenenTisch' => (bool) ($satz['amGruenenTisch'] ?? false),
             'spielfrei' => false,
+            'nichtAusgelost' => false,
             'tisch' => (int) ($satz['tisch'] ?? 0),
             'partien' => $partien,
         ];
@@ -407,6 +413,7 @@ final class Mannschaftswertung
             'gespielt' => false,
             'amGruenenTisch' => false,
             'spielfrei' => true,
+            'nichtAusgelost' => false,
             'tisch' => PHP_INT_MAX,
             'partien' => [],
         ];
@@ -548,7 +555,7 @@ final class Mannschaftswertung
                 // Gegner 0 heißt spielfrei; ebenso der Platzhalter, den manche
                 // Programme als Mannschaft mitführen.
                 if (0 === $gegner || ($mannschaften[$gegner]['spielfrei'] ?? false) || !isset($mannschaften[$gegner])) {
-                    $zellen[$runde] = ['gegner' => null, 'gegnerName' => '', 'brettpunkte' => null, 'brettpunkteGegner' => null, 'gespielt' => false, 'spielfrei' => true, 'leer' => false, 'stand' => $stand];
+                    $zellen[$runde] = ['gegner' => null, 'gegnerName' => '', 'brettpunkte' => null, 'brettpunkteGegner' => null, 'gespielt' => false, 'spielfrei' => true, 'nichtAusgelost' => (bool) ($satz['nichtAusgelost'] ?? false), 'leer' => false, 'stand' => $stand];
 
                     continue;
                 }

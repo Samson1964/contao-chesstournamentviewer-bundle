@@ -40,7 +40,7 @@ $rundenkopf = false !== $this->rundenkopf;
                 <?php endif; ?>
               </th>
               <?php if ($kampf['spielfrei']): ?>
-                <th scope="colgroup" class="ctv-paarung__seite"><em><?= Ausgabe::wort('freilos', 'Freilos') ?></em></th>
+                <th scope="colgroup" class="ctv-paarung__seite"><em><?= ($kampf['nichtAusgelost'] ?? false) ? Ausgabe::wort('nichtAusgelost', 'nicht ausgelost') : Ausgabe::wort('freilos', 'Freilos') ?></em></th>
                 <th scope="col" class="ctv-zahl ctv-schmal"></th>
               <?php else: ?>
                 <th scope="colgroup" class="ctv-paarung__seite<?= Ausgabe::landklasse($kampf['gastLand'] ?? '') ?>"><?= Ausgabe::landesflagge($kampf['gastLand'] ?? '') ?><?= Ausgabe::esc($kampf['gastName']) ?></th>
