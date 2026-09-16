@@ -21,7 +21,7 @@ $rundenkopf = false !== $this->rundenkopf;
   <?php foreach ($this->kaempfe as $runde => $kaempfe): ?>
 
     <?php if ($rundenkopf): ?>
-      <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+      <h4 class="ctv-ueberschrift ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
     <?php endif; ?>
 
     <div class="ctv-rollbar">
@@ -30,7 +30,7 @@ $rundenkopf = false !== $this->rundenkopf;
           <tbody class="ctv-gruppe">
             <tr class="ctv-gruppe__kopf ctv-kampfkopf<?= $kampf['spielfrei'] ? ' ctv-partie--frei' : '' ?>">
               <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('brett') ?>"><?= Ausgabe::spalte('brettKurz') ?></th>
-              <th scope="colgroup" class="ctv-paarung__seite"><?= Ausgabe::landesflagge($kampf['heimLand'] ?? '') ?><?= Ausgabe::esc($kampf['heimName']) ?></th>
+              <th scope="colgroup" class="ctv-paarung__seite<?= Ausgabe::landklasse($kampf['heimLand'] ?? '') ?>"><?= Ausgabe::landesflagge($kampf['heimLand'] ?? '') ?><?= Ausgabe::esc($kampf['heimName']) ?></th>
               <th scope="col" class="ctv-zahl ctv-schmal"><?= $wertung ?></th>
               <th scope="col" class="ctv-paarung__ergebnis">
                 <?php if (!$kampf['spielfrei'] && $this->mitErgebnissen && $kampf['gespielt']): ?>
@@ -43,7 +43,7 @@ $rundenkopf = false !== $this->rundenkopf;
                 <th scope="colgroup" class="ctv-paarung__seite"><em><?= Ausgabe::wort('freilos', 'Freilos') ?></em></th>
                 <th scope="col" class="ctv-zahl ctv-schmal"></th>
               <?php else: ?>
-                <th scope="colgroup" class="ctv-paarung__seite"><?= Ausgabe::landesflagge($kampf['gastLand'] ?? '') ?><?= Ausgabe::esc($kampf['gastName']) ?></th>
+                <th scope="colgroup" class="ctv-paarung__seite<?= Ausgabe::landklasse($kampf['gastLand'] ?? '') ?>"><?= Ausgabe::landesflagge($kampf['gastLand'] ?? '') ?><?= Ausgabe::esc($kampf['gastName']) ?></th>
                 <th scope="col" class="ctv-zahl ctv-schmal"><?= $wertung ?></th>
               <?php endif; ?>
             </tr>
@@ -62,7 +62,7 @@ $rundenkopf = false !== $this->rundenkopf;
   <?php foreach ($this->runden as $runde => $partien): ?>
 
     <?php if ($rundenkopf): ?>
-      <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+      <h4 class="ctv-ueberschrift ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
     <?php endif; ?>
 
     <div class="ctv-rollbar">

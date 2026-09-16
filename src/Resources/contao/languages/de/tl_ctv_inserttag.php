@@ -18,7 +18,7 @@ use Contao\System;
  */
 System::loadLanguageFile('tl_content');
 
-foreach (['ctvDatei', 'ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvRundenkopfAus', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz', 'ctvDatum', 'ctvHinweise', 'ctv_legend', 'ctv_spalten_legend', 'ctv_runden_legend', 'ctv_ueberschrift_legend', 'ctv_mannschaft_legend', 'ctv_hinweis_legend'] as $feld) {
+foreach (['ctvDatei', 'ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvRunden', 'ctvUeberschriftenAus', 'ctvStandAus', 'ctvRundenkopfAus', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz', 'ctvDatum', 'ctvHinweise', 'ctv_legend', 'ctv_spalten_legend', 'ctv_runden_legend', 'ctv_ueberschrift_legend', 'ctv_mannschaft_legend', 'ctv_hinweis_legend'] as $feld) {
     if (isset($GLOBALS['TL_LANG']['tl_content'][$feld])) {
         $GLOBALS['TL_LANG']['tl_ctv_inserttag'][$feld] = $GLOBALS['TL_LANG']['tl_content'][$feld];
     }

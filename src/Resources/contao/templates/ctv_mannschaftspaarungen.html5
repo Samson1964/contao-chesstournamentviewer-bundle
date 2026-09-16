@@ -11,7 +11,7 @@ $rundenkopf = false !== $this->rundenkopf;
 <?php foreach ($this->runden as $runde => $kaempfe): ?>
 
   <?php if ($rundenkopf): ?>
-    <h4 class="ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
+    <h4 class="ctv-ueberschrift ctv-runde"><?= Ausgabe::esc(Ausgabe::runde((int) $runde)) ?></h4>
   <?php endif; ?>
 
   <div class="ctv-rollbar">
@@ -34,7 +34,7 @@ $rundenkopf = false !== $this->rundenkopf;
                    eigene Kopfzeile. */ ?>
           <tr class="ctv-wettkampf<?= $kampf['spielfrei'] ? ' ctv-partie--frei' : '' ?>">
             <td class="ctv-zahl"><?= $kampf['spielfrei'] ? '' : Ausgabe::zahl($kampf['tisch'] ?: $nummer + 1) ?></td>
-            <td><?= Ausgabe::esc($kampf['heimName']) ?></td>
+            <td class="ctv-mannschaft<?= Ausgabe::landklasse($kampf['heimLand'] ?? '') ?>"><?= Ausgabe::landesflagge($kampf['heimLand'] ?? '') ?><?= Ausgabe::esc($kampf['heimName']) ?></td>
             <td class="ctv-zahl"><?= Ausgabe::zahl($kampf['schnittHeim']) ?></td>
             <td class="ctv-paarung__ergebnis ctv-punkte">
               <?= $kampf['gespielt'] ? Ausgabe::punkte($kampf['brettpunkteHeim']).':'.Ausgabe::punkte($kampf['brettpunkteGast']) : '&ndash;' ?>
@@ -43,7 +43,7 @@ $rundenkopf = false !== $this->rundenkopf;
               <?php if ($kampf['spielfrei']): ?>
                 <em><?= Ausgabe::wort('freilos', 'Freilos') ?></em>
               <?php else: ?>
-                <?= Ausgabe::esc($kampf['gastName']) ?>
+                <?= Ausgabe::landesflagge($kampf['gastLand'] ?? '') ?><?= Ausgabe::esc($kampf['gastName']) ?>
               <?php endif; ?>
             </td>
             <td class="ctv-zahl"><?= Ausgabe::zahl($kampf['schnittGast']) ?></td>

@@ -17,7 +17,7 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
       <?php foreach ($this->mannschaften as $zeile): ?>
         <tr>
           <td class="ctv-zahl"><?= (int) $zeile['nummer'] ?></td>
-          <td><?= Ausgabe::esc($zeile['mannschaft']['name']) ?></td>
+          <td class="ctv-mannschaft<?= Ausgabe::landklasse($zeile['mannschaft']['land'] ?? '') ?>"><?= Ausgabe::landesflagge($zeile['mannschaft']['land'] ?? '') ?><?= Ausgabe::esc($zeile['mannschaft']['name']) ?></td>
           <td class="ctv-zahl"><?= Ausgabe::zahl($zeile['anzahl']) ?></td>
           <td class="ctv-zahl"><?= Ausgabe::zahl($zeile['schnitt']) ?></td>
         </tr>

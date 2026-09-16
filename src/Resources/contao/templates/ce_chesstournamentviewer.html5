@@ -27,7 +27,7 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
              data-ctv-name="<?= Ausgabe::esc($this->reitername) ?>">
 
       <?php if ($this->stand): ?>
-        <p class="ctv-stand"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['standTitel'] ?? 'Stand nach Runde %d', $this->stand)) ?></p>
+        <h4 class="ctv-ueberschrift ctv-stand"><?= Ausgabe::esc(sprintf($GLOBALS['TL_LANG']['ctv']['standTitel'] ?? 'Stand nach Runde %d', $this->stand)) ?></h4>
       <?php endif; ?>
 
       <?php if ($this->hinweise): ?>

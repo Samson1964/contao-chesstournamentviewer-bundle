@@ -61,7 +61,7 @@ sie gewählt und gespeichert ist.
 | Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden**; bei Mannschaftsturnieren zusätzlich **Mannschaften** |
 | Mannschaften, Wettkämpfe | **Spieler mit ausgeben** |
 | Kreuztabelle der Mannschaften | **Kreuztabelle kürzen** |
-| alle | **Zeile „Stand nach Runde" ausblenden** und **Rundenüberschriften ausblenden** (Feldgruppe „Überschriften"), **Stand der Turnierdatei anzeigen** und **Hinweise zu den Zahlen anzeigen** |
+| alle | **Automatische Überschriften ausblenden** (Feldgruppe „Überschriften"), **Stand der Turnierdatei anzeigen** und **Hinweise zu den Zahlen anzeigen** |
 
 **Eine Einstellung wirkt nur bei den Listen, zu denen sie gehört.** Wer ein
 Element von der Mannschaftstabelle nach Runde 3 auf die Mannschaftsliste
@@ -241,18 +241,14 @@ Kästchen an.
 
 Zwei Zeilen setzt der Betrachter von sich aus über die Tabelle: „Stand nach
 Runde 4", wenn ein früherer Stand gewählt ist, und „Runde 4" über jeder Runde
-einer Paarungs-, Ergebnis- oder Wettkampfliste. Beide lassen sich in der
-Feldgruppe **Überschriften** abschalten:
-
-| Kästchen | Wirkung |
-| --- | --- |
-| **Zeile „Stand nach Runde" ausblenden** | Unterdrückt die Angabe über der Ausgabe |
-| **Rundenüberschriften ausblenden** | Unterdrückt „Runde 1", „Runde 2" über den Tabellen |
+einer Paarungs-, Ergebnis- oder Wettkampfliste. Beide sehen gleich aus und
+werden zusammen abgeschaltet — mit dem Kästchen **Automatische Überschriften
+ausblenden** in der Feldgruppe „Überschriften".
 
 Die Gruppe steht in **jedem** Element und bei jedem Inserttag, gleich welche
 Liste gewählt ist — so wie die Gruppe „Hinweise" auch. Ein Kästchen, das je
-nach Liste verschwindet, sucht man beim nächsten Mal vergeblich; wo es die
-jeweilige Überschrift gar nicht gibt, bleibt es einfach wirkungslos.
+nach Liste verschwindet, sucht man beim nächsten Mal vergeblich; wo es keine
+automatische Überschrift gibt, bleibt es einfach wirkungslos.
 
 Ohne Auswahl erscheinen beide Überschriften. Das ist Absicht: Eine
 zurückversetzte Tabelle ohne Angabe sähe aus wie die Endtabelle, und eine
@@ -365,6 +361,17 @@ die schlichtere Fassung früherer Versionen möchte, setzt `--ctv-rundung: 0`,
 **Die Farbe am Brett steht als Punkt vor dem Namen**, weiß gefüllt für Weiß,
 dunkel für Schwarz. Bis Fassung 1.12.0 war stattdessen die ganze Zelle
 eingefärbt; das nahm der Tabelle die Streifung.
+
+**Jedes Mannschaftsfeld trägt die Klasse seiner Föderation** —
+`ctv-land--ger`, `ctv-land--pol`, `ctv-land--ibca`. Mitgeliefert ist eine
+Regel, die die deutschen Mannschaften hervorhebt: fett und mit einem Balken in
+der Akzentfarbe. Für eine andere Nation genügt eine Regel im Theme:
+
+```css
+.ctv .ctv-tabelle .ctv-land--ger { font-weight: 400 }        /* abschalten */
+.ctv .ctv-tabelle td.ctv-land--ger { box-shadow: none }
+.ctv .ctv-tabelle .ctv-land--aut { font-weight: 700 }        /* stattdessen Österreich */
+```
 
 Auf einer dunklen Seite sind mindestens `--ctv-grund`, `--ctv-text` und
 `--ctv-wechsel` zu setzen: Die Reiter bringen ihre Farben ausdrücklich mit,

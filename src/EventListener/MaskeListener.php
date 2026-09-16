@@ -120,7 +120,7 @@ class MaskeListener
         // Schritt 1: Ohne lesbare Datei bleibt nur die Dateiauswahl. Alles
         // Weitere hinge am Inhalt der Datei.
         if (null === $turnier) {
-            $this->kuerze(['ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvRundenkopfAus', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
+            $this->kuerze(['ctvFormat', 'ctvListe', 'ctvSpalten', 'ctvStand', 'ctvRunden', 'ctvUeberschriftenAus', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
 
             return;
         }
@@ -130,7 +130,7 @@ class MaskeListener
 
         // Schritt 2: Datei da, aber noch keine Ausgabe gewählt.
         if ('' === $liste) {
-            $this->kuerze(['ctvSpalten', 'ctvStand', 'ctvStandAus', 'ctvRunden', 'ctvRundenkopfAus', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
+            $this->kuerze(['ctvSpalten', 'ctvStand', 'ctvRunden', 'ctvUeberschriftenAus', 'ctvHinweise', 'ctvMannschaftswahl', 'ctvMannschaftSpieler', 'ctvKreuzKurz']);
 
             return;
         }
@@ -148,11 +148,11 @@ class MaskeListener
             $weg[] = 'ctvRunden';
         }
 
-        // Die beiden Kästchen der Feldgruppe „Überschriften" bleiben stehen,
-        // gleich welche Liste gewählt ist — so wie die Hinweise auch. Sie
-        // wirken nur dort, wo es die jeweilige Überschrift gibt, und ein
-        // Kästchen, das je nach Liste verschwindet, sucht der Redakteur beim
-        // nächsten Mal vergeblich.
+        // Das Kästchen der Feldgruppe „Überschriften" bleibt stehen, gleich
+        // welche Liste gewählt ist — so wie die Hinweise auch. Es wirkt nur
+        // dort, wo es eine automatische Überschrift gibt, und ein Kästchen,
+        // das je nach Liste verschwindet, sucht der Redakteur beim nächsten
+        // Mal vergeblich.
 
         if (!$turnier->istMannschaftsturnier() || !\in_array($liste, Listen::MIT_MANNSCHAFTSWAHL, true)) {
             $weg[] = 'ctvMannschaftswahl';
@@ -344,9 +344,35 @@ class MaskeListener
         $mannschaften = Laender::uebersetzeMannschaften($turnier)->getMannschaften();
         $beschriftungen = [];
 
+        /*
+         * Alphabetisch, aber die deutschen Mannschaften zuerst: Bei einer
+         * Olympiade mit 180 Ländern sucht ein deutscher Redakteur so gut wie
+         * immer die eigene Mannschaft, und die stünde unter „D" mitten in der
+         * Liste. Sortiert wird mit dem Collator, wo er zur Verfügung steht —
+         * nur er stellt „Österreich" zu den O und nicht ans Ende. Contao
+         * verlangt die Erweiterung intl ohnehin; fehlt sie doch einmal,
+         * bleibt die einfache Reihenfolge ohne Umlautbehandlung.
+         */
+        $sammler = class_exists('Collator') ? new \Collator('de_DE') : null;
+
         uasort(
             $mannschaften,
-            static fn (array $a, array $b): int => ((int) ($a['startnummer'] ?? 0)) <=> ((int) ($b['startnummer'] ?? 0))
+            static function (array $a, array $b) use ($sammler): int {
+                $eigen = [
+                    'GER' === strtoupper(trim((string) ($a['land'] ?? ''))) ? 0 : 1,
+                    'GER' === strtoupper(trim((string) ($b['land'] ?? ''))) ? 0 : 1,
+                ];
+
+                if ($eigen[0] !== $eigen[1]) {
+                    return $eigen[0] <=> $eigen[1];
+                }
+
+                $namen = [(string) ($a['name'] ?? ''), (string) ($b['name'] ?? '')];
+
+                return null === $sammler
+                    ? strcasecmp($namen[0], $namen[1])
+                    : (int) $sammler->compare($namen[0], $namen[1]);
+            }
         );
 
         foreach ($mannschaften as $nummer => $mannschaft) {

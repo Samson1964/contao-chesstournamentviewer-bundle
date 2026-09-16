@@ -146,6 +146,28 @@ final class Ausgabe
     }
 
     /**
+     * Liefert die Stilklasse zu einer Föderation.
+     *
+     * Damit lässt sich in einer Tabelle jede beliebige Nation hervorheben:
+     * Das Feld einer deutschen Mannschaft trägt `ctv-land--ger`, das einer
+     * polnischen `ctv-land--pol`. Die mitgelieferte Stilvorlage hebt die
+     * deutschen Mannschaften hervor — das ist der Regelfall auf den Seiten,
+     * für die dieses Bundle gebaut ist —, jede andere Nation ist eine
+     * Stilregel im Theme entfernt.
+     *
+     * @param mixed $land Die Föderation, dreibuchstabig
+     *
+     * @return string Die Klasse mit führendem Leerzeichen, oder eine leere
+     *                Zeichenkette, wenn keine Föderation angegeben ist
+     */
+    public static function landklasse(mixed $land): string
+    {
+        $code = strtolower(preg_replace('/[^A-Za-z]/', '', (string) $land) ?? '');
+
+        return '' === $code ? '' : ' ctv-land--'.$code;
+    }
+
+    /**
      * Maskiert einen Wert für die Ausgabe im HTML.
      *
      * Turnierdateien kommen nicht durch die Eingabeprüfung von Contao; ihre

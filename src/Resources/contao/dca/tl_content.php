@@ -25,7 +25,7 @@ $GLOBALS['TL_DCA']['tl_content']['palettes']['chesstournamentviewer'] =
     .'{ctv_legend},ctvDatei,ctvFormat,ctvListe;'
     .'{ctv_spalten_legend},ctvSpalten;'
     .'{ctv_runden_legend},ctvStand,ctvRunden;'
-    .'{ctv_ueberschrift_legend},ctvStandAus,ctvRundenkopfAus;'
+    .'{ctv_ueberschrift_legend},ctvUeberschriftenAus;'
     .'{ctv_mannschaft_legend},ctvMannschaftswahl,ctvMannschaftSpieler,ctvKreuzKurz;'
     .'{ctv_hinweis_legend},ctvDatum,ctvHinweise;'
     .'{template_legend:hide},customTpl;'
@@ -132,11 +132,15 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvStand'] = [
 ];
 
 /*
- * Blendet die Zeile „Stand nach Runde" über der Ausgabe aus. Standard ist
- * die Zeile sichtbar: Eine zurückgesetzte Tabelle ohne Angabe sähe aus wie
- * die Endtabelle.
+ * Blendet die automatischen Überschriften aus: die Zeile „Stand nach Runde"
+ * über der Ausgabe und die Überschriften „Runde 1", „Runde 2" über den
+ * Tabellen. Ein Kästchen für beide — es sind zwei Ausprägungen derselben
+ * Sache, und wer die eine nicht will, will in aller Regel auch die andere
+ * nicht. Standard sind die Überschriften sichtbar: Eine zurückgesetzte
+ * Tabelle ohne Angabe sähe aus wie die Endtabelle, und eine Liste über
+ * mehrere Runden wäre ohne Rundenüberschriften nicht zu lesen.
  */
-$GLOBALS['TL_DCA']['tl_content']['fields']['ctvStandAus'] = [
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvUeberschriftenAus'] = [
     'exclude' => true,
     'inputType' => 'checkbox',
     'eval' => [
@@ -172,22 +176,6 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvRunden'] = [
     'sql' => 'blob NULL',
 ];
 
-/*
- * Blendet die Überschriften „Runde 1", „Runde 2" über den Paarungen,
- * Ergebnissen und Wettkämpfen aus. Gebraucht wird das, wo die Runde schon
- * anderswo steht — in der Überschrift des Elements oder im Text um einen
- * Inserttag herum. Standard sind die Überschriften sichtbar: Eine Liste über
- * mehrere Runden wäre ohne sie nicht zu lesen.
- */
-$GLOBALS['TL_DCA']['tl_content']['fields']['ctvRundenkopfAus'] = [
-    'exclude' => true,
-    'inputType' => 'checkbox',
-    'eval' => [
-        'tl_class' => 'clr',
-    ],
-    'sql' => "char(1) NOT NULL default ''",
-];
-
 $GLOBALS['TL_DCA']['tl_content']['fields']['ctvDatum'] = [
     'exclude' => true,
     'inputType' => 'checkbox',
@@ -221,6 +209,20 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['ctvKreuzKurz'] = [
     'eval' => [
         'tl_class' => 'clr',
     ],
+    'sql' => "char(1) NOT NULL default ''",
+];
+
+/*
+ * Bis Fassung 1.14.0 gab es zwei Kästchen für die beiden automatischen
+ * Überschriften. Die Felder bleiben in der Datenbank und wirken weiter,
+ * damit ein Element, das eine der beiden Überschriften abgeschaltet hatte,
+ * sie nicht wieder zeigt; in der Maske erscheinen sie nicht mehr.
+ */
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvStandAus'] = [
+    'sql' => "char(1) NOT NULL default ''",
+];
+
+$GLOBALS['TL_DCA']['tl_content']['fields']['ctvRundenkopfAus'] = [
     'sql' => "char(1) NOT NULL default ''",
 ];
 

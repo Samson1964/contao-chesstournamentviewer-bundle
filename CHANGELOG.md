@@ -1,5 +1,28 @@
 # Änderungen
 
+## Version 1.15.0 (2026-09-16)
+
+* Change: **Ein Kästchen für beide automatischen Überschriften.** Aus „Zeile
+  ‚Stand nach Runde' ausblenden" und „Rundenüberschriften ausblenden" wird
+  **„Automatische Überschriften ausblenden"** — es sind zwei Ausprägungen
+  derselben Sache, und wer die eine nicht will, will in aller Regel auch die
+  andere nicht. Die beiden alten Felder bleiben in der Datenbank und wirken
+  weiter, damit nichts wieder auftaucht, was schon abgeschaltet war.
+* Change: **Beide Überschriften sehen jetzt gleich aus** — ein `h4` mit dem
+  Aussehen der bisherigen Standzeile: heller Grund, Balken in der Akzentfarbe.
+  Vorher war die eine ein Absatz und die andere eine schlichte Überschrift;
+  das sah nach zwei Ebenen aus, die es nicht gibt.
+* Change: **Die Mannschaftsauswahl steht alphabetisch**, deutsche
+  Mannschaften zuoberst. Vorher galt die Startnummer — bei einer Olympiade
+  mit vielen Ländern war die eigene Mannschaft damit kaum zu finden.
+* Add: **Deutsche Mannschaften sind in den Tabellen hervorgehoben**: fett und
+  mit einem Balken in der Akzentfarbe. Jedes Mannschaftsfeld trägt die Klasse
+  seiner Föderation (`ctv-land--ger`, `ctv-land--pol`), sodass sich im Theme
+  jede beliebige Nation hervorheben lässt.
+* Add: Mannschaftstabelle, Mannschaftsliste und Wettkämpfe zeigen die
+  **Flagge vor dem Mannschaftsnamen**, wie die Paarungen und Ergebnisse es
+  schon taten.
+
 ## Version 1.14.0 (2026-09-16)
 
 * Add: Kästchen **„Rundenüberschriften ausblenden"**. Bisher stand über jeder

@@ -74,6 +74,14 @@ class TurnierAusgabe
 
         $schluessel = MaskeListener::liste($einstellungen['ctvListe'] ?? '', $einstellungen['ctvListen'] ?? null);
 
+        // Ein Kästchen schaltet beide automatischen Überschriften ab. Die
+        // beiden Felder aus der Zeit davor wirken weiter, damit ein Element,
+        // das eine der Überschriften abgeschaltet hatte, sie nicht wieder
+        // zeigt.
+        $ohneUeberschriften = (bool) ($einstellungen['ctvUeberschriftenAus'] ?? false);
+        $ohneStandzeile = $ohneUeberschriften || (bool) ($einstellungen['ctvStandAus'] ?? false);
+        $ohneRundenkopf = $ohneUeberschriften || (bool) ($einstellungen['ctvRundenkopfAus'] ?? false);
+
         $auswahl = Auswahl::fuerListe(
             $schluessel,
             (bool) ($einstellungen['ctvMannschaftSpieler'] ?? false),
@@ -82,7 +90,7 @@ class TurnierAusgabe
             StringUtil::deserialize($einstellungen['ctvRunden'] ?? null, true),
             StringUtil::deserialize($einstellungen['ctvSpalten'] ?? null, true),
             StringUtil::deserialize($einstellungen['ctvMannschaftswahl'] ?? null, true),
-            (bool) ($einstellungen['ctvRundenkopfAus'] ?? false),
+            $ohneRundenkopf,
         );
 
         // Nationalmannschaften heißen in den Dateien meist englisch —
@@ -113,7 +121,7 @@ class TurnierAusgabe
             // Der Zwischenstand steht unabhängig von den Hinweisen über der
             // Ausgabe: Eine Tabelle nach Runde 4 sähe sonst aus wie die
             // Endtabelle, und niemand könnte den Unterschied erkennen.
-            'stand' => ($einstellungen['ctvStandAus'] ?? false) ? 0 : (int) $turnier->kopf('standNachRunde', 0),
+            'stand' => $ohneStandzeile ? 0 : (int) $turnier->kopf('standNachRunde', 0),
             'aktualisiert' => ($einstellungen['ctvDatum'] ?? false) ? $this->aktualisiert($turnier) : '',
         ];
     }

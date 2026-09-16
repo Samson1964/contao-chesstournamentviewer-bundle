@@ -35,13 +35,36 @@
     margin-block: 1rem;
 }
 
-/* --- Zwischenstand ------------------------------------------------------
+/* --- Automatische Ueberschriften ----------------------------------------
  *
- * Steht ueber der ganzen Ausgabe, wenn das Element einen Rundenschnitt zeigt.
+ * Zwei Zeilen setzt der Betrachter von sich aus: den Zwischenstand ueber der
+ * ganzen Ausgabe („Stand nach Runde 4") und die Rundenueberschrift ueber
+ * jeder Runde („Runde 1"). Beide sehen gleich aus — es sind zwei
+ * Auspraegungen derselben Sache, und zwei Gestaltungen nebeneinander wirkten
+ * wie zwei Ebenen, die es nicht gibt.
+ *
  * Die Farbe kommt vom Akzent, damit sich die Zeile als Angabe zur Ausgabe
- * liest und nicht als Warnung. Die Schriftgroesse traegt ein !important,
- * weil Themes ihre Absaetze gern ueber ID-Selektoren gestalten.
+ * liest und nicht als Warnung. Die Eigenschaften tragen ein !important, weil
+ * Themes ihre Ueberschriften gern ueber ID-Selektoren gestalten.
  */
+
+.ctv .ctv-ueberschrift,
+.ctv-stand {
+    margin: 0 0 .75rem !important;
+    padding: .35rem .6rem !important;
+    border-left: 3px solid var(--ctv-akzent) !important;
+    background: var(--ctv-wechsel) !important;
+    color: var(--ctv-text) !important;
+    font-size: 1em !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+}
+
+/* Ueber der zweiten und jeder weiteren Runde etwas mehr Luft. */
+.ctv .ctv-tabelle + .ctv-ueberschrift,
+.ctv .ctv-rollbar + .ctv-ueberschrift {
+    margin-top: 1.5rem !important;
+}
 
 .ctv-stand {
     margin: 0 0 .75rem !important;
@@ -504,13 +527,14 @@
     border-bottom: 0;
 }
 
-.ctv-runde {
-    margin: 1.25rem 0 .35rem;
-}
-
-.ctv-liste > .ctv-runde:first-child,
-.ctv-liste__titel + .ctv-runde {
-    margin-top: 0;
+/*
+ * Die Rundenueberschrift traegt dieselbe Gestaltung wie der Zwischenstand;
+ * sie steht weiter oben bei den automatischen Ueberschriften. Hier bleibt
+ * nur, was sie von ihm unterscheidet: Sie steht ueber einer Tabelle und
+ * braucht deshalb keinen so grossen Abstand nach unten.
+ */
+.ctv .ctv-runde {
+    margin-bottom: .5rem !important;
 }
 
 /* --- Gliederung nach Mannschaften ---------------------------------------
@@ -646,6 +670,24 @@
 .ctv .ctv-tabelle td.ctv-farbe--s:not(.ctv-zahl)::before {
     border-color: var(--ctv-schwarz);
     background: var(--ctv-schwarz);
+}
+
+/* --- Hervorgehobene Mannschaften ----------------------------------------
+ *
+ * Jedes Mannschaftsfeld traegt die Klasse seiner Foederation:
+ * `ctv-land--ger`, `ctv-land--pol`, `ctv-land--ibca`. Hervorgehoben werden
+ * hier die deutschen Mannschaften — das ist der Regelfall auf den Seiten,
+ * fuer die dieses Bundle gebaut ist. Wer eine andere Nation hervorheben oder
+ * die Hervorhebung ganz abstellen will, schreibt eine Regel ins Theme; dafuer
+ * sind die Klassen da.
+ */
+
+.ctv .ctv-tabelle .ctv-land--ger {
+    font-weight: 700;
+}
+
+.ctv .ctv-tabelle td.ctv-land--ger {
+    box-shadow: inset 3px 0 0 var(--ctv-akzent);
 }
 
 /* --- Stand der Turnierdatei --------------------------------------------- */
