@@ -280,7 +280,17 @@
  * Die Linien liegen deshalb am unteren Rand der Zellen.
  */
 .ctv-tabelle {
-    width: 100%;
+    /*
+     * `display: table` steht ausdrücklich da und mit !important: Manche
+     * Themes setzen `table { display: block }`, damit breite Tabellen rollen —
+     * so auch schachbund.de. Eine Tabelle als Block ist zwar 100 % breit, ihre
+     * Zeilen bilden darin aber eine unsichtbare Innentabelle, die nur so breit
+     * wird wie ihr Inhalt. Die festen Spaltenbreiten wirkten dann nicht, und
+     * jede Tabelle teilte ihre Namensspalten anders auf. Das Rollen übernimmt
+     * hier `.ctv-rollbar`.
+     */
+    display: table !important;
+    width: 100% !important;
     margin: 0 0 1.5rem;
     border-collapse: separate;
     border-spacing: 0;
@@ -547,7 +557,7 @@
 @container (max-width: 34rem) {
     .ctv .ctv-tabelle--paarungen,
     .ctv .ctv-tabelle--wettkaempfe {
-        min-width: 22rem;
+        min-width: 20rem;
         font-size: .9em;
     }
 

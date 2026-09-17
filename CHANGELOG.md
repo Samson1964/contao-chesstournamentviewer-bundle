@@ -1,5 +1,20 @@
 # Änderungen
 
+## Version 1.16.3 (2026-09-17)
+
+* Fix: **Die Tabellen waren auf schachbund.de trotz fester Spaltenbreiten
+  ungleich breit.** Das Theme setzt `table { display: block }`, damit breite
+  Tabellen rollen. Eine Tabelle als Block ist zwar 100 % breit, ihre Zeilen
+  bilden darin aber eine unsichtbare Innentabelle, die nur so breit wird wie
+  ihr Inhalt — die Namensspalten teilten sich den Platz dann je nach Namen
+  verschieden auf. Die Tabellen des Betrachters erzwingen jetzt
+  `display: table`; das Rollen übernimmt ohnehin ihr eigener Behälter.
+  Auf der Live-Seite geprüft: alle drei Tabellen der Olympia-Box Spalte für
+  Spalte gleich, bei 1400 px wie auf dem Handy.
+* Change: Die Mindestbreite, unter der schmale Tabellen waagerecht rollen,
+  sinkt von 22 auf 20 rem. Auf einem 400 px breiten Handy ist die Box
+  330 px breit — mit 22 rem rollte sie dort um 22 px.
+
 ## Version 1.16.2 (2026-09-17)
 
 * Fix: **Paarungen und Ergebnisse hatten verschiedene Spaltenbreiten.** Die
