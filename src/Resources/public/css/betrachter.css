@@ -474,6 +474,74 @@
     white-space: nowrap;
 }
 
+/*
+ * Feste Spaltenbreiten in Paarungen, Ergebnissen und Wettkämpfen.
+ *
+ * Mit Breiten nach dem Inhalt sahen zwei Tabellen derselben Art verschieden
+ * aus: In den Paarungen steht im Ergebnis ein „–", in den Ergebnissen
+ * „2½:1½" — die Ergebnisspalte wurde breiter, die Namen rückten zusammen,
+ * und drei Tabellen untereinander standen nicht bündig. Jetzt hat jede Spalte
+ * eine feste Breite, und die beiden Namensspalten teilen sich den Rest zu
+ * gleichen Teilen.
+ *
+ * Die Ergebnisspalte ist von vornherein so breit, dass „10½:9½" hineinpasst —
+ * das breiteste Ergebnis eines Wettkampfs mit zwanzig Brettern. Ein „–" vor
+ * der Runde nimmt damit denselben Platz ein wie das Ergebnis danach.
+ *
+ * `table-layout: fixed` nimmt die Breiten aus der ersten Zeile; das ist der
+ * Tabellenkopf oder, bei den Wettkämpfen, die Kopfzeile des ersten Kampfs.
+ * Beide haben dieselben sechs Spalten.
+ */
+.ctv .ctv-tabelle--paarungen,
+.ctv .ctv-tabelle--wettkaempfe {
+    table-layout: fixed;
+}
+
+.ctv .ctv-tabelle--paarungen tr > :nth-child(1),
+.ctv .ctv-tabelle--wettkaempfe tr > :nth-child(1) {
+    width: 3.5rem !important;
+}
+
+.ctv .ctv-tabelle--paarungen tr > :nth-child(2),
+.ctv .ctv-tabelle--paarungen tr > :nth-child(5),
+.ctv .ctv-tabelle--wettkaempfe tr > :nth-child(2),
+.ctv .ctv-tabelle--wettkaempfe tr > :nth-child(5) {
+    width: auto !important;
+}
+
+.ctv .ctv-tabelle--paarungen tr > :nth-child(3),
+.ctv .ctv-tabelle--paarungen tr > :nth-child(6),
+.ctv .ctv-tabelle--wettkaempfe tr > :nth-child(3),
+.ctv .ctv-tabelle--wettkaempfe tr > :nth-child(6) {
+    width: 4.75rem !important;
+}
+
+.ctv .ctv-tabelle--paarungen tr > :nth-child(4),
+.ctv .ctv-tabelle--wettkaempfe tr > :nth-child(4) {
+    width: calc(7ch + 1.2rem) !important;
+}
+
+/* Auf schmalen Bildschirmen rücken die festen Spalten zusammen, damit für
+ * die Namen noch Platz bleibt. */
+@media (max-width: 640px) {
+    .ctv .ctv-tabelle--paarungen tr > :nth-child(1),
+    .ctv .ctv-tabelle--wettkaempfe tr > :nth-child(1) {
+        width: 2.4rem !important;
+    }
+
+    .ctv .ctv-tabelle--paarungen tr > :nth-child(3),
+    .ctv .ctv-tabelle--paarungen tr > :nth-child(6),
+    .ctv .ctv-tabelle--wettkaempfe tr > :nth-child(3),
+    .ctv .ctv-tabelle--wettkaempfe tr > :nth-child(6) {
+        width: 3.6rem !important;
+    }
+
+    .ctv .ctv-tabelle--paarungen tr > :nth-child(4),
+    .ctv .ctv-tabelle--wettkaempfe tr > :nth-child(4) {
+        width: calc(7ch + .6rem) !important;
+    }
+}
+
 /* --- Fortschrittstabelle ------------------------------------------------ */
 
 .ctv .ctv-tabelle .ctv-fortschritt__kopf {
