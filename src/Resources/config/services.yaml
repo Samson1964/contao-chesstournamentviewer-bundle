@@ -36,6 +36,9 @@ services:
     Schachbulle\ContaoChesstournamentviewerBundle\Liste\InserttagAusgabe:
         arguments:
             $logger: '@monolog.logger.contao.error'
+            # Der Slug-Dienst hat nicht in jeder Contao-Fassung einen Alias
+            # auf den Klassennamen und kommt deshalb über die Dienst-ID.
+            $slug: '@contao.slug'
 
     # --- Rückrufe des Data Containers --------------------------------------
 
@@ -142,6 +145,8 @@ services:
               method: pruefeUploadTypen
 
     Schachbulle\ContaoChesstournamentviewerBundle\EventListener\TlCtvInserttagListener:
+        arguments:
+            $slug: '@contao.slug'
         tags:
             - name: contao.callback
               table: tl_ctv_inserttag

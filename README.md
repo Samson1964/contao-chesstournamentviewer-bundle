@@ -118,6 +118,14 @@ Datei wählen, speichern, Liste wählen, Einstellungen setzen. Dazu kommen ein
 {{ctv::olympiade-ger-r1}}
 ```
 
+**Die Kennung wird gebildet wie ein Seitenalias**: klein, mit Bindestrichen,
+Umlaute umgeschrieben. Aus dem Titel „Olympiade 2026 Männer, 2. Runde" wird
+`olympiade-2026-maenner-2-runde`; eine von Hand eingetragene Kennung wird
+genauso umgeschrieben. Eine rein numerische Kennung bekommt ein `id-` davor,
+damit sie nicht mit einer Datensatz-ID verwechselt wird. Kennungen, die vor
+Fassung 1.16.1 noch mit Umlaut gespeichert wurden, greifen trotzdem — der
+Inserttag vergleicht notfalls nach der Umschrift.
+
 Statt der Kennung geht auch die Datensatz-ID, also `{{ctv::7}}`. Die Ausgabe
 ist dieselbe wie beim Inhaltselement, nur ohne dessen Überschrift und ohne
 Reiter. Stilvorlage und Skript meldet der Inserttag selbst an; auf einer

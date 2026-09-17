@@ -1,5 +1,24 @@
 # Änderungen
 
+## Version 1.16.1 (2026-09-17)
+
+* Fix: **Inserttag fand seine Ausgabe nicht, wenn die Kennung einen Umlaut
+  hatte.** Die Kennung wurde mit `StringUtil::generateAlias()` gebildet, und
+  das lässt „ä" stehen: Aus „Olympiade 2026 Männer, 2. Runde" wurde
+  „olympiade-2026-männer-2-runde". Im Text stand
+  `{{ctv::olympiade-2026-maenner-2-runde}}`, und im Fehlerprotokoll „Zum
+  Inserttag … gibt es keine Turnierausgabe". Die Kennung entsteht jetzt über
+  den Slug-Dienst von Contao, wie ein Seitenalias: „ä" wird zu „ae", „ß" zu
+  „ss". Das gilt auch für eine von Hand eingetragene Kennung.
+* Fix: **Bestehende Kennungen mit Umlaut greifen sofort**, ohne dass jemand
+  die Datensätze neu speichern muss: Passt ein Inserttag nicht auf Anhieb,
+  werden die Kennungen nach derselben Umschrift verglichen.
+* Fix: **„Stand nach Runde" und „Angezeigte Runden" erscheinen schon ab der
+  ersten Runde.** Bisher erst ab der zweiten. Wer eine Ausgabe anlegte,
+  solange erst Runde 1 gespeichert war, konnte die Runde nicht wählen — und
+  sobald die Datei mehr Runden hatte, zeigte die Ausgabe alle, obwohl Runde 1
+  gemeint war.
+
 ## Version 1.16.0 (2026-09-16)
 
 * Add: **Spaltenauswahl für die Mannschaftstabelle**, wie bei Teilnehmerliste

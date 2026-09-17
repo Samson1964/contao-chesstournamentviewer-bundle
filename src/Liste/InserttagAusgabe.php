@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Liste;
 
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\CoreBundle\Slug\Slug;
 use Contao\FrontendTemplate;
 use Psr\Log\LoggerInterface;
 use Schachbulle\ContaoChesstournamentviewerBundle\Model\CtvInserttagModel;
@@ -36,12 +37,15 @@ class InserttagAusgabe
      * @param TurnierAusgabe  $ausgabe      Stellt die Ausgabe aus den Einstellungen zusammen
      * @param LoggerInterface $logger       Schreibt Lesefehler ins Contao-Fehlerprotokoll
      * @param RequestStack    $requestStack Liefert die Sprache der laufenden Anfrage
+     * @param Slug            $slug         Der Slug-Dienst von Contao; bildet
+     *                                      Kennungen für den Vergleich
      */
     public function __construct(
         private readonly ContaoFramework $framework,
         private readonly TurnierAusgabe $ausgabe,
         private readonly LoggerInterface $logger,
         private readonly RequestStack $requestStack,
+        private readonly Slug $slug,
     ) {
     }
 
@@ -64,7 +68,8 @@ class InserttagAusgabe
 
         $this->framework->initialize();
 
-        $datensatz = $this->framework->getAdapter(CtvInserttagModel::class)->findByIdOrAlias($kennung);
+        $model = $this->framework->getAdapter(CtvInserttagModel::class);
+        $datensatz = $model->findByIdOrAlias($kennung) ?? $this->findeNachUmschrift($kennung);
 
         if (null === $datensatz) {
             $this->logger->error(sprintf('Zum Inserttag {{ctv::%s}} gibt es keine Turnierausgabe.', $kennung));
@@ -94,6 +99,42 @@ class InserttagAusgabe
         $template->setData($werte);
 
         return $template->parse();
+    }
+
+    /**
+     * Sucht eine Ausgabe, deren Kennung erst nach der Umschrift passt.
+     *
+     * Bis Fassung 1.16.0 wurde eine eingegebene Kennung unverändert
+     * gespeichert. Steht in der Datenbank noch „olympiade-2026-männer" und im
+     * Text der Inserttag „olympiade-2026-maenner", soll er trotzdem greifen —
+     * ohne dass erst jemand jeden alten Datensatz neu speichern muss.
+     * Verglichen werden deshalb die Kennungen nach derselben Umschrift, mit
+     * der neue Kennungen entstehen.
+     *
+     * Gelesen werden dafür alle Datensätze. Das ist vertretbar: Es geht um
+     * eine Handvoll Turnierausgaben, und der Weg wird nur beschritten, wenn
+     * die Kennung nicht auf Anhieb passt.
+     *
+     * @param string $kennung Der Wert hinter `ctv::`
+     *
+     * @return CtvInserttagModel|null Der Datensatz, oder null wenn auch nach der
+     *                                Umschrift keiner passt
+     */
+    private function findeNachUmschrift(string $kennung): ?CtvInserttagModel
+    {
+        $gesucht = CtvInserttagModel::kennung($this->slug, $kennung);
+
+        if ('' === $gesucht) {
+            return null;
+        }
+
+        foreach ($this->framework->getAdapter(CtvInserttagModel::class)->findAll() ?? [] as $datensatz) {
+            if (CtvInserttagModel::kennung($this->slug, (string) $datensatz->alias) === $gesucht) {
+                return $datensatz;
+            }
+        }
+
+        return null;
     }
 
     /**

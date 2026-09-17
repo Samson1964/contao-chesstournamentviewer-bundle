@@ -140,11 +140,15 @@ class MaskeListener
             $weg[] = 'ctvSpalten';
         }
 
-        if (!\in_array($liste, Listen::MIT_STAND, true) || $turnier->getLetzteRunde() < 2) {
+        // Schon ab der ersten Runde: Wer ein Element anlegt, solange erst
+        // Runde 1 gespeichert ist, muss die Runde wählen können. Sonst bleibt
+        // das Feld leer, und eine spätere Fassung der Datei mit mehr Runden
+        // zeigt dann alle — obwohl Runde 1 gemeint war.
+        if (!\in_array($liste, Listen::MIT_STAND, true) || $turnier->getLetzteRunde() < 1) {
             $weg[] = 'ctvStand';
         }
 
-        if (!\in_array($liste, Listen::MIT_RUNDEN, true) || $turnier->getLetzteRunde() < 2) {
+        if (!\in_array($liste, Listen::MIT_RUNDEN, true) || $turnier->getLetzteRunde() < 1) {
             $weg[] = 'ctvRunden';
         }
 
