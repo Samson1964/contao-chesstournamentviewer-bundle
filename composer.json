@@ -1,7 +1,7 @@
 {
     "name": "schachbulle/contao-chesstournamentviewer-bundle",
     "type": "contao-bundle",
-    "description": "Zeigt Dateien von Schachturnierverwaltungen im Frontend an: Teilnehmerliste, Rangliste, Kreuztabelle, Fortschrittstabelle, Paarungen und Ergebnisse, bei Mannschaftsturnieren auch Mannschaftstabelle und Wettkämpfe. Erstes Format ist SWT (Swiss-Chess).",
+    "description": "Zeigt Dateien von Schachturnierverwaltungen (Swiss-Chess, Swiss-Manager) im Frontend an: Teilnehmerliste, Rangliste, Kreuztabelle, Fortschrittstabelle, Paarungen und Ergebnisse, bei Mannschaftsturnieren auch Mannschaftstabelle und Wettkämpfe.",
     "keywords": [
         "contao",
         "schach",
@@ -14,7 +14,7 @@
     "license": "LGPL-3.0-or-later",
     "authors": [
         {
-            "name": "Frank Hoppe",
+            "name": "Frank Binding",
             "homepage": "https://www.schachbulle.de/"
         }
     ],
