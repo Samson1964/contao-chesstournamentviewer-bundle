@@ -1,5 +1,21 @@
 # Änderungen
 
+## Version 1.16.2 (2026-09-17)
+
+* Fix: **Paarungen und Ergebnisse hatten verschiedene Spaltenbreiten.** Die
+  Spalten richteten sich nach dem Inhalt: In den Paarungen steht im Ergebnis
+  ein „–", in den Ergebnissen „2½:1½" — die Ergebnisspalte wurde breiter, die
+  Namen rückten zusammen, und mehrere Tabellen untereinander standen nicht
+  bündig. Jetzt haben Brett, Wertungszahlen und Ergebnis feste Breiten, und
+  die beiden Namensspalten teilen sich den Rest. Die Ergebnisspalte fasst von
+  vornherein „10½:9½". Das gilt auch für die Liste der Wettkämpfe.
+* Change: **Wird der Platz knapp, rücken diese Tabellen zusammen** — maßgeblich
+  ist die Breite der Tabelle selbst, nicht die des Bildschirms, damit es auch
+  in einer schmalen Seitenleiste greift. Unterhalb von etwa 350 px rollt die
+  Tabelle waagerecht, statt die Namen weiter zu stauchen.
+* Fix: Lange Namen liefen in schmalen Tabellen über die Wertungszahl daneben;
+  sie brechen jetzt um.
+
 ## Version 1.16.1 (2026-09-17)
 
 * Fix: **Inserttag fand seine Ausgabe nicht, wenn die Kennung einen Umlaut
