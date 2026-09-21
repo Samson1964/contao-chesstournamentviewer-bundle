@@ -224,7 +224,8 @@ class SpaltenTest extends TestCase
      *
      * Startnummer, Bilanz und Föderation laufen über dieselben Spalten wie
      * bei den Teilnehmern; die Zeile bekommt dafür die passenden Felder.
-     * Mannschaftspunkte stehen ohne Komma, Brettpunkte mit.
+     * Mannschaftspunkte stehen ohne Komma, Brettpunkte mit Komma nur bei
+     * halben Punkten.
      *
      * @return void
      */
@@ -241,5 +242,43 @@ class SpaltenTest extends TestCase
         $this->assertSame('2.5', Ausgabe::sortierwert($eins, 'brettpunkte'));
         $this->assertSame('ctv-mannschaft', Ausgabe::zellklasse($eins, 'mannschaft'));
         $this->assertSame('ctv-mannschaft ctv-land--ger', Ausgabe::zellklasse(['land' => 'GER'], 'mannschaft'));
+    }
+
+    /**
+     * Prüft die Vorgabespalten der Fortschrittstabelle der Mannschaften.
+     *
+     * Ohne Wertungsliste in der Datei gelten Mannschafts- und Brettpunkte;
+     * die Olympia-Wertungen erscheinen gar nicht erst. Führt die Datei die
+     * Liste der Olympiade, folgen die Spalten deren Reihenfolge — so wie
+     * chess-results die Endtabelle aufbaut.
+     *
+     * @return void
+     */
+    public function testVorgabeDerMannschaftsfortschrittstabelle(): void
+    {
+        $ohne = Spalten::fuerAusgabe('mannschaftsfortschritt', [], TurnierBauer::mannschaftsturnier());
+        $this->assertSame(['platz', 'mannschaft', 'runden', 'mannschaftspunkte', 'brettpunkte'], array_column($ohne, 'schluessel'));
+        $this->assertNotContains('osb', Spalten::verfuegbar('mannschaftsfortschritt', TurnierBauer::mannschaftsturnier()));
+
+        $olympiade = TurnierBauer::mannschaftsturnier(['mannschaftsWertungen' => [0x0D, 0x4A, 0x01, 0x4B]]);
+        $mit = Spalten::fuerAusgabe('mannschaftsfortschritt', [], $olympiade);
+        $this->assertSame(['platz', 'mannschaft', 'runden', 'mannschaftspunkte', 'osb', 'brettpunkte', 'mpsumme'], array_column($mit, 'schluessel'));
+        $this->assertContains('osb', Spalten::verfuegbar('mannschaftsrangliste', $olympiade));
+    }
+
+    /**
+     * Prüft die Zellen der Olympia-Wertungen.
+     *
+     * Ganze Zahlen stehen ohne „,0", halbe mit Komma — wie bei chess-results.
+     *
+     * @return void
+     */
+    public function testZellenDerOlympiaWertungen(): void
+    {
+        $this->assertSame('162,5', Ausgabe::zelle(['wertungen' => ['osb' => 162.5]], 'osb'));
+        $this->assertSame('58', Ausgabe::zelle(['wertungen' => ['mpsumme' => 58.0]], 'mpsumme'));
+        $this->assertSame('58', Ausgabe::sortierwert(['wertungen' => ['mpsumme' => 58.0]], 'mpsumme'));
+        $this->assertSame('0', Ausgabe::kurzzahl(0.0));
+        $this->assertSame('', Ausgabe::kurzzahl(null));
     }
 }

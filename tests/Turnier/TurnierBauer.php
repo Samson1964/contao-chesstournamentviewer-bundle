@@ -35,9 +35,12 @@ final class TurnierBauer
      * Freilos. Punkte gibt es dafür keine — was in der Datei nicht steht,
      * wird nicht erfunden.
      *
+     * @param array<string,mixed> $kopf Zusätzliche Kopfangaben, etwa die
+     *                                  Wertungsliste von Swiss-Manager
+     *
      * @return Turnier Das zusammengebaute Turnier
      */
-    public static function mannschaftsturnier(): Turnier
+    public static function mannschaftsturnier(array $kopf = []): Turnier
     {
         // Spieler 1+2 gehören zu Mannschaft 1, 3+4 zu Mannschaft 2 und so fort
         $spieler = [];
@@ -139,7 +142,7 @@ final class TurnierBauer
                 'runden' => 2,
                 'teilnehmerzahl' => 8,
                 'modusText' => 'Schweizer System',
-            ],
+            ] + $kopf,
             $spieler,
             $mannschaften,
             $paarungen,

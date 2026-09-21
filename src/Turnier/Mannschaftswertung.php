@@ -32,12 +32,11 @@ namespace Schachbulle\ContaoChesstournamentviewerBundle\Turnier;
  * beiden Sichten eines Wettkampfs zusammen, hängt die Einzelpartien an und
  * bildet die Summen für die Tabelle.
  *
- * **Freilose bleiben unbewertet.** Der Leser vergibt für eine spielfreie
- * Runde weder Brett- noch Mannschaftspunkte, weil in der Datei nichts darüber
- * steht. Manche Turnierleitungen schreiben einer freigelosten Mannschaft
- * trotzdem einen kampflosen Sieg gut; dann weicht die hier gezeigte Tabelle
- * von der gespeicherten ab, und der Leser vermerkt das als Hinweis über den
- * Tabellen. Ihn stillschweigend nachzubilden hieße raten.
+ * **Freilose werten die Leser, nicht diese Klasse.** Swiss-Manager legt die
+ * Wertung eines Freiloses in der Datei ab (bei der Olympiade 1 MP und 2 BP),
+ * und der Leser schreibt sie in den Wettkampfsatz. Der SWT-Leser findet dazu
+ * nichts und vergibt nichts; weicht die gespeicherte Tabelle deshalb ab,
+ * vermerkt er es als Hinweis. Hier wird nur summiert, was die Sätze tragen.
  */
 final class Mannschaftswertung
 {
@@ -111,18 +110,19 @@ final class Mannschaftswertung
      * Stellt die Mannschaftstabelle auf.
      *
      * Summiert wird über die Wettkampfsätze der jeweiligen Mannschaft, so wie
-     * der Leser sie liefert. Die Reihenfolge ergibt sich aus Mannschafts- und
-     * Brettpunkten; bei völligem Gleichstand entscheidet die in der Datei
-     * gespeicherte Platzierung, damit die Tabelle nicht bei jedem Aufruf
-     * springt und die Feinwertungen des Turnierprogramms nicht verlorengehen.
+     * der Leser sie liefert. Die Reihenfolge ergibt sich aus den Wertungen
+     * des Turniers (siehe Mannschaftsfeinwertung); bei völligem Gleichstand
+     * entscheidet die in der Datei gespeicherte Platzierung, damit die
+     * Tabelle nicht bei jedem Aufruf springt.
      *
      * @param Turnier $turnier Das eingelesene Turnier
      *
      * @return array<int,array<string,mixed>> Die Mannschaften nach Platz
      *         sortiert, mit `platz`, `nummer`, `name`, `kaempfe`, `siege`,
      *         `unentschieden`, `niederlagen`, `freilose`,
-     *         `mannschaftspunkte`, `brettpunkte`, `schnitt` und dem
-     *         ursprünglichen Datensatz unter `datensatz`
+     *         `mannschaftspunkte`, `brettpunkte`, `schnitt`, den berechneten
+     *         Wertungen unter `wertungen` und dem ursprünglichen Datensatz
+     *         unter `datensatz`
      */
     public static function tabelle(Turnier $turnier): array
     {
@@ -167,6 +167,12 @@ final class Mannschaftswertung
                         ++$zeile['freilose'];
                     }
 
+                    // Die Matchpunkte eines Freiloses, sofern das Format es
+                    // wertet — Swiss-Manager nach der Turniereinstellung,
+                    // der SWT-Leser gar nicht. Die Brettpunkte stehen oben
+                    // schon in der Summe.
+                    $zeile['mannschaftspunkte'] += (float) ($satz['mannschaftspunkte'] ?? 0.0);
+
                     continue;
                 }
 
@@ -193,11 +199,43 @@ final class Mannschaftswertung
             $zeilen[] = $zeile;
         }
 
-        usort(
-            $zeilen,
-            static fn (array $a, array $b): int => [$b['mannschaftspunkte'], $b['brettpunkte'], -(int) ($a['datensatz']['platz'] ?? 0)]
-                <=> [$a['mannschaftspunkte'], $a['brettpunkte'], -(int) ($b['datensatz']['platz'] ?? 0)]
-        );
+        // Geordnet wird nach den Wertungen des Turniers in ihrer Reihenfolge —
+        // bei der Olympiade Matchpunkte, Olympiade-Sonneborn-Berger,
+        // Brettpunkte, Summe der Matchpunkte der Gegner. Ohne Angabe in der
+        // Datei gelten Matchpunkte und Brettpunkte. Bei völligem Gleichstand
+        // entscheidet die gespeicherte Platzierung, damit die Tabelle nicht
+        // bei jedem Aufruf springt und die Feinwertungen des Turnierprogramms
+        // nicht verlorengehen; zuletzt die Nummer.
+        $kriterien = Mannschaftsfeinwertung::kriterien($turnier);
+        $werte = Mannschaftsfeinwertung::werte($turnier);
+
+        // Nennt die Liste nur Wertungen, die sich nicht berechnen lassen,
+        // bleibt von ihr womöglich allein die Matchpunkt-Regel übrig. Dann
+        // entscheiden wie vor Fassung 1.17.0 die Brettpunkte — sonst stünden
+        // Punktgleiche nach Startnummer.
+        if (!\in_array('brettpunkte', $kriterien, true)) {
+            $kriterien[] = 'brettpunkte';
+        }
+
+        foreach ($zeilen as $index => $zeile) {
+            $zeilen[$index]['wertungen'] = $werte[$zeile['nummer']] ?? [];
+        }
+
+        $schluessel = static function (array $zeile) use ($kriterien): array {
+            $folge = [];
+
+            foreach ($kriterien as $kriterium) {
+                $folge[] = -(float) ($zeile['wertungen'][$kriterium] ?? 0.0);
+            }
+
+            $gespeichert = (int) ($zeile['datensatz']['platz'] ?? 0);
+            $folge[] = $gespeichert > 0 ? $gespeichert : PHP_INT_MAX;
+            $folge[] = $zeile['nummer'];
+
+            return $folge;
+        };
+
+        usort($zeilen, static fn (array $a, array $b): int => $schluessel($a) <=> $schluessel($b));
 
         foreach ($zeilen as $index => $zeile) {
             $zeilen[$index]['platz'] = $index + 1;
@@ -501,26 +539,28 @@ final class Mannschaftswertung
     /**
      * Erzeugt die Fortschrittstabelle der Mannschaften.
      *
-     * Je Mannschaft eine Zeile, je Runde eine Zelle mit den eigenen
-     * Brettpunkten, dem Gegner und dem Stand der Mannschaftspunkte nach
-     * dieser Runde. Die Reihenfolge ist die der Mannschaftstabelle; so lässt
-     * sich ablesen, wie eine Mannschaft auf ihren Platz gekommen ist.
+     * Je Mannschaft eine Zeile in der Reihenfolge der Mannschaftstabelle, je
+     * Runde eine Zelle mit den eigenen Brettpunkten, der Farbe und dem
+     * Gegner. Aufgebaut wie die Endtabelle bei chess-results:
      *
-     * Als Gegnernummer dient die Startnummer der gegnerischen Mannschaft,
-     * wie in der Fortschrittstabelle der Spieler. Der Name geht als Titel mit.
+     * * **Der Gegner steht mit seinem Platz**, nicht mit seiner Startnummer —
+     *   so lässt sich an der Zelle ablesen, wie stark er am Ende war. Bis
+     *   Fassung 1.17.0 stand hier die Startnummer.
+     * * **Die Farbe** ist die am ersten Brett: Weiß heißt, die Mannschaft
+     *   führte dort Weiß.
+     * * Die Wertungen des Turniers stehen unter `wertungen`, in der Tabelle
+     *   bereits berechnet.
      *
-     * Ein Wettkampf ohne Mannschaftspunkte ist ausgelost, aber noch nicht
-     * gespielt: Die Zelle nennt den Gegner, lässt das Ergebnis aber offen und
-     * übernimmt den bisherigen Stand. Freilose bleiben wie in der Tabelle
-     * unbewertet.
+     * Ein ausgeloster, aber noch nicht gespielter Kampf nennt Gegner und
+     * Farbe ohne Punkte. Ein Freilos nennt die Punkte, die es gebracht hat,
+     * und keinen Gegner; „nicht ausgelost" nichts.
      *
      * @param Turnier $turnier Das eingelesene Turnier
      *
-     * @return array<int,array<string,mixed>> Je Mannschaft `platz`, `nummer`,
-     *         `startnummer`, `name`, `land`, `mannschaftspunkte`,
-     *         `brettpunkte` und `runden` — nach Rundennummer indiziert, je
-     *         Zelle `gegner`, `gegnerName`, `brettpunkte`,
-     *         `brettpunkteGegner`, `gespielt`, `spielfrei`, `leer`, `stand`
+     * @return array<int,array<string,mixed>> Die Zeilen der Mannschaftstabelle
+     *         mit `runden` — nach Rundennummer indiziert, je Zelle `gegner`
+     *         (Platz), `gegnerName`, `farbe` (`w`, `s` oder leer),
+     *         `brettpunkte`, `gespielt`, `spielfrei`, `nichtAusgelost`, `leer`
      */
     public static function fortschritt(Turnier $turnier): array
     {
@@ -535,59 +575,78 @@ final class Mannschaftswertung
         $runden = array_keys($turnier->getRunden());
         sort($runden);
 
+        $platz = [];
+
+        foreach ($tabelle as $zeile) {
+            $platz[(int) $zeile['nummer']] = (int) $zeile['platz'];
+        }
+
+        // Die Farbe am ersten Brett, je Runde und Mannschaft. Die Heimmannschaft
+        // eines Wettkampfs ist die mit Weiß am niedrigsten Brett.
+        $farbe = [];
+
+        foreach (self::kaempfe($turnier) as $runde => $kaempfe) {
+            foreach ($kaempfe as $kampf) {
+                if ($kampf['spielfrei'] || [] === $kampf['partien']) {
+                    continue;
+                }
+
+                $farbe[$runde][$kampf['heim']] = $kampf['partien'][0]['heimFarbe'];
+                $farbe[$runde][$kampf['gast']] = $kampf['partien'][0]['gastFarbe'];
+            }
+        }
+
         $zeilen = [];
 
         foreach ($tabelle as $zeile) {
             $nummer = (int) $zeile['nummer'];
-            $stand = 0.0;
             $zellen = [];
 
             foreach ($runden as $runde) {
                 $satz = $alle[$nummer][$runde] ?? null;
                 $gegner = (int) ($satz['gegner'] ?? 0);
+                $zelle = [
+                    'gegner' => null,
+                    'gegnerName' => '',
+                    'farbe' => '',
+                    'brettpunkte' => null,
+                    'gespielt' => false,
+                    'spielfrei' => false,
+                    'nichtAusgelost' => false,
+                    'leer' => null === $satz,
+                ];
 
                 if (null === $satz) {
-                    $zellen[$runde] = ['gegner' => null, 'gegnerName' => '', 'brettpunkte' => null, 'brettpunkteGegner' => null, 'gespielt' => false, 'spielfrei' => false, 'leer' => true, 'stand' => $stand];
+                    $zellen[$runde] = $zelle;
 
                     continue;
                 }
 
-                // Gegner 0 heißt spielfrei; ebenso der Platzhalter, den manche
-                // Programme als Mannschaft mitführen.
-                if (0 === $gegner || ($mannschaften[$gegner]['spielfrei'] ?? false) || !isset($mannschaften[$gegner])) {
-                    $zellen[$runde] = ['gegner' => null, 'gegnerName' => '', 'brettpunkte' => null, 'brettpunkteGegner' => null, 'gespielt' => false, 'spielfrei' => true, 'nichtAusgelost' => (bool) ($satz['nichtAusgelost'] ?? false), 'leer' => false, 'stand' => $stand];
+                // Gegner 0 heißt spielfrei oder nicht ausgelost; ebenso der
+                // Platzhalter, den manche Programme als Mannschaft mitführen.
+                if (0 === $gegner || !isset($mannschaften[$gegner]) || ($mannschaften[$gegner]['spielfrei'] ?? false)) {
+                    $zelle['spielfrei'] = true;
+                    $zelle['nichtAusgelost'] = (bool) ($satz['nichtAusgelost'] ?? false);
+                    $zelle['gespielt'] = null !== ($satz['mannschaftspunkte'] ?? null) && !$zelle['nichtAusgelost'];
+                    $zelle['brettpunkte'] = $zelle['gespielt'] ? (float) ($satz['brettpunkte'] ?? 0.0) : null;
+                    $zellen[$runde] = $zelle;
 
                     continue;
                 }
 
-                $gespielt = null !== ($satz['mannschaftspunkte'] ?? null);
-
-                if ($gespielt) {
-                    $stand += (float) $satz['mannschaftspunkte'];
-                }
-
-                $zellen[$runde] = [
-                    'gegner' => (int) ($mannschaften[$gegner]['startnummer'] ?? 0) ?: $gegner,
-                    'gegnerName' => (string) ($mannschaften[$gegner]['name'] ?? ''),
-                    'brettpunkte' => $gespielt ? (float) ($satz['brettpunkte'] ?? 0.0) : null,
-                    'brettpunkteGegner' => $gespielt ? (float) ($satz['brettpunkteGegner'] ?? 0.0) : null,
-                    'gespielt' => $gespielt,
-                    'spielfrei' => false,
-                    'leer' => false,
-                    'stand' => $stand,
-                ];
+                $zelle['gegner'] = $platz[$gegner] ?? null;
+                $zelle['gegnerName'] = (string) ($mannschaften[$gegner]['name'] ?? '');
+                $zelle['farbe'] = (string) ($farbe[$runde][$nummer] ?? '');
+                $zelle['gespielt'] = null !== ($satz['mannschaftspunkte'] ?? null);
+                $zelle['brettpunkte'] = $zelle['gespielt'] ? (float) ($satz['brettpunkte'] ?? 0.0) : null;
+                $zellen[$runde] = $zelle;
             }
 
-            $zeilen[] = [
-                'platz' => (int) $zeile['platz'],
-                'nummer' => $nummer,
+            $zeilen[] = array_merge($zeile, [
                 'startnummer' => (int) ($mannschaften[$nummer]['startnummer'] ?? 0) ?: $nummer,
-                'name' => (string) $zeile['name'],
                 'land' => (string) ($mannschaften[$nummer]['land'] ?? ''),
-                'mannschaftspunkte' => (float) $zeile['mannschaftspunkte'],
-                'brettpunkte' => (float) $zeile['brettpunkte'],
                 'runden' => $zellen,
-            ];
+            ]);
         }
 
         return $zeilen;

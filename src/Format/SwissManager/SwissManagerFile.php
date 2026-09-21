@@ -383,10 +383,35 @@ class SwissManagerFile
         }
 
         $runden = 0;
+        $wertungen = [];
+        $freilosMannschaftspunkte = 0.0;
+        $freilosBrettpunkte = 0.0;
         $bereich = $this->bereich(0x95);
 
         if (null !== $bereich) {
             $runden = $this->wort($bereich[0]);
+
+            /*
+             * Die Wertungen des Turniers: an +27 ihre Zahl, ab +29 je ein
+             * 16-Bit-Schlüssel. Bei Mannschaftsturnieren steht an erster
+             * Stelle die Matchpunkt-Regel — `0x0D` für 2/1/0, `0x28` für
+             * 3/1/0 —, danach die Feinwertungen. Siehe Mannschaftsfeinwertung.
+             */
+            $anzahl = \ord($this->inhalt[$bereich[0] + 27] ?? "\0");
+
+            for ($i = 0; $i < min($anzahl, 12); ++$i) {
+                $wertungen[] = $this->wort($bereich[0] + 29 + 2 * $i);
+            }
+
+            /*
+             * Die Wertung eines Freiloses: an +67 die Matchpunkte, an +69 die
+             * Brettpunkte in halben Punkten. Belegt an zwei Turnieren und ihren
+             * Endtabellen bei chess-results: Die Olympiade 2026 (1 und 4, also
+             * 1 MP und 2 BP) und der German Cup der Mädchen (3 und 0 bei
+             * Matchpunkten nach 3/1/0).
+             */
+            $freilosMannschaftspunkte = (float) \ord($this->inhalt[$bereich[0] + 67] ?? "\0");
+            $freilosBrettpunkte = \ord($this->inhalt[$bereich[0] + 69] ?? "\0") / 2;
         }
 
         // Der Ort steht an zwei Stellen: als eigenes Feld und häufig auch im
@@ -414,6 +439,13 @@ class SwissManagerFile
             'runden' => $runden,
             'partienProRunde' => 1,
             'mannschaftsturnier' => isset($this->abschnitte[0xB5]),
+            'mannschaftsWertungen' => $wertungen,
+            // Ein Sieg bringt zwei Matchpunkte, außer die Matchpunkt-Regel
+            // lautet 3/1/0. Das Remis bringt in beiden Regeln einen.
+            'siegMannschaftspunkte' => \in_array(0x28, $wertungen, true) ? 3.0 : 2.0,
+            'remisMannschaftspunkte' => 1.0,
+            'freilosMannschaftspunkte' => $freilosMannschaftspunkte,
+            'freilosBrettpunkte' => $freilosBrettpunkte,
         ];
     }
 

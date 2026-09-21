@@ -386,8 +386,12 @@ final class Ausgabe
             'freilose' => self::zahl($zeile['freilose'] ?? 0),
             // Mannschaftspunkte sind ganze Zahlen; ein Komma wäre dort Lärm.
             'mannschaftspunkte' => self::punkte($zeile['mannschaftspunkte'] ?? 0),
-            'brettpunkte' => self::kommazahl($zeile['brettpunkte'] ?? 0),
+            // Brettpunkte wie bei chess-results: „21" und „17,5", kein „21,0".
+            'brettpunkte' => self::kurzzahl($zeile['brettpunkte'] ?? 0),
             'schnitt' => self::zahl($zeile['schnitt'] ?? 0),
+            // Die Olympia-Wertungen stehen berechnet unter `wertungen`; wie bei
+            // chess-results ohne „,0" hinter ganzen Zahlen.
+            'osb', 'mpsumme' => self::kurzzahl($zeile['wertungen'][$spalte] ?? null),
             default => '',
         };
     }
@@ -437,6 +441,27 @@ final class Ausgabe
         }
 
         return (string) preg_replace('/(,\d)0$/', '$1', number_format((float) $wert, 2, ',', ''));
+    }
+
+    /**
+     * Schreibt eine Zahl mit Komma, aber ohne überflüssige Nachkommastellen.
+     *
+     * „162,5" bleibt „162,5", aus „58,0" wird „58" — so schreibt
+     * chess-results die Mannschaftswertungen. Anders als `kommazahl()` gibt
+     * es kein festes „,0": Die Olympia-Sonneborn-Berger-Wertung läuft in die
+     * Hunderte, und ein angehängtes „,0" machte die Spalte nur breiter.
+     *
+     * @param float|int|string|null $wert Die Zahl
+     *
+     * @return string Die Zahl als Text, oder leer wenn keine vorliegt
+     */
+    public static function kurzzahl(mixed $wert): string
+    {
+        if (null === $wert || '' === $wert) {
+            return '';
+        }
+
+        return rtrim(rtrim(number_format((float) $wert, 2, ',', ''), '0'), ',');
     }
 
     /**
@@ -511,6 +536,7 @@ final class Ausgabe
             'geburtsjahr' => self::geburtsjahr($zeile),
             'name', 'mannschaft' => 'mannschaft' === $spalte ? ($zeile['name'] ?? null) : self::name($zeile),
             'bilanz' => ($zeile['siege'] ?? 0) + ($zeile['remis'] ?? 0) + ($zeile['niederlagen'] ?? 0),
+            'osb', 'mpsumme' => $zeile['wertungen'][$spalte] ?? null,
             default => $zeile[$spalte] ?? null,
         };
     }
@@ -535,6 +561,7 @@ final class Ausgabe
             // In der Mannschaftszelle steht vor dem Namen eine Flagge; geordnet
             // wird nach dem Namen allein.
             'mannschaft' => (string) ($zeile['name'] ?? ''),
+            'osb', 'mpsumme' => (string) (float) ($zeile['wertungen'][$spalte] ?? 0),
             'bilanz' => (string) (int) ($zeile['siege'] ?? 0),
             // In der Zelle steht eine Flagge; nach ihr zu ordnen ergäbe die
             // Reihenfolge der Unicode-Zeichen. Geordnet wird nach dem Code.

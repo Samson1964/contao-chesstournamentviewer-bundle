@@ -170,6 +170,8 @@ Werte selbst stehen nirgends, Swiss-Manager rechnet sie bei jeder Anzeige neu.
 | +0 | 16 Bit | Rundenzahl |
 | +27 | 16 Bit | Zahl der Feinwertungen |
 | +29, +31, … | je 16 Bit | die Schlüssel, in der Reihenfolge der Wertung |
+| +67 | 8 Bit | Mannschaftspunkte für ein Freilos |
+| +69 | 8 Bit | Brettpunkte für ein Freilos, in halben Punkten |
 
 Belegt an vier Turnieren, deren Rangkriterien auf chess-results.com stehen:
 
@@ -204,11 +206,35 @@ Verknüpfung zur zugehörigen Seite; unter der Rangliste steht dort die Legende
 mit den Rangkriterien im Klartext. Damit lässt sich jede Vermutung über die
 fehlenden Merkmale sofort an achtundsiebzig Turnieren prüfen.
 
+### Wertungen der Mannschaften (`95`)
+
+Die Freilosgutschrift ist an zwei Turnieren belegt: Die Olympiade für
+Menschen mit Behinderung 2026 (tnr1470206) führt 1 und 4 (1 MP, 2 BP), der
+Deutschland-Cup der Mädchen 3 und 0 (3 MP, 0 BP) — beides deckt sich mit den
+Endtabellen bei chess-results.
+
+Bei Mannschaftsturnieren stehen in derselben Liste andere Schlüssel. **Diese werden gerechnet**
+(`Turnier\Mannschaftsfeinwertung`), weil ihre Rechenweise an der Endtabelle
+der Olympiade für Menschen mit Behinderung 2026 für alle 41 Mannschaften und
+alle vier Wertungen nachgeprüft ist:
+
+| Schlüssel | Bedeutung |
+| --- | --- |
+| `0x0D` | Mannschaftspunkte 2/1/0 |
+| `0x28` | Mannschaftspunkte 3/1/0 |
+| `0x01` | Brettpunkte |
+| `0x4A` | Olympia-Sonneborn-Berger (Chennai): Summe aus Mannschaftspunkten des Gegners mal eigenen Brettpunkten, der Gegner mit den wenigsten Mannschaftspunkten wird gestrichen; ein Freilos zählt als Gegner mit 0 MP und fällt zuerst |
+| `0x4B` | Summe der Mannschaftspunkte der Gegner (Chennai), mit derselben Streichung |
+
+Gesehen, aber nicht entschlüsselt: `0x30` und `0x4E` (Deutsche
+Frauen-Mannschaftsmeisterschaft), `0x4D`, `0x52` und `0x53`
+(Deutschland-Cup). Unbekannte Schlüssel fallen aus der Rangfolge heraus;
+die Tabelle ordnet dann hilfsweise nach Brettpunkten und dem in der Datei
+gespeicherten Platz.
+
 ## Was noch offen ist
-* **Mannschaftspunkte.** Die Regel steht nicht in der Datei; angesetzt sind
-  zwei für den Sieg und einer für das Unentschieden. Für die
-  Frauen-Mannschaftsmeisterschaft 2025 trifft das die Tabelle von
-  chess-results exakt.
+* **Mannschaftspunkte.** Die Regel steht als Wertungsschlüssel in der Datei
+  (`0x0D` für 2/1/0, `0x28` für 3/1/0); ohne ihn gilt 2/1/0.
 * **Ungeklärte Zahlenfelder** in der Teilnehmerkarte, unter anderem bei +6,
   +12, +16 und +50. Für die Ausgabe werden sie nicht gebraucht.
 

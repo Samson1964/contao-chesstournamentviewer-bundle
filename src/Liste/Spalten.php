@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Schachbulle\ContaoChesstournamentviewerBundle\Liste;
 
+use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftsfeinwertung;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Mannschaftswertung;
 use Schachbulle\ContaoChesstournamentviewerBundle\Turnier\Turnier;
 
@@ -36,7 +37,7 @@ final class Spalten
      * Paarungsliste steht in jeder Spalte etwas, ohne das die Zeile nicht zu
      * lesen wäre.
      */
-    public const LISTEN = ['teilnehmer', 'rangliste', 'mannschaftsrangliste'];
+    public const LISTEN = ['teilnehmer', 'rangliste', 'mannschaftsrangliste', 'mannschaftsfortschritt'];
 
     /**
      * Alle bekannten Spalten mit ihrer Darstellung.
@@ -74,6 +75,10 @@ final class Spalten
         'mannschaftspunkte' => ['label' => 'mannschaftspunkteVoll', 'kurz' => 'mannschaftspunkte', 'klasse' => 'ctv-zahl ctv-schmal ctv-punkte', 'zahl' => true],
         'brettpunkte' => ['label' => 'brettpunkteVoll', 'kurz' => 'brettpunkte', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
         'schnitt' => ['label' => 'schnitt', 'kurz' => '', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
+        // Wertungen der Mannschaften und der Block der Rundenzellen
+        'osb' => ['label' => 'osbVoll', 'kurz' => 'osb', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
+        'mpsumme' => ['label' => 'mpsummeVoll', 'kurz' => 'mpsumme', 'klasse' => 'ctv-zahl ctv-schmal', 'zahl' => true],
+        'runden' => ['label' => 'runden', 'kurz' => '', 'klasse' => '', 'zahl' => false],
     ];
 
     /**
@@ -86,7 +91,8 @@ final class Spalten
     private const ANGEBOT = [
         'teilnehmer' => ['nr', 'brett', 'name', 'titel', 'elo', 'dwz', 'twz', 'verein', 'land', 'gruppe', 'geburtsjahr', 'fideId'],
         'rangliste' => ['platz', 'nr', 'titel', 'name', 'twz', 'elo', 'dwz', 'verein', 'land', 'gruppe', 'geburtsjahr', 'fideId', 'bilanz', 'partien', 'punkte', 'feinwertung1', 'feinwertung2'],
-        'mannschaftsrangliste' => ['platz', 'nr', 'mannschaft', 'land', 'kaempfe', 'bilanz', 'freilose', 'mannschaftspunkte', 'brettpunkte', 'schnitt'],
+        'mannschaftsrangliste' => ['platz', 'nr', 'mannschaft', 'land', 'kaempfe', 'bilanz', 'freilose', 'mannschaftspunkte', 'brettpunkte', 'osb', 'mpsumme', 'schnitt'],
+        'mannschaftsfortschritt' => ['platz', 'nr', 'mannschaft', 'land', 'runden', 'mannschaftspunkte', 'osb', 'brettpunkte', 'mpsumme'],
     ];
 
     /**
@@ -132,7 +138,7 @@ final class Spalten
     public static function vorauswahl(string $liste, Turnier $turnier): array
     {
         return array_values(array_intersect(
-            self::VORGABE[$liste] ?? [],
+            self::vorgabe($liste, $turnier),
             self::verfuegbar($liste, $turnier)
         ));
     }
@@ -160,6 +166,7 @@ final class Spalten
         $zeilen = match ($liste) {
             'rangliste' => $turnier->getRangliste(),
             'mannschaftsrangliste' => self::mannschaftszeilen($turnier),
+            'mannschaftsfortschritt' => self::fortschrittszeilen($turnier),
             default => $turnier->getTeilnehmer(),
         };
 
@@ -194,7 +201,7 @@ final class Spalten
         ));
 
         if ([] === $schluessel) {
-            $schluessel = array_values(array_intersect(self::VORGABE[$liste] ?? [], $verfuegbar));
+            $schluessel = array_values(array_intersect(self::vorgabe($liste, $turnier), $verfuegbar));
         }
 
         $schluessel = array_unique($schluessel);
@@ -303,6 +310,73 @@ final class Spalten
     }
 
     /**
+     * Liefert die Zeilen der Fortschrittstabelle der Mannschaften in der Form
+     * der Spaltenzeilen.
+     *
+     * Wie bei der Mannschaftstabelle bekommen Startnummer und Föderation die
+     * Feldnamen, die `Ausgabe::zelle()` kennt; die Rundenzellen bleiben unter
+     * `runden` stehen und werden von der Vorlage selbst ausgegeben.
+     *
+     * @param Turnier $turnier Das eingelesene Turnier
+     *
+     * @return array<int,array<string,mixed>> Die Zeilen in Tabellenreihenfolge,
+     *         leer bei einem Einzelturnier
+     */
+    public static function fortschrittszeilen(Turnier $turnier): array
+    {
+        $zeilen = [];
+
+        foreach (Mannschaftswertung::fortschritt($turnier) as $zeile) {
+            $zeilen[] = array_merge($zeile, [
+                'tnr' => (int) $zeile['startnummer'],
+                'remis' => (int) $zeile['unentschieden'],
+            ]);
+        }
+
+        return $zeilen;
+    }
+
+    /**
+     * Nennt die Vorgabespalten einer Liste für dieses Turnier.
+     *
+     * Für die meisten Listen ist die Vorgabe fest. Die Fortschrittstabelle
+     * der Mannschaften folgt dagegen chess-results: Platz, Mannschaft, die
+     * Runden und dahinter die Wertungen **in der Reihenfolge, in der das
+     * Turnier nach ihnen ordnet** — bei der Olympiade also
+     * Mannschaftspunkte, Olympia-Sonneborn-Berger, Brettpunkte und
+     * Mannschaftspunktsumme. Diese Folge steht in der Turnierdatei und ist
+     * darum nicht als Konstante zu haben.
+     *
+     * @param string  $liste   Schlüssel der Liste
+     * @param Turnier $turnier Das eingelesene Turnier
+     *
+     * @return string[] Die Spaltenschlüssel der Vorgabe, leer bei einer
+     *                  Liste ohne Spaltenauswahl
+     */
+    private static function vorgabe(string $liste, Turnier $turnier): array
+    {
+        if ('mannschaftsfortschritt' !== $liste) {
+            return self::VORGABE[$liste] ?? [];
+        }
+
+        $spalten = ['platz', 'mannschaft', 'runden'];
+
+        foreach (Mannschaftsfeinwertung::kriterien($turnier) as $kriterium) {
+            if (isset(self::SPALTEN[$kriterium])) {
+                $spalten[] = $kriterium;
+            }
+        }
+
+        // Ohne Brettpunkte ist eine Mannschaftstabelle nicht zu lesen, auch
+        // wenn das Turnier nicht nach ihnen ordnet.
+        if (!\in_array('brettpunkte', $spalten, true)) {
+            $spalten[] = 'brettpunkte';
+        }
+
+        return $spalten;
+    }
+
+    /**
      * Prüft, ob eine Spalte in diesem Turnier überhaupt Werte hat.
      *
      * Textspalten gelten als belegt, sobald irgendwo etwas steht;
@@ -317,8 +391,15 @@ final class Spalten
      */
     private static function belegt(string $spalte, array $zeilen, Turnier $turnier): bool
     {
-        if (\in_array($spalte, ['nr', 'platz', 'name', 'punkte', 'bilanz', 'mannschaft', 'kaempfe', 'mannschaftspunkte', 'brettpunkte'], true)) {
+        if (\in_array($spalte, ['nr', 'platz', 'name', 'punkte', 'bilanz', 'mannschaft', 'kaempfe', 'mannschaftspunkte', 'brettpunkte', 'runden'], true)) {
             return true;
+        }
+
+        // Die Olympiade-Wertungen gibt es nur, wo das Turnier sie führt —
+        // gerechnet werden könnten sie immer, aber eine Wertung, nach der
+        // das Turnier nicht ordnet, führte in die Irre.
+        if (\in_array($spalte, ['osb', 'mpsumme'], true)) {
+            return \in_array($spalte, Mannschaftsfeinwertung::kriterien($turnier), true);
         }
 
         // Brett und Mannschaft gibt es nur, wo Mannschaften geführt werden.

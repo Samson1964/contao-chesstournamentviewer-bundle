@@ -611,8 +611,10 @@
     font-size: .85em;
 }
 
-/* Ohne den Punktestand braucht eine Zelle nur noch eine Zeile. */
-.ctv-tabelle--fortschritt-schmal .ctv-fortschritt__zelle {
+/* Ohne den Punktestand braucht eine Zelle nur noch eine Zeile; die
+   kompakten Zellen der Mannschaften („2½w6") dürfen nicht umbrechen. */
+.ctv-tabelle--fortschritt-schmal .ctv-fortschritt__zelle,
+.ctv .ctv-tabelle--mannschaftsfortschritt .ctv-fortschritt__zelle {
     padding-inline: .35rem;
     white-space: nowrap;
 }

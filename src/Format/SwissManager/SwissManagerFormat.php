@@ -127,9 +127,9 @@ class SwissManagerFormat implements TurnierFormatInterface
      * Die Datei nennt je Runde nur, wer gegen wen antrat. Brett- und
      * Mannschaftspunkte stehen nicht darin und werden aus den Einzelpartien
      * gebildet: Jede Partie zählt für die Mannschaft, der ihre Spieler
-     * angehören. Die Mannschaftspunkte folgen der verbreiteten Regel zwei für
-     * den Sieg, einen für das Unentschieden — welche Regel das Turnier
-     * wirklich führte, steht in der Datei nicht.
+     * angehören. Die Matchpunkt-Regel — 2/1/0 oder 3/1/0 — und die Wertung
+     * eines Freiloses stehen dagegen in den Einstellungen der Datei und
+     * kommen von dort (siehe SwissManagerFile::leseKopf()).
      *
      * Jeder Wettkampf erscheint zweimal, einmal aus Sicht jeder Mannschaft;
      * so erwartet es das Modell.
@@ -144,6 +144,8 @@ class SwissManagerFormat implements TurnierFormatInterface
     private function wettkaempfe(SwissManagerFile $datei, array $spieler, array $paarungen, array $mannschaften): array
     {
         $wettkaempfe = [];
+        $kopf = $datei->getTurnier();
+        $sieg = (float) ($kopf['siegMannschaftspunkte'] ?? 2.0);
 
         foreach ($datei->getWettkaempfe() as $runde => $liste) {
             foreach ($liste as $kampf) {
@@ -151,12 +153,21 @@ class SwissManagerFormat implements TurnierFormatInterface
                 $gast = (int) $kampf['gast'];
 
                 // Ohne Gegenseite ist die Mannschaft in dieser Runde
-                // spielfrei. Punkte gibt es dafür keine — siehe den
-                // Klassenkommentar der Mannschaftswertung: Was die Datei
-                // nicht sagt, wird nicht geraten.
+                // spielfrei oder gar nicht ausgelost. Ein Freilos wird so
+                // gewertet, wie es die Turniereinstellung vorgibt — bei der
+                // Olympiade 1 MP und 2 BP, beim German Cup 3 MP und 0 BP.
+                // „Nicht ausgelost" bringt nichts: Die Mannschaft ist nicht
+                // angetreten, und chess-results führt dafür keine Punkte.
                 if (0 === $gast) {
+                    $nichtAusgelost = (bool) ($kampf['nichtAusgelost'] ?? false);
                     $satz = $this->wettkampfsatz($mannschaften, 0, 0.0, 0.0, 0, false);
-                    $satz['nichtAusgelost'] = (bool) ($kampf['nichtAusgelost'] ?? false);
+                    $satz['nichtAusgelost'] = $nichtAusgelost;
+
+                    if (!$nichtAusgelost) {
+                        $satz['brettpunkte'] = (float) ($kopf['freilosBrettpunkte'] ?? 0.0);
+                        $satz['mannschaftspunkte'] = (float) ($kopf['freilosMannschaftspunkte'] ?? 0.0);
+                    }
+
                     $wettkaempfe[$heim][$runde] = $satz;
 
                     continue;
@@ -171,8 +182,8 @@ class SwissManagerFormat implements TurnierFormatInterface
                 // statt 8 Mannschaftspunkten da, weil Runde 5 schon ausgelost war.
                 $gespielt = $punkte[2] > 0;
 
-                $wettkaempfe[$heim][$runde] = $this->wettkampfsatz($mannschaften, $gast, $punkte[0], $punkte[1], (int) $kampf['tisch'], $gespielt);
-                $wettkaempfe[$gast][$runde] = $this->wettkampfsatz($mannschaften, $heim, $punkte[1], $punkte[0], (int) $kampf['tisch'], $gespielt);
+                $wettkaempfe[$heim][$runde] = $this->wettkampfsatz($mannschaften, $gast, $punkte[0], $punkte[1], (int) $kampf['tisch'], $gespielt, $sieg);
+                $wettkaempfe[$gast][$runde] = $this->wettkampfsatz($mannschaften, $heim, $punkte[1], $punkte[0], (int) $kampf['tisch'], $gespielt, $sieg);
             }
         }
 
@@ -257,10 +268,12 @@ class SwissManagerFormat implements TurnierFormatInterface
      * @param float                          $fremd        Brettpunkte der Gegenseite
      * @param int                            $tisch        Tischnummer
      * @param bool                           $gespielt     Ob mindestens ein Brett gewertet ist
+     * @param float                          $sieg         Matchpunkte für einen Sieg — 2 nach der
+     *                                                     Regel 2/1/0, 3 nach 3/1/0
      *
      * @return array<string,mixed> Der Wettkampfsatz
      */
-    private function wettkampfsatz(array $mannschaften, int $gegner, float $eigen, float $fremd, int $tisch, bool $gespielt = true): array
+    private function wettkampfsatz(array $mannschaften, int $gegner, float $eigen, float $fremd, int $tisch, bool $gespielt = true, float $sieg = 2.0): array
     {
         return [
             'gegner' => $gegner,
@@ -269,7 +282,7 @@ class SwissManagerFormat implements TurnierFormatInterface
             'brettpunkteGegner' => $fremd,
             'mannschaftspunkte' => match (true) {
                 !$gespielt => null,
-                $eigen > $fremd => 2.0,
+                $eigen > $fremd => $sieg,
                 $eigen < $fremd => 0.0,
                 default => 1.0,
             },

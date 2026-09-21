@@ -176,13 +176,22 @@ class MannschaftsausgabeTest extends TestCase
         $zeilen = Mannschaftswertung::fortschritt(TurnierBauer::mannschaftsturnier());
         $nachNummer = array_column($zeilen, null, 'nummer');
 
+        // Der Gegner steht mit seinem Platz, nicht mit seiner Startnummer —
+        // so wie in der Endtabelle bei chess-results.
+        $platz = array_column($zeilen, 'platz', 'nummer');
+
         $eins = $nachNummer[1]['runden'];
-        $this->assertSame(2, $eins[1]['gegner']);
+        $this->assertSame($platz[2], $eins[1]['gegner']);
+        $this->assertSame('Mannschaft 2', $eins[1]['gegnerName']);
+        $this->assertSame('w', $eins[1]['farbe']);
         $this->assertSame(2.0, $eins[1]['brettpunkte']);
-        $this->assertSame(2.0, $eins[1]['stand']);
-        $this->assertSame(3, $eins[2]['gegner']);
+        $this->assertSame($platz[3], $eins[2]['gegner']);
+        $this->assertSame('w', $eins[2]['farbe']);
         $this->assertSame(0.5, $eins[2]['brettpunkte']);
-        $this->assertSame(2.0, $eins[2]['stand']);
+        $this->assertArrayNotHasKey('stand', $eins[1]);
+
+        // Die Gegenseite hatte am ersten Brett Schwarz.
+        $this->assertSame('s', $nachNummer[2]['runden'][1]['farbe']);
 
         $this->assertTrue($nachNummer[2]['runden'][2]['spielfrei']);
         $this->assertSame(array_column(Mannschaftswertung::tabelle(TurnierBauer::mannschaftsturnier()), 'nummer'), array_column($zeilen, 'nummer'));

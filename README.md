@@ -56,7 +56,7 @@ sie gewählt und gespeichert ist.
 
 | Liste | Einstellungen |
 | --- | --- |
-| Teilnehmer, Rangliste, Mannschaftstabelle | **Spalten** — siehe [Spalten und Sortierung](#spalten-und-sortierung) |
+| Teilnehmer, Rangliste, Mannschaftstabelle, Fortschrittstabelle der Mannschaften | **Spalten** — siehe [Spalten und Sortierung](#spalten-und-sortierung) |
 | Rangliste, Kreuztabelle, Fortschritt, Mannschaftstabelle, Fortschrittstabelle der Mannschaften, Kreuztabelle der Mannschaften | **Stand nach Runde** — siehe [Zeitpunkt und Runden](#zeitpunkt-und-runden) |
 | Paarungen, Ergebnisse, Wettkämpfe | **Angezeigte Runden**; bei Mannschaftsturnieren zusätzlich **Mannschaften** |
 | Mannschaften, Wettkämpfe | **Spieler mit ausgeben** |
@@ -155,8 +155,8 @@ Fassung der Turnierdatei von selbst mit.
 | Paarungen | Auslosung je Runde, ohne Ergebnisse; bei Mannschaftsturnieren je Wettkampf eine Kopfzeile mit beiden Mannschaften — bei Ländern mit Flagge —, darunter die Bretter ab 1 |
 | Ergebnisse | Dieselben Partien mit Ergebnis; in der Kopfzeile eines Wettkampfs steht dessen Endstand |
 | Mannschaften | Mannschaftsliste, auf Wunsch mit Aufstellung |
-| Mannschaftstabelle | Wettkämpfe, Bilanz, Mannschafts- und Brettpunkte |
-| Fortschrittstabelle der Mannschaften | Je Runde die eigenen Brettpunkte und die Startnummer des Gegners, darunter der Stand der Mannschaftspunkte |
+| Mannschaftstabelle | Wettkämpfe, Bilanz, Mannschafts- und Brettpunkte, bei der Olympiade die Olympia-Wertungen |
+| Fortschrittstabelle der Mannschaften | Je Runde in einer Zelle Brettpunkte, Farbe am ersten Brett und Platz des Gegners — „2½w6" —, dahinter die Wertungen wie bei chess-results |
 | Wettkämpfe | Die Begegnungen je Runde mit Wertungsschnitt, auf Wunsch mit Einzelpartien; die Bretter stehen nach Mannschaft ausgerichtet, die Farbe ist am Grund der Felder abzulesen |
 | Kreuztabelle der Mannschaften | Die Wettkampfergebnisse als Kreuztabelle |
 
@@ -167,7 +167,8 @@ Farben; wer Schwarz führte, sitzt auf dunklerem Grund.
 
 ### Spalten und Sortierung
 
-Für **Teilnehmerliste**, **Rangliste** und **Mannschaftstabelle** lässt sich
+Für **Teilnehmerliste**, **Rangliste**, **Mannschaftstabelle** und
+**Fortschrittstabelle der Mannschaften** lässt sich
 einstellen, welche Spalten erscheinen und in welcher Reihenfolge. Angeboten wird nur, was die
 gewählte Datei hergibt: Ein Turnier ohne Elo-Zahlen bietet keine Elo-Spalte
 an, ein Einzelturnier keine Brettspalte, eine Datei ohne Feinwertung keine
@@ -186,9 +187,30 @@ Wettkämpfe, Bilanz, Freilose, Mannschaftspunkte, Brettpunkte und den
 Wertungsschnitt an. Vorgabe ist die Tabelle, wie sie vor der Spaltenauswahl
 aussah: Platz, Mannschaft, Wettkämpfe, Bilanz, Freilose — nur wenn es welche
 gibt —, Mannschafts- und Brettpunkte. Mannschaftspunkte stehen als ganze Zahl,
-Brettpunkte mit Komma. Die Tabelle lässt sich im Frontend sortieren; die
+Brettpunkte wie bei chess-results mit Komma nur bei halben Punkten („21",
+„17,5"). Die Tabelle lässt sich im Frontend sortieren; die
 Teilnehmerliste und die Rangliste eines Mannschaftsturniers dagegen nicht, weil
 sie nach Mannschaften gegliedert sind.
+
+Führt eine Swiss-Manager-Datei die Wertungen der Schacholympiade, kommen zwei
+Spalten hinzu: **OSB** (Olympia-Sonneborn-Berger) und **MP-Summe** (Summe der
+Mannschaftspunkte der Gegner), beide mit einer Streichung. Angeboten werden sie
+nur, wenn das Turnier nach ihnen ordnet.
+
+Die **Fortschrittstabelle der Mannschaften** bietet Platz, Startnummer,
+Mannschaft, Land, den Block der Runden und die Wertungen an. Die Vorgabe folgt
+der Endtabelle bei chess-results: Platz, Mannschaft, die Runden und dahinter
+die Wertungen **in der Reihenfolge, nach der das Turnier ordnet** — bei der
+Olympiade also MP, OSB, BP, MP-Summe. Wer die Runden an eine andere Stelle
+zieht, verschiebt den ganzen Block.
+
+In jeder Rundenzelle stehen ohne Zwischenraum die eigenen Brettpunkte, die
+Farbe am ersten Brett (`w` oder `s`) und der **Platz** des Gegners — nicht
+seine Startnummer, so lässt sich ablesen, wie stark er am Ende war. Der Name
+erscheint beim Überfahren. Ein Freilos zeigt seine Punkte und „--", ein
+ausgeloster, noch nicht gespielter Kampf nur Farbe und Gegner, eine nicht
+ausgeloste Runde einen Strich. Sortierbar ist diese Tabelle nicht: Der Platz
+in den Zellen gilt nur in der Endreihenfolge.
 
 Zwei Spalten werden besonders gesetzt: **Die Föderation erscheint als
 Flagge** — als Titel am Feld stehen Ländername und Code, etwa „Polen (POL)";
@@ -422,7 +444,9 @@ Der Nachweis gegen die Ausgaben von Swiss-Chess selbst:
 | Mannschaftstabelle Betriebs-MM 2012 (Platz, Name, S/R/N, MP, BP) | 38 Mannschaften | 0 |
 | Kreuztabelle der Mannschaften Blitz-MM 2012 | 784 Felder | 0 |
 
-**Freilose bleiben unbewertet.** Zu einer spielfreien Runde steht in der Datei
+**Freilose bleiben bei SWT-Dateien unbewertet.** Swiss-Manager legt die
+Gutschrift in der Datei ab (bei der Olympiade 1 MP und 2 BP, beim
+Deutschland-Cup 3 MP), und die wird übernommen. Zu einer spielfreien Runde steht in der SWT-Datei
 nichts als das Fehlen eines Gegners. Ob die Turnierleitung dafür einen
 kampflosen Sieg gutgeschrieben hat, ist daraus nicht zu erkennen — manche tun
 es, manche nicht. Weicht die hier gezeigte Tabelle deshalb von der in der

@@ -90,6 +90,11 @@ $GLOBALS['TL_LANG']['ctv']['spalte']['schnitt'] = 'Ø TWZ';
 $GLOBALS['TL_LANG']['ctv']['spalte']['wettkampf'] = 'Wettkampf';
 $GLOBALS['TL_LANG']['ctv']['spalte']['mannschaftspunkteVoll'] = 'Mannschaftspunkte';
 $GLOBALS['TL_LANG']['ctv']['spalte']['brettpunkteVoll'] = 'Brettpunkte';
+$GLOBALS['TL_LANG']['ctv']['spalte']['runden'] = 'Runden';
+$GLOBALS['TL_LANG']['ctv']['spalte']['osb'] = 'OSB';
+$GLOBALS['TL_LANG']['ctv']['spalte']['osbVoll'] = 'Olympia-Sonneborn-Berger';
+$GLOBALS['TL_LANG']['ctv']['spalte']['mpsumme'] = 'MP-Summe';
+$GLOBALS['TL_LANG']['ctv']['spalte']['mpsummeVoll'] = 'Summe der Mannschaftspunkte der Gegner';
 
 // Einzelne Wörter und Wendungen in der Ausgabe
 $GLOBALS['TL_LANG']['ctv']['runde'] = 'Runde %s';

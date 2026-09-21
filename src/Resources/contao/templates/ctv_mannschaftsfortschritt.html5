@@ -3,10 +3,15 @@
 /*
  * Fortschrittstabelle der Mannschaften.
  *
- * Aufgebaut wie die Fortschrittstabelle der Spieler: je Mannschaft eine
- * Zeile, je Runde eine Zelle. In der Zelle stehen die eigenen Brettpunkte,
- * die Startnummer des Gegners — der Name erscheint beim Überfahren — und
- * darunter die Mannschaftspunkte nach dieser Runde.
+ * Die Spalten sind wählbar; die Spalte „runden" steht für den Block der
+ * Rundenzellen. In jeder Zelle stehen ohne Zwischenraum die eigenen
+ * Brettpunkte, die Farbe am ersten Brett und der Platz des Gegners —
+ * „2½w6" heißt: 2½ Brettpunkte, Weiß am ersten Brett, gegen den
+ * Sechstplatzierten. Der Name des Gegners erscheint beim Überfahren.
+ *
+ * Ein Freilos zeigt seine Punkte und „--", ein ausgeloster, noch nicht
+ * gespielter Kampf nur Farbe und Gegner, eine nicht ausgeloste Runde einen
+ * Strich.
  */
 
 use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
@@ -16,38 +21,43 @@ use Schachbulle\ContaoChesstournamentviewerBundle\Liste\Ausgabe;
   <table class="ctv-tabelle ctv-tabelle--fortschritt ctv-tabelle--mannschaftsfortschritt">
     <thead>
       <tr>
-        <th scope="col" class="ctv-zahl ctv-schmal" title="<?= Ausgabe::spalte('platz') ?>"><?= Ausgabe::spalte('platzKurz') ?></th>
-        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('nr') ?></th>
-        <th scope="col"><?= Ausgabe::spalte('mannschaft') ?></th>
-        <?php foreach ($this->runden as $runde): ?>
-          <th scope="col" class="ctv-fortschritt__kopf"><?= (int) $runde ?></th>
+        <?php foreach ($this->spalten as $spalte): ?>
+          <?php if ('runden' === $spalte['schluessel']): ?>
+            <?php foreach ($this->runden as $runde): ?>
+              <th scope="col" class="ctv-fortschritt__kopf" title="<?= sprintf(Ausgabe::wort('runde', 'Runde %s'), (int) $runde) ?>"><?= (int) $runde ?></th>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <?php $this->insert('ctv_spaltenkopf', ['spalte' => $spalte, 'sortierbar' => false]); ?>
+          <?php endif; ?>
         <?php endforeach; ?>
-        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('mannschaftspunkte') ?></th>
-        <th scope="col" class="ctv-zahl ctv-schmal"><?= Ausgabe::spalte('brettpunkte') ?></th>
       </tr>
     </thead>
     <tbody>
       <?php foreach ($this->zeilen as $zeile): ?>
         <tr>
-          <td class="ctv-zahl"><?= (int) $zeile['platz'] ?></td>
-          <td class="ctv-zahl"><?= (int) $zeile['startnummer'] ?></td>
-          <td class="ctv-mannschaft<?= Ausgabe::landklasse($zeile['land']) ?>"><?= Ausgabe::landesflagge($zeile['land']) ?><?= Ausgabe::esc($zeile['name']) ?></td>
-          <?php foreach ($this->runden as $runde): ?>
-            <?php $zelle = $zeile['runden'][$runde] ?? null; ?>
-            <td class="ctv-fortschritt__zelle">
-              <?php if (null === $zelle || $zelle['leer']): ?>
-                &nbsp;
-              <?php elseif ($zelle['spielfrei']): ?>
-                <span class="ctv-fortschritt__frei" title="<?= ($zelle['nichtAusgelost'] ?? false) ? Ausgabe::wort('nichtAusgelost', 'nicht ausgelost') : Ausgabe::wort('freilos', 'Freilos') ?>">&mdash;</span>
-                <span class="ctv-fortschritt__stand"><?= Ausgabe::punkte($zelle['stand']) ?></span>
-              <?php else: ?>
-                <span class="ctv-fortschritt__ergebnis"><?= $zelle['gespielt'] ? Ausgabe::punkte($zelle['brettpunkte']) : '&ndash;' ?></span><span class="ctv-fortschritt__gegner" title="<?= Ausgabe::esc($zelle['gegnerName']) ?>"><?= (int) $zelle['gegner'] ?></span>
-                <span class="ctv-fortschritt__stand"><?= Ausgabe::punkte($zelle['stand']) ?></span>
-              <?php endif; ?>
-            </td>
+          <?php foreach ($this->spalten as $spalte): ?>
+            <?php if ('runden' === $spalte['schluessel']): ?>
+              <?php foreach ($this->runden as $runde): ?>
+                <?php $zelle = $zeile['runden'][$runde] ?? null; ?>
+                <td class="ctv-fortschritt__zelle">
+                  <?php if (null === $zelle || $zelle['leer']): ?>
+                    &nbsp;
+                  <?php elseif ($zelle['nichtAusgelost']): ?>
+                    <span class="ctv-fortschritt__frei" title="<?= Ausgabe::wort('nichtAusgelost', 'nicht ausgelost') ?>">&ndash;</span>
+                  <?php elseif ($zelle['spielfrei']): ?>
+                    <span title="<?= Ausgabe::wort('freilos', 'Freilos') ?>"><span class="ctv-fortschritt__ergebnis"><?= Ausgabe::punkte($zelle['brettpunkte']) ?></span><span class="ctv-fortschritt__frei">--</span></span>
+                  <?php else: ?>
+                    <span title="<?= Ausgabe::esc($zelle['gegnerName']) ?>"><span class="ctv-fortschritt__ergebnis"><?= Ausgabe::punkte($zelle['brettpunkte']) ?></span><span class="ctv-fortschritt__farbe"><?= Ausgabe::esc($zelle['farbe']) ?></span><?= null === $zelle['gegner'] ? '' : (int) $zelle['gegner'] ?></span>
+                  <?php endif; ?>
+                </td>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <?php
+                $klasse = trim(str_replace('ctv-schmal', '', $spalte['klasse']).' '.Ausgabe::zellklasse($zeile, $spalte['schluessel']));
+              ?>
+              <td<?= '' === $klasse ? '' : ' class="'.$klasse.'"' ?>><?= Ausgabe::zelle($zeile, $spalte['schluessel'], (bool) ($spalte['ohneTitel'] ?? false)) ?></td>
+            <?php endif; ?>
           <?php endforeach; ?>
-          <td class="ctv-zahl ctv-punkte"><?= Ausgabe::punkte($zeile['mannschaftspunkte']) ?></td>
-          <td class="ctv-zahl"><?= Ausgabe::punkte($zeile['brettpunkte']) ?></td>
         </tr>
       <?php endforeach; ?>
     </tbody>

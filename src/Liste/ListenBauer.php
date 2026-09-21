@@ -129,7 +129,7 @@ class ListenBauer
             'paarungen', 'ergebnisse' => $this->runden($turnier, 'ergebnisse' === $schluessel, $auswahl),
             'mannschaften' => $this->mannschaften($turnier, $auswahl->mitSpielern),
             'mannschaftsrangliste' => $this->mannschaftsrangliste($turnier, $auswahl),
-            'mannschaftsfortschritt' => $this->mannschaftsfortschritt($turnier),
+            'mannschaftsfortschritt' => $this->mannschaftsfortschritt($turnier, $auswahl),
             'mannschaftspaarungen' => $this->mannschaftspaarungen($turnier, $auswahl),
             'mannschaftskreuztabelle' => $this->mannschaftskreuztabelle($turnier, $auswahl->kreuzKurz),
             default => [],
@@ -641,16 +641,23 @@ class ListenBauer
     /**
      * Bereitet die Fortschrittstabelle der Mannschaften auf.
      *
+     * Die Spalten sind wählbar wie in der Mannschaftstabelle; die Spalte
+     * `runden` steht für den Block der Rundenzellen und kann an beliebiger
+     * Stelle stehen. Sortierbar ist die Tabelle nicht: In den Rundenzellen
+     * steht der Platz des Gegners, und der gilt nur in der Endreihenfolge.
+     *
      * @param Turnier $turnier Das eingelesene Turnier, gegebenenfalls
      *                         bereits auf den gewählten Stand zurückversetzt
+     * @param Auswahl $auswahl Die Einstellungen des Inhaltselements
      *
      * @return array<string,mixed> Unter `zeilen` die Mannschaften, unter
-     *                             `runden` die Rundennummern; leer, wenn es
-     *                             keine Mannschaften gibt
+     *                             `runden` die Rundennummern, unter `spalten`
+     *                             die Spalten; leer, wenn es keine
+     *                             Mannschaften gibt
      */
-    private function mannschaftsfortschritt(Turnier $turnier): array
+    private function mannschaftsfortschritt(Turnier $turnier, Auswahl $auswahl): array
     {
-        $zeilen = Mannschaftswertung::fortschritt($turnier);
+        $zeilen = Spalten::fortschrittszeilen($turnier);
 
         if ([] === $zeilen) {
             return [];
@@ -659,7 +666,11 @@ class ListenBauer
         $runden = array_keys($turnier->getRunden());
         sort($runden);
 
-        return ['zeilen' => $zeilen, 'runden' => $runden];
+        return [
+            'zeilen' => $zeilen,
+            'runden' => $runden,
+            'spalten' => Spalten::fuerAusgabe('mannschaftsfortschritt', $auswahl->spaltenFuer('mannschaftsfortschritt'), $turnier),
+        ];
     }
 
     /**

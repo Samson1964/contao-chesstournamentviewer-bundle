@@ -1,5 +1,30 @@
 # Änderungen
 
+## Version 1.17.0 (2026-09-21)
+
+* Fix: **Die Fortschrittstabelle der Mannschaften war bei der Olympiade
+  falsch.** Freilose brachten keine Punkte, weil die Gutschrift in der Datei
+  nicht gelesen wurde, und die Reihenfolge folgte nur Mannschafts- und
+  Brettpunkten. Jetzt liest der Swiss-Manager-Leser die Wertungsliste des
+  Turniers und die Freilosgutschrift aus dem Einstellungsabschnitt, und die
+  Olympia-Wertungen werden gerechnet. Gegen die Endtabelle bei chess-results
+  (tnr1470206): alle 41 Mannschaften, alle vier Wertungen und alle 287
+  Rundenzellen gleich.
+* Change: **Neue Darstellung der Rundenzellen**, wie bei chess-results in
+  einem Zug: Brettpunkte, Farbe am ersten Brett, Platz des Gegners —
+  „2½w6". Schwarz heißt `s`. Der Punktestand unter jeder Zelle entfällt.
+  In der Zelle steht jetzt der Platz des Gegners statt seiner Startnummer.
+* Add: **Spaltenauswahl für die Fortschrittstabelle der Mannschaften.** Die
+  Vorgabe folgt der Wertungsreihenfolge des Turniers, bei der Olympiade
+  Platz, Mannschaft, Runden, MP, OSB, BP, MP-Summe.
+* Add: Spalten **OSB** (Olympia-Sonneborn-Berger) und **MP-Summe** für
+  Mannschaftstabelle und Fortschrittstabelle — angeboten nur, wenn das
+  Turnier nach ihnen ordnet.
+* Change: Mannschaften mit 3/1/0-Wertung bekommen drei Punkte für den Sieg,
+  wenn die Datei das so festlegt; bisher galt bei Swiss-Manager immer 2/1/0.
+* Change: Brettpunkte stehen wie bei chess-results ohne „,0" hinter ganzen
+  Zahlen.
+
 ## Version 1.16.3 (2026-09-17)
 
 * Fix: **Die Tabellen waren auf schachbund.de trotz fester Spaltenbreiten
