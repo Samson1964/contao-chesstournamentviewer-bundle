@@ -97,6 +97,12 @@ Die Beschriftung einer Reiterlasche ist die **Überschrift** der
 Turnierausgabe, und wenn dort nichts steht, der Name der Liste. Ein eigenes
 Feld dafür gibt es nicht.
 
+In der Backend-Liste zeigen die beiden Umschlag-Elemente nur einen grauen
+Hinweiskasten statt einer Vorschau. Das ist Absicht: Eine Hülle besteht aus
+einem halben `div`, und Contao stellt jede Vorschau mitten in die Liste —
+halbes HTML risse sie auseinander. Contao hält es bei Akkordeon und Slider
+ebenso.
+
 **Die Reiterleiste baut das Skript**, nicht der Server: Das öffnende Element
 weiß beim Ausliefern nicht, was nach ihm kommt. Ohne JavaScript stehen die
 Ausgaben deshalb untereinander, jede vollständig lesbar — dieselbe

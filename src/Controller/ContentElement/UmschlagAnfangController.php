@@ -44,10 +44,19 @@ class UmschlagAnfangController extends AbstractContentElementController
      * @param ContentModel $model    Der Datensatz des Inhaltselements
      * @param Request      $request  Die laufende Anfrage
      *
-     * @return Response Die öffnende Hülle
+     * @return Response Die öffnende Hülle, im Backend ein Hinweiskasten
      */
     protected function getResponse(Template $template, ContentModel $model, Request $request): Response
     {
+        // Im Backend darf kein offenes `div` herauskommen: Es zerreißt die
+        // Liste der Inhaltselemente. Siehe Umschlagvorschau.
+        if (Umschlagvorschau::istBackend($request)) {
+            return Umschlagvorschau::antwort(
+                Umschlagvorschau::hinweis('chesstournamentviewerStart'),
+                \is_string($template->headline ?? null) ? $template->headline : ''
+            );
+        }
+
         $GLOBALS['TL_CSS']['ctv'] = 'bundles/contaochesstournamentviewer/css/betrachter.css|static';
         $GLOBALS['TL_JAVASCRIPT']['ctv'] = 'bundles/contaochesstournamentviewer/js/betrachter.js|static';
 

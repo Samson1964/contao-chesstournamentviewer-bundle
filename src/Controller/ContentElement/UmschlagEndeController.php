@@ -32,10 +32,17 @@ class UmschlagEndeController extends AbstractContentElementController
      * @param ContentModel $model    Der Datensatz des Inhaltselements
      * @param Request      $request  Die laufende Anfrage
      *
-     * @return Response Die schließende Hülle
+     * @return Response Die schließende Hülle, im Backend ein Hinweiskasten
      */
     protected function getResponse(Template $template, ContentModel $model, Request $request): Response
     {
+        // Im Backend darf das einzelne `</div>` nicht herauskommen: Es
+        // schließt dort die Liste der Inhaltselemente statt der Vorschau.
+        // Siehe Umschlagvorschau.
+        if (Umschlagvorschau::istBackend($request)) {
+            return Umschlagvorschau::antwort(Umschlagvorschau::hinweis('chesstournamentviewerStop'));
+        }
+
         return $template->getResponse();
     }
 }

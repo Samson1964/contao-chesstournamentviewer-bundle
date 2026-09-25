@@ -1,5 +1,17 @@
 # Änderungen
 
+## Version 1.17.1 (2026-09-25)
+
+* Fix: **Die Umschlag-Elemente zerrissen die Liste der Inhaltselemente im
+  Backend.** Contao stellt dort jedes Element mit seiner echten
+  Frontend-Ausgabe dar. Bei „Umschlag Ende" ist das ein einzelnes `</div>`,
+  und das schloss nicht die Vorschau, sondern die Liste selbst: Alle Elemente
+  hinter dem ersten Umschlag standen außerhalb der `ul`. Sichtbar war das
+  daran, dass die folgenden Elemente nach links rückten und sich nicht mehr
+  ziehen ließen — was außerhalb der Liste steht, kennt die Sortierung nicht.
+  Beide Umschlag-Elemente zeigen im Backend jetzt einen Hinweiskasten, so wie
+  Akkordeon und Slider von Contao.
+
 ## Version 1.17.0 (2026-09-21)
 
 * Fix: **Die Fortschrittstabelle der Mannschaften war bei der Olympiade
